@@ -1,11 +1,13 @@
 ## Directories and Files
-DSFMTDIR := ${HOME}/Downloads/dSFMT-src-2.2.1
-SFMTDIR := ${HOME}/Downloads/SFMT-src-1.4
+DSFMT := dSFMT-src-2.2.1
+SFMT := SFMT-src-1.4
 MEXP := 19937
 LIBRARY := libsfmt.a
+SRCDIR := ${HOME}/Downloads
+URL_PREFIX := http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/SFMT
 
 OBJS := dSFMT.o SFMT.o
-HEADERS := $(wildcard ${DSFMTDIR}/*.h) $(wildcard ${SFMTDIR}/*.h)
+HEADERS := $(wildcard ${SRCDIR}/${DSFMT}/*.h) $(wildcard ${SRCDIR}/${DSFMT}/*.h)
 
 prefix := ${HOME}/local
 exec_prefix := $(prefix)
@@ -38,16 +40,20 @@ INSTALL_DATA := $(INSTALL) -m 644
 
 ## Targets
 .DEFAULT_GOAL := all
-.PHONY: all clean install
-
-dSFMT.o: ${DSFMTDIR}/dSFMT.c
-	$(COMPILE.cpp) -DDSFMT_MEXP=${MEXP} $(OUTPUT_OPTION) $<
-
-SFMT.o: ${SFMTDIR}/SFMT.c
-	$(COMPILE.cpp) -DSFMT_MEXP=${MEXP} $(OUTPUT_OPTION) $<
+.PHONY: all clean install download
 
 all: ${LIBRARY}
 	@:
+
+dSFMT.o: ${SRCDIR}/${DSFMT}/dSFMT.c
+	$(COMPILE.cpp) -DDSFMT_MEXP=${MEXP} $(OUTPUT_OPTION) $<
+
+SFMT.o: ${SRCDIR}/${SFMT}/SFMT.c
+	$(COMPILE.cpp) -DSFMT_MEXP=${MEXP} $(OUTPUT_OPTION) $<
+
+download:
+	wget -O - ${URL_PREFIX}/${DSFMT}.tar.gz | tar xzf - -C ${SRCDIR}
+	wget -O - ${URL_PREFIX}/${SFMT}.tar.gz | tar xzf - -C ${SRCDIR}
 
 clean:
 	$(RM) ${OBJS} ${LIBRARY}
