@@ -293,11 +293,19 @@ class Fios: public std::fstream{
 
 class Fin: public Fios{
   public:
+#ifdef BOOST_FILESYSTEM_PATH_HPP
+    explicit Fin(
+            const boost::filesystem::path& filepath,
+            const std::ios::openmode mode = std::ios::binary
+            )
+    : Fios(filepath.string(), mode | std::ios::in) {}
+#else
     explicit Fin(
             const std::string& filename,
             const std::ios::openmode mode = std::ios::binary
             )
     : Fios(filename, mode | std::ios::in) {}
+#endif
     
     std::string readline(const char delimiter='\n') {
         std::string buffer;
@@ -319,12 +327,19 @@ class Fin: public Fios{
 
 class Fout: public Fios{
   public:
+#ifdef BOOST_FILESYSTEM_PATH_HPP
+    explicit Fout(
+            const boost::filesystem::path& filepath,
+            const std::ios::openmode mode = std::ios::binary
+            )
+    : Fios(filepath.string(), mode | std::ios::out) {}
+#else
     explicit Fout(
             const std::string& filename,
             const std::ios::openmode mode = std::ios::binary
             )
     : Fios(filename, mode | std::ios::out) {}
-    
+#endif
     template <class Iter>
     Fout& writelines(Iter begin_, const Iter end_, const char sep='\n') {
         if (begin_ == end_) return *this;
