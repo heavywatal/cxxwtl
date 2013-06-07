@@ -277,42 +277,24 @@ inline std::string iso8601datetime() {return strftime("%FT%T%z");}
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 // fstream wrapper for binary mode and exceptions
 
-class Fios: public std::fstream{
+class Fin: public std::ifstream{
   public:
-    explicit Fios(
-            const std::string& filename, 
-            const std::ios::openmode mode = std::ios::in | std::ios::out | std::ios::binary
-            )
-    : std::fstream(filename.c_str(), mode) {
-        if (this->fail()) {
-            std::cerr << filename << ": " << std::strerror(errno) << std::endl;
-            exit(errno);
-        }
-    };
-};
-
-class Fin: public Fios{
-  public:
+    explicit Fin(
 #ifdef BOOST_FILESYSTEM_PATH_HPP
-    explicit Fin(
             const boost::filesystem::path& filepath,
-            const std::ios::openmode mode = std::ios::binary
-            )
-    : Fios(filepath.string(), mode | std::ios::in) {}
 #else
-    explicit Fin(
-            const std::string& filename,
+            const std::string& filepath,
+#endif
             const std::ios::openmode mode = std::ios::binary
             )
-    : Fios(filename, mode | std::ios::in) {}
-#endif
-    
+    : std::ifstream(filepath.c_str(), mode) {exceptions(std::ios::eofbit);}
+
     std::string readline(const char delimiter='\n') {
         std::string buffer;
         std::getline(*this, buffer, delimiter);
         return buffer;
     }
-    
+
     std::vector<std::string> readlines(const char delimiter='\n') {
         std::vector<std::string> lines;
         std::string buffer;
@@ -321,25 +303,23 @@ class Fin: public Fios{
         }
         return lines;
     }
-    
+
     std::string read(const char delimiter='\0') {return readline(delimiter);}
 };
 
-class Fout: public Fios{
+class Fout: public std::ofstream{
   public:
+    Fout() = default;
+    explicit Fout(
 #ifdef BOOST_FILESYSTEM_PATH_HPP
-    explicit Fout(
             const boost::filesystem::path& filepath,
-            const std::ios::openmode mode = std::ios::binary
-            )
-    : Fios(filepath.string(), mode | std::ios::out) {}
 #else
-    explicit Fout(
-            const std::string& filename,
+            const std::string& filepath,
+#endif
             const std::ios::openmode mode = std::ios::binary
             )
-    : Fios(filename, mode | std::ios::out) {}
-#endif
+    : std::ofstream(filepath.c_str(), mode) {exceptions(std::ios::eofbit);}
+
     template <class Iter>
     Fout& writelines(Iter begin_, const Iter end_, const char sep='\n') {
         if (begin_ == end_) return *this;
@@ -347,7 +327,7 @@ class Fout: public Fios{
         while (++begin_ != end_) {*this << sep << *begin_;}
         return *this;
     }
-    
+
     template <class V>
     Fout& writelines(const V& lines, const char sep='\n') {
         return writelines(begin(lines), end(lines), sep);
