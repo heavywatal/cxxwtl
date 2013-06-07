@@ -79,7 +79,7 @@ make_property_writer(const Values& values, const std::string& key="label") {
 inline std::string str_graphviz(Graph& graph) {
     std::ostringstream oss;
     boost::write_graphviz(oss, graph,
-        boost::default_writer(),
+//        boost::default_writer(),
         make_property_writer(boost::get(VertexProperty::tag_type(), graph), "input"),
         make_property_writer(boost::get(boost::edge_weight, graph), "weight"),
         boost::make_graph_attributes_writer(graph)
@@ -98,11 +98,10 @@ std::string str_graphml(GraphType& graph) {
     return oss.str();
 }
 
-template <class GraphType, class V> inline
-void put_vertices_property(GraphType* g, const V& values) {
+template <class Graph, class V> inline
+void put_vertices_property(Graph* g, const V& values) {
     for (size_t i=0; i<values.size(); ++i) {
-        boost::put(GraphType::vertex_property_type::tag_type(),
-                   *g, boost::vertex(i, *g), values[i]);
+        boost::put(vertex_input, *g, boost::vertex(i, *g), values[i]);
     }
 }
 
