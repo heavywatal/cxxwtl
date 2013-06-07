@@ -36,8 +36,8 @@ typedef boost::property<boost::graph_graph_attribute_t, AttrMap,
 
 
 typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS,
-                       boost::no_property, EdgeProperty, GraphProperty> Graph;
-//                       VertexProperty, EdgeProperty, GraphProperty> Graph;
+//                       boost::no_property, EdgeProperty, GraphProperty> Graph;
+                       VertexProperty, EdgeProperty, GraphProperty> Graph;
 
 Graph make_graph(const std::vector<std::vector<double> >& adj_matrix) {
     const size_t order = adj_matrix.size();
@@ -80,7 +80,7 @@ inline std::string str_graphviz(Graph& graph) {
     std::ostringstream oss;
     boost::write_graphviz(oss, graph,
         boost::default_writer(),
-//        make_property_writer(boost::get(VertexProperty::tag_type(), graph), "input"),
+        make_property_writer(boost::get(VertexProperty::tag_type(), graph), "input"),
         make_property_writer(boost::get(boost::edge_weight, graph), "weight"),
         boost::make_graph_attributes_writer(graph)
         );
@@ -114,10 +114,10 @@ void insert_graphattr(GraphType* graph, const std::string& key, const Value& val
 }
 
 std::string dot_grn(const std::vector<std::vector<double> >& adj_matrix,
-//                    const std::vector<double>& receptors,
+                    const std::vector<double>& receptors,
                     const size_t frequency) {
     Graph graph = make_graph(adj_matrix);
-//    put_vertices_property(&graph, receptors);
+    put_vertices_property(&graph, receptors);
     insert_graphattr(&graph, "freqency", frequency);
     return str_graphviz(graph);
 }
