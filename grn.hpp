@@ -12,11 +12,13 @@
 namespace wtl {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
-typedef boost::property<boost::vertex_name_t, double> VertexProperty;
+//typedef boost::property<boost::vertex_priority_t, double> VertexProperty;
+typedef boost::property<boost::vertex_potential_t, double> VertexProperty;
 typedef boost::property<boost::edge_weight_t, double> EdgeProperty;
+typedef boost::property<boost::graph_name_t, double> GraphProperty;
 
 typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS,
-                       VertexProperty, EdgeProperty> Graph;
+                       VertexProperty, EdgeProperty, GraphProperty> Graph;
 typedef boost::graph_traits<Graph>::vertex_descriptor Vertex;
 typedef boost::graph_traits<Graph>::edge_descriptor Edge;
 
@@ -37,6 +39,24 @@ Graph make_graph(const std::vector<std::vector<double> >& adj_matrix) {
     return graph;
 }
 
+template <class Graph>
+class weight_label_writer {
+  public:
+    weight_label_writer(const Graph& g) : graph_(g) {}
+
+    template <class VertexOrEdge>
+    void operator()(std::ostream& ost, const VertexOrEdge& edge) const {
+        write(ost, boost::get(boost::edge_weight, graph_, edge));
+    }
+
+  private:
+    template <class Edge, class Weight>
+    void write(std::ostream& ost, const Weight& weight) const {
+        ost << "[weight=" << weight << "]";
+    }
+
+    const Graph& graph_;
+};
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 } // namespace wtl
