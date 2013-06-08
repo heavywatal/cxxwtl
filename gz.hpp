@@ -4,9 +4,8 @@
 #define GZ_HPP_
 
 #include <string>
-#include <fstream>
+#include <ostream>
 
-#include <boost/filesystem.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
 
@@ -14,18 +13,14 @@
 namespace wtl {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
-namespace fs = boost::filesystem;
-
-template <class Ofstream>
 class gzip {
   public:
-    gzip(fs::path filepath):
-                filter_(boost::iostreams::gzip_compressor()) {
-        if (filepath.extension() != ".gz") {
-            filepath += ".gz";
-        }
-        ofs_.open(filepath.c_str(), std::ios::binary);
-        filter_.push(ofs_);
+    gzip(): filter_(boost::iostreams::gzip_compressor()) {;}
+    gzip(std::ostream& ofs): gzip() {
+        filter_.push(ofs);
+    }
+    gzip(std::ostream&& ofs): gzip() {
+        filter_.push(ofs);
     }
     template <class T>
     gzip& operator<< (const T& x) {
@@ -34,19 +29,19 @@ class gzip {
     }
 
   private:
-    Ofstream ofs_;
     boost::iostreams::filtering_ostream filter_;
     gzip(const gzip &) = delete;
     gzip &operator=(const gzip &) = delete;
 };
 
-template <class Ifstream>
 class gunzip {
   public:
-    gunzip(const fs::path& filepath):
-        ifs_{filepath.c_str(), std::ios::binary},
-        filter_(boost::iostreams::gzip_decompressor()) {
-        filter_.push(ifs_);
+    gunzip(): filter_(boost::iostreams::gzip_decompressor()) {;}
+    gunzip(std::istream& ifs): gunzip{} {
+        filter_.push(ifs);
+    }
+    gunzip(std::istream&& ifs): gunzip{} {
+        filter_.push(ifs);
     }
     template <class T>
     gunzip& operator>> (const T& x) {
@@ -71,7 +66,6 @@ class gunzip {
     std::string read(const char delimiter='\0') {return readline(delimiter);}
 
   private:
-    Ifstream ifs_;
     boost::iostreams::filtering_istream filter_;
     gunzip(const gunzip &) = delete;
     gunzip &operator=(const gunzip &) = delete;
