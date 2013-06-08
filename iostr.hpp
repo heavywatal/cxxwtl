@@ -157,19 +157,18 @@ inline std::vector<std::string> split_algorithm(const std::string& src, const st
     return dst;
 }
 
-template <class T> inline
-size_t split(T* dst, const std::string& src, const std::string& delimiter=" \t\n") {
-    for (size_t start(0), offset(0); start++!=src.npos; start+=offset) {
+inline std::vector<std::string>
+split(const std::string& src, const std::string& delimiter=" \t\n") {
+    std::vector<std::string> dst;
+    size_t start = 0, offset = 0;
+    while (true) {
         offset = src.find_first_of(delimiter, start);
         offset -= start;
-        dst->push_back(src.substr(start, offset));
+        dst.push_back(src.substr(start, offset));
+        start += offset;
+        if (start == src.npos) break;
+        ++start;
     }
-    return dst->size();
-}
-
-inline std::vector<std::string> split(const std::string& src, const std::string& delimiter=" \t\n") {
-    std::vector<std::string> dst;
-    split(&dst, src, delimiter);
     return dst;
 }
 
@@ -285,9 +284,9 @@ class Fin: public std::ifstream{
 #else
             const std::string& filepath,
 #endif
-            const std::ios::openmode mode = std::ios::binary
+            const std::ios::openmode mode = std::ios::in
             )
-    : std::ifstream(filepath.c_str(), mode) {exceptions(std::ios::eofbit);}
+    : std::ifstream(filepath.c_str(), mode) {exceptions(std::ios::badbit);}
 
     std::string readline(const char delimiter='\n') {
         std::string buffer;
@@ -316,9 +315,9 @@ class Fout: public std::ofstream{
 #else
             const std::string& filepath,
 #endif
-            const std::ios::openmode mode = std::ios::binary
+            const std::ios::openmode mode = std::ios::out
             )
-    : std::ofstream(filepath.c_str(), mode) {exceptions(std::ios::eofbit);}
+    : std::ofstream(filepath.c_str(), mode) {exceptions(std::ios::failbit);}
 
     template <class Iter>
     Fout& writelines(Iter begin_, const Iter end_, const char sep='\n') {
