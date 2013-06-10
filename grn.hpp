@@ -78,6 +78,8 @@ make_property_writer(const Values& values, const std::string& key="label") {
 
 inline std::string str_graphviz(Graph& graph) {
     std::ostringstream oss;
+    oss << std::fixed;
+    oss.precision(5);
     boost::write_graphviz(oss, graph,
 //        boost::default_writer(),
         make_property_writer(boost::get(VertexProperty::tag_type(), graph), "input"),
@@ -117,7 +119,7 @@ std::string dot_grn(const std::vector<std::vector<double> >& adj_matrix,
                     const size_t frequency) {
     Graph graph = make_graph(adj_matrix);
     put_vertices_property(&graph, receptors);
-    insert_graphattr(&graph, "freqency", frequency);
+    insert_graphattr(&graph, "frequency", frequency);
     return str_graphviz(graph);
 }
 
