@@ -44,8 +44,8 @@ class gunzip {
         filter_.push(ifs);
     }
     template <class T>
-    gunzip& operator>> (const T& x) {
-        x >> filter_;
+    gunzip& operator>> (T& x) {
+        filter_ >> x;
         return *this;
     }
     std::string readline(const char delimiter='\n') {
