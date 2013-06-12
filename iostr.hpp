@@ -275,6 +275,7 @@ inline std::string iso8601datetime() {return strftime("%FT%T%z");}
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 // fstream wrapper for binary mode and exceptions
+// boost::serialization requires binary mode
 
 class Fin: public std::ifstream{
   public:
@@ -284,9 +285,9 @@ class Fin: public std::ifstream{
 #else
             const std::string& filepath,
 #endif
-            const std::ios::openmode mode = std::ios::in
-            )
-    : std::ifstream(filepath.c_str(), mode) {exceptions(std::ios::badbit);}
+            const std::ios::openmode mode=std::ios::in)
+    : std::ifstream(filepath.c_str(), mode | std::ios::binary)
+    {exceptions(std::ios::badbit);}
 
     std::string readline(const char delimiter='\n') {
         std::string buffer;
@@ -315,9 +316,9 @@ class Fout: public std::ofstream{
 #else
             const std::string& filepath,
 #endif
-            const std::ios::openmode mode = std::ios::out
-            )
-    : std::ofstream(filepath.c_str(), mode) {exceptions(std::ios::failbit);}
+            const std::ios::openmode mode=std::ios::out)
+    : std::ofstream(filepath.c_str(), mode | std::ios::binary)
+    {exceptions(std::ios::failbit);}
 
     template <class Iter>
     Fout& writelines(Iter begin_, const Iter end_, const char sep='\n') {
