@@ -4,6 +4,7 @@
 #define OS_HPP_
 
 #include <unistd.h> // chdir, getcwd, unlink, access, getpid, gethostname
+#include <dirent.h> // opendir
 #include <sys/stat.h> // mkdir, stat
 #include <cxxabi.h> // demangle
 
@@ -67,6 +68,23 @@ inline std::string pwd() {
 
 inline void cd(const std::string& dir) {
     if (::chdir(dir.c_str())) {FLPF; throw wtl::strerror(dir);}
+}
+
+inline std::vector<std::string>
+ls(const std::string& dir, const bool all=false) {
+    DIR* dirp = opendir(dir.c_str());
+    if (dirp==nullptr) {FLPF; throw strerror(dir);}
+    struct dirent* entp;
+    std::vector<std::string> dst;
+    while ((entp=readdir(dirp))) {
+        // ignore '.' and '..'
+        if (!strcmp(entp->d_name, ".\0") || !strcmp(entp->d_name, "..\0")) continue;
+        // other dot files are depending on the flag
+        if (*(entp->d_name)== '.' && !all) continue;
+        dst.push_back(entp->d_name);
+    }
+    closedir(dirp);
+    return dst;
 }
 
 inline void rm(const std::string& target) {
