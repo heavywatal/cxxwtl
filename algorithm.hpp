@@ -29,7 +29,7 @@ template <class T> struct Pow<1, T> {
 };
 
 template <class T> struct Pow<0, T> {
-    constexpr T operator()(const T& x) const {return 1;}
+    constexpr T operator()(const T& x) const {return x * 0 + 1;}
 };
 
 } // namespace detail

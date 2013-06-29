@@ -11,17 +11,17 @@ HEADERS := $(wildcard ${SRCDIR}/${DSFMT}/*.h) $(wildcard ${SRCDIR}/${DSFMT}/*.h)
 
 prefix := ${HOME}/local
 exec_prefix := $(prefix)
-includedir := $(prefix)/include/sfmt
+includedir := $(prefix)/include
 libdir := $(exec_prefix)/lib
 
 
 ## Programs and Options
-CXX := clang
+CXX := clang++
 ifeq ($(strip $(shell which $(CXX))),)
   CXX := g++-4.8
 endif
 
-CXXFLAGS := -O3
+CXXFLAGS := -O3 -std=c++11
 CPPFLAGS := -Wall -Wextra -fno-strict-aliasing -DNDEBUG
 TARGET_ARCH := -march=core2 -m64 -msse -msse2 -msse3
 
@@ -41,6 +41,12 @@ INSTALL_DATA := $(INSTALL) -m 644
 ## Targets
 .DEFAULT_GOAL := all
 .PHONY: all clean install download
+
+a.out: test.cpp
+	$(LINK.cpp) -I$(includedir) $(OUTPUT_OPTION) $^ -L$(libdir) -lsfmt
+
+test: a.out
+	./$<
 
 all: ${LIBRARY}
 	@:
@@ -68,8 +74,8 @@ ${LIBRARY}: dSFMT.o SFMT.o
 install-lib: ${LIBRARY} | $(DESTDIR)$(libdir)
 	$(INSTALL_DATA) $< $(DESTDIR)$(libdir)/$<
 
-install-include: ${HEADERS} | $(DESTDIR)$(includedir)
-	for i in ${HEADERS}; do $(INSTALL_DATA) $$i $(DESTDIR)$(includedir)/$$(basename $$i); done
+install-include: ${HEADERS} | $(DESTDIR)$(includedir)/sfmt
+	for i in ${HEADERS}; do $(INSTALL_DATA) $$i $(DESTDIR)$(includedir)/sfmt/$$(basename $$i); done
 
 $(DESTDIR)$(libdir):
 	mkdir -p $@
