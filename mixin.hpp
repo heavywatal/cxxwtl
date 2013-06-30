@@ -26,7 +26,7 @@ class Singleton {
 
   protected:
     Singleton() = default;
-    virtual ~Singleton() = default;
+    ~Singleton() = default;
 
   private:
     Singleton(const Singleton&) = delete;
