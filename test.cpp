@@ -6,70 +6,43 @@
 #include <random>
 #include <regex>
 
-#include "debug.hpp"
-#include "iostr.hpp"
-#include "prandom.hpp"
 #include "algorithm.hpp"
-#include "genetic.hpp"
-#include "os.hpp"
 #include "cow.hpp"
+#include "debug.hpp"
+#include "genetic.hpp"
+//#include "getopt.hpp" // needs boost/program_options
+//#include "grn.hpp" // needs boost/graph
+//#include "gz.hpp" // needs boost/iostreams
+#include "iostr.hpp"
+#include "mixin.hpp"
 #include "omp.hpp"
+#include "os.hpp"
+#include "prandom.hpp"
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
-size_t num_items = 1000000;
-
-// http://enki-tech.blogspot.jp/2012/08/c11-generic-singleton.html
-template <class T>
-class Singleton {
+class Cls: public Singleton<Cls> {
+    friend Singleton<Cls>;
   public:
-    template <typename... Args>
-    static T* get_instance(Args... args) {
-        if (!instance_) {
-            instance_ = new T(std::forward<Args>(args)...);
-        }
-        return instance_;
-    }
-    
-    static void destroy_instance() {
-        delete instance_;
-        instance_ = nullptr;
-    }
-    
+    int get_x() const {return x_;}
+    void print_x() const {std::cout << x_ << std::endl;}
   private:
-    static T* instance_;
+    Cls(): x_(42) {};
+    Cls(const int x): x_(x) {};
+    int x_;
 };
-template <class T> T*  Singleton<T>::instance_ = nullptr;
 
-inline void cxx11_regex() {
-    std::regex patt{"(\\w+)(file)"};
-    std::smatch match;
-    auto entries = wtl::ls(".");
-    for (const auto& entry: entries) {
-        if (std::regex_search(entry, match, patt)) {
-            for (const auto& sm: match) {
-                std::cerr << sm << std::endl;
-            }
-        }
-    }
+inline void test_validity() {
+    auto& ref = Cls::instance(1);
+    ref.print_x();
+    Cls::instance(2).print_x();
 }
 
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
-
-inline void test_function() {HERE;
-    const std::string homedir(std::getenv("HOME"));
-    const std::string tmpdir = homedir + "/tmp";
-    wtl::mkdir(tmpdir);
-
-    std::cerr << "hostname: " << wtl::gethostname() << std::endl;
-    std::cerr << "pid: " << ::getpid() << std::endl;
-    std::cerr << "pwd: " << wtl::pwd() << std::endl;
-    std::cerr << wtl::LINE << wtl::strftime() << "\n" << wtl::LINE << std::endl;
+inline void test_speed() {
+    const size_t n = 1000000;
+    std::vector<double> x(n);
 
     wtl::Fout dev_null("/dev/null");
-
-    const size_t n = num_items;
-    std::vector<double> x(n);
 
     double mu = 0.01;
     auto dist = std::normal_distribution<>(mu);
@@ -103,7 +76,33 @@ inline void test_function() {HERE;
 
     x.resize(6);
     std::cerr << x << std::endl;
-    
+}
+
+inline void cxx11_regex() {
+    std::regex patt{"(\\w+)(file)"};
+    std::smatch match;
+    auto entries = wtl::ls(".");
+    for (const auto& entry: entries) {
+        if (std::regex_search(entry, match, patt)) {
+            for (const auto& sm: match) {
+                std::cerr << sm << std::endl;
+            }
+        }
+    }
+}
+
+inline void test_function() {HERE;
+    const std::string homedir(std::getenv("HOME"));
+    const std::string tmpdir = homedir + "/tmp";
+    wtl::mkdir(tmpdir);
+
+    std::cerr << "hostname: " << wtl::gethostname() << std::endl;
+    std::cerr << "pid: " << ::getpid() << std::endl;
+    std::cerr << "pwd: " << wtl::pwd() << std::endl;
+    std::cerr << wtl::LINE << wtl::strftime() << "\n" << wtl::LINE << std::endl;
+
+    test_validity();
+    test_speed();
     cxx11_regex();
 }
 

@@ -1,88 +1,48 @@
 // -*- mode: c++; coding: utf-8 -*-
+#pragma once
 #ifndef MIXIN_HPP_
 #define MIXIN_HPP_
 
-#include <boost/utility.hpp>
-#include <boost/thread.hpp>
+#include <mutex>
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
-
 // usage:
 //  - public inheritance
 //  - private constructor
 //  - friend class Singleton<T>;
 
 template <class T>
-class SingletonWoBoost{
+class Singleton {
   public:
-    static T* instance() {
-        if (existance_==nullptr) {
-            if (existance_==nullptr) {
-                static T instance_; // survive until the end of the program!
-                existance_ = &instance_;
-            }
-        }
-        return existance_;
+    template <typename... Args>
+    static T& instance(Args... args) {
+        std::call_once(once_flag_, init<Args...>, std::forward<Args>(args)...);
+        return *instance_;
     }
-    
+
+    static void destroy() {
+        instance_.reset(nullptr);
+    }
+
   protected:
-    SingletonWoBoost() {}
-    ~SingletonWoBoost() {}
-    
-  private:
-    SingletonWoBoost(const SingletonWoBoost&);
-    T& operator=(const T&); // doesn't work well...
-    
-    static T* existance_;
-};
+    Singleton() = default;
+    virtual ~Singleton() = default;
 
-template <class T>
-T* SingletonWoBoost<T>::existance_ = nullptr;
+  private:
+    Singleton(const Singleton&) = delete;
+    Singleton& operator=(const Singleton&) = delete;
+
+    template <typename... Args>
+    static void init(Args... args) {
+        instance_.reset(new T(std::forward<Args>(args)...));
+    }
+
+    static std::once_flag once_flag_;
+    static std::unique_ptr<T> instance_;
+};
+template <class T> std::once_flag Singleton<T>::once_flag_;
+template <class T> std::unique_ptr<T> Singleton<T>::instance_ = nullptr;
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
-
-template <class T>
-class SynchronizedSingleton: boost::noncopyable {
-  public:
-    static T *instance() {
-        boost::lock_guard<boost::mutex> lock(mutex_);
-        if (!instance_) {
-            instance_ = new T;
-        }
-        return instance_;
-    }
-    
-  private:
-    static T* instance_;
-    static boost::mutex mutex_;
-};
-
-template <class T>
-T* SynchronizedSingleton<T>::instance_ = nullptr;
-
-template <class T>
-boost::mutex SynchronizedSingleton<T>::mutex_;
-
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
-
-template <class T>
-class OnceSingleton: boost::noncopyable{
-  public:
-    static T* instance() {
-        static boost::once_flag flag(BOOST_ONCE_INIT);
-        boost::call_once(init, flag);
-        return instance_;
-    }
-    
-  private:
-    static void init() {
-        instance_ = new T;
-    }
-    static T* instance_;
-};
-
-template <class T>
-T* OnceSingleton<T>::instance_ = nullptr;
-
 
 #endif /* MIXIN_HPP_ */
