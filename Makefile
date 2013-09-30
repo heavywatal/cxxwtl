@@ -1,5 +1,5 @@
 ## Directories and Files
-DSFMT := dSFMT-src-2.2.1
+DSFMT := dSFMT-src-2.2.2
 SFMT := SFMT-src-1.4
 MEXP := 19937
 LIBRARY := libsfmt.a
@@ -81,4 +81,7 @@ $(DESTDIR)$(libdir):
 	mkdir -p $@
 
 $(DESTDIR)$(includedir):
+	mkdir -p $@
+
+$(DESTDIR)$(includedir)/sfmt:
 	mkdir -p $@
