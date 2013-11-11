@@ -44,13 +44,13 @@ class Semaphore {
     static const size_t max_count_ = 4;
 };
 
-class SimplePool {
+class Pool {
   public:
-    explicit SimplePool(const size_t n)
+    explicit Pool(const size_t n)
         : semaphore_(n) {}
 
     template <class Func> inline
-    auto async (Func&& func) -> std::future<decltype(func())> {
+    auto async_future (Func&& func) -> std::future<decltype(func())> {
         semaphore_.lock();
         return std::async(std::launch::async, [&] {
             auto result = func();
@@ -59,42 +59,18 @@ class SimplePool {
         });
     }
 
-  private:
-    Semaphore semaphore_;
-};
-
-template <class Return>
-class Pool {
-  public:
-    explicit Pool(const size_t n)
-        : semaphore_(n) {}
-
     template <class Func> inline
-    void async (Func&& func) {
+    auto async_thread (Func&& func) -> std::thread {
         semaphore_.lock();
-        results_.push_back(std::async(std::launch::async, [&] {
-            auto result = func();
-            semaphore_.unlock();
-            return result;
-        }));
-    }
-
-    template <class Func> inline
-    void async_void (Func&& func) {
-        semaphore_.lock();
-        results_.push_back(std::async(std::launch::async, [&] {
+        return std::thread([&] {
             func();
             semaphore_.unlock();
-        }));
+        });
     }
-
-    std::vector<std::future<Return> >&& get() {return std::move(results_);}
 
   private:
     Semaphore semaphore_;
-    std::vector<std::future<Return> > results_;
 };
-
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 } // namespace wtl

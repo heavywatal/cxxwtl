@@ -94,28 +94,52 @@ inline void cxx11_regex() {HERE;
     }
 }
 
-
 inline void cxx11_thread() {HERE;
     std::cerr << "std::thread::hardware_concurrency(): "
               << std::thread::hardware_concurrency() << std::endl;
     std::mutex display_mutex;
     constexpr size_t n = 10;
-
-    wtl::Pool<double> pool(4);
+    wtl::Pool pool(4);
+    std::vector<std::thread> threads;
     for (size_t i=0; i<n; ++i) {
-        pool.async([&] {
+        threads.push_back(pool.async_thread([&]()->void {
             display_mutex.lock();
             std::cerr << std::this_thread::get_id() << std::endl;
             display_mutex.unlock();
             std::this_thread::sleep_for(std::chrono::milliseconds(500));
-            return prandom().random();
+//            return prandom().random();
+        }));
+    }
+
+    wtl::Semaphore sem(4);
+    for (size_t i=0; i<n; ++i) {
+        sem.lock();
+        threads.emplace_back([&]()->void {
+            display_mutex.lock();
+            std::cerr << std::this_thread::get_id() << std::endl;
+            display_mutex.unlock();
+            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+            sem.unlock();
         });
     }
-    auto dist = std::uniform_real_distribution<>();
-    for (size_t i=0; i<n; ++i) {
-        pool.async(rng(dist));
+    for (auto& x: threads) {
+        x.join();
     }
-    auto results = pool.get();
+
+    auto dist = std::uniform_real_distribution<>();
+    auto gen = std_rng(dist);
+    std::vector<std::future<double> > results;
+    for (size_t i=0; i<n; ++i) {
+        results.push_back(pool.async_future(gen));
+    }
+    for (size_t i=0; i<n; ++i) {
+        sem.lock();
+        results.push_back(std::async(std::launch::async, [&] {
+            auto x = gen();
+            sem.unlock();
+            return x;
+        }));
+    }
     for (auto& x: results) {
         std::cerr << x.get() << std::endl;
     }
