@@ -4,6 +4,8 @@
 
 #include <chrono>
 #include <random>
+#include <thread>
+#include <future>
 #include <regex>
 
 #include "algorithm.hpp"
@@ -18,6 +20,7 @@
 #include "omp.hpp"
 #include "os.hpp"
 #include "prandom.hpp"
+#include "multiprocessing.hpp"
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
@@ -32,14 +35,14 @@ class Cls: public Singleton<Cls> {
     int x_;
 };
 
-inline void test_validity() {
+inline void test_validity() {HERE;
     auto& ref = Cls::instance(1);
     ref.print_x();
     Cls::instance(2).print_x();
 }
 
-inline void test_speed() {
-    const size_t n = 1000000;
+inline void test_speed() {HERE;
+    constexpr size_t n = 5 * 1000 * 1000;
     std::vector<double> x(n);
 
     wtl::Fout dev_null("/dev/null");
@@ -78,7 +81,7 @@ inline void test_speed() {
     std::cerr << x << std::endl;
 }
 
-inline void cxx11_regex() {
+inline void cxx11_regex() {HERE;
     std::regex patt{"(\\w+)(file)"};
     std::smatch match;
     auto entries = wtl::ls(".");
@@ -88,6 +91,33 @@ inline void cxx11_regex() {
                 std::cerr << sm << std::endl;
             }
         }
+    }
+}
+
+
+inline void cxx11_thread() {HERE;
+    std::cerr << "std::thread::hardware_concurrency(): "
+              << std::thread::hardware_concurrency() << std::endl;
+    std::mutex display_mutex;
+    constexpr size_t n = 10;
+
+    wtl::Pool<double> pool(4);
+    for (size_t i=0; i<n; ++i) {
+        pool.async([&] {
+            display_mutex.lock();
+            std::cerr << std::this_thread::get_id() << std::endl;
+            display_mutex.unlock();
+            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+            return prandom().random();
+        });
+    }
+    auto dist = std::uniform_real_distribution<>();
+    for (size_t i=0; i<n; ++i) {
+        pool.async(rng(dist));
+    }
+    auto results = pool.get();
+    for (auto& x: results) {
+        std::cerr << x.get() << std::endl;
     }
 }
 
@@ -104,6 +134,7 @@ inline void test_function() {HERE;
     test_validity();
     test_speed();
     cxx11_regex();
+    cxx11_thread();
 }
 
 
