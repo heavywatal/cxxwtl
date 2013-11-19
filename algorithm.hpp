@@ -756,6 +756,38 @@ class Tanh: public std::unary_function<double, double> {
 };
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
+// numerical integration
+
+template <class Func> inline
+double integrate_midpoint(Func func, const double lower, const double upper) {
+    constexpr double delta = 1.0 / precision;
+    double step = (upper - lower) * delta;
+    double result = 0.0;
+    for (double x=lower + 0.5 * step; x<upper; x+=step) {
+        result += func(x);
+    }
+    return result *= step;
+}
+
+template <class Func> inline
+double integrate_trapezoid(Func func, const double lower, const double upper) {
+    constexpr double delta = 1.0 / precision;
+    double step = (upper - lower) * delta;
+    double result = func(lower);
+    result += func(upper);
+    result *= 0.5;
+    for (double x=lower + step; x<upper; x+=step) {
+        result += func(x);
+    }
+    return result *= step;
+}
+
+template <class Func> inline
+double integrate(Func func, const double lower, const double upper) {
+    return integrate_midpoint(func, lower, upper);
+}
+
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 } // namespace wtl
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
