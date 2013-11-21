@@ -19,8 +19,8 @@ namespace wtl {
 namespace detail {
 
 template <unsigned int N, class T> struct Pow {
-    constexpr T operator()(T x) const {
-        return x *= Pow<N - 1, T>()(x);
+    constexpr T operator()(const T x) const {
+        return x * Pow<N - 1, T>()(x);
     }
 };
 
@@ -35,7 +35,7 @@ template <class T> struct Pow<0, T> {
 } // namespace detail
 
 // interger powers at compile time
-template <unsigned int N, class T> inline
+template <unsigned int N, class T> inline constexpr
 T pow(const T& x) {
     return detail::Pow<N, T>()(x);
 }
@@ -759,20 +759,8 @@ class Tanh: public std::unary_function<double, double> {
 // numerical integration
 
 template <class Func> inline
-double integrate_midpoint(Func func, const double lower, const double upper) {
-    constexpr double delta = 1.0 / precision;
-    double step = (upper - lower) * delta;
-    double result = 0.0;
-    for (double x=lower + 0.5 * step; x<upper; x+=step) {
-        result += func(x);
-    }
-    return result *= step;
-}
-
-template <class Func> inline
-double integrate_trapezoid(Func func, const double lower, const double upper) {
-    constexpr double delta = 1.0 / precision;
-    double step = (upper - lower) * delta;
+double integrate_trapezoid(Func func, const double lower, const double upper, const size_t precision=100) {
+    const double step = (upper - lower) / precision;
     double result = func(lower);
     result += func(upper);
     result *= 0.5;
@@ -783,8 +771,40 @@ double integrate_trapezoid(Func func, const double lower, const double upper) {
 }
 
 template <class Func> inline
-double integrate(Func func, const double lower, const double upper) {
-    return integrate_midpoint(func, lower, upper);
+double integrate_midpoint(Func func, const double lower, const double upper, const size_t precision=100) {
+    const double step = (upper - lower) / precision;
+    double result = 0.0;
+    for (double x=lower + 0.5 * step; x<upper; x+=step) {
+        result += func(x);
+    }
+    return result *= step;
+}
+
+template <class Func> inline
+double integrate_simpson(Func func, const double lower, const double upper, const size_t precision=100) {
+    const double step = (upper - lower) / precision;
+    const double double_step = step * 2.0;
+    double result_odd = 0.0;
+    for (double x=lower + step; x<upper; x+=double_step) {
+        result_odd += func(x);
+    }
+    result_odd *= 4.0;
+    double result_even = 0.0;
+    for (double x=lower + double_step; x<upper; x+=double_step) {
+        result_even += func(x);
+    }
+    result_even *= 2.0;
+    double result = func(lower);
+    result += result_odd;
+    result += result_even;
+    result += func(upper);
+    result /= 3.0;
+    return result *= step;
+}
+
+template <class Func> inline
+double integrate(Func func, const double lower, const double upper, const size_t precision=100) {
+    return integrate_simpson(func, lower, upper, precision);
 }
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
