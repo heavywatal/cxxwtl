@@ -15,8 +15,8 @@
 #define SFMT_MEXP 19937
 #define DSFMT_MEXP 19937
 #define DSFMT_DO_NOT_USE_OLD_NAMES
-#include "sfmt/dSFMT.h"
-//#include "sfmt/SFMT.h"
+#include <dSFMT.h>
+//#include <SFMT.h>
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 // 
