@@ -7,6 +7,7 @@ endif
 CXXFLAGS := -O3 -std=c++11
 CPPFLAGS := -Wall -Wextra -fno-strict-aliasing -DNDEBUG
 TARGET_ARCH := -march=core2 -m64 -msse -msse2 -msse3
+LDLIBS := -lsfmt
 
 ifeq (,$(findstring clang,$(CXX)))
   CXXFLAGS += -mfpmath=sse
@@ -19,10 +20,10 @@ endif
 .PHONY: all clean
 
 a.out: test.cpp
-	$(LINK.cpp) -I$(includedir) $(OUTPUT_OPTION) $^ -L$(libdir) -lsfmt
+	$(LINK.cpp) $(OUTPUT_OPTION) $^ $(LDLIBS)
 
 all: a.out
 	./$<
 
 clean:
-	$(RM) ${OBJS} ${LIBRARY}
+	$(RM) a.out
