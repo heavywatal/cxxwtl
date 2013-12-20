@@ -334,19 +334,8 @@ class Fout: public std::ofstream{
     }
 };
 
-// テーブル形式のファイルから二次元ベクタに格納
-template <class T> inline
-size_t read_matrix(T* dst, const std::string& filename, const std::string& dlms=",") {
-    std::vector<std::string> lines = Fin(filename).readlines();
-    dst->resize(lines.size());
-    auto dit = dst->begin();
-    for (auto sit=begin(lines); sit!=end(lines); ++dit, ++sit) {
-        split(&(*dit), *sit, dlms);
-    }
-    return dst->size();
-}
-
-inline std::vector<std::pair<std::string, std::string> > read_ini(const std::string& filename) {
+inline std::vector<std::pair<std::string, std::string> >
+read_ini(const std::string& filename) {
     std::vector<std::string> lines = Fin(filename).readlines();
     std::vector<std::pair<std::string, std::string> > dst;
     dst.reserve(lines.size());
