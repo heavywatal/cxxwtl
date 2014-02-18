@@ -4,11 +4,11 @@
 #define PRANDOM_HPP_
 
 #define _USE_MATH_DEFINES /* #define M_constant in cmath (for VC++ compatibility) */
-#include <cmath> // sqrt,sin,cos
+#include <cmath> // sqrt, sin, cos
 #include <cassert>
 #include <random>
 #include <limits> // numeric_limits
-#include <algorithm> // random_shuffle
+#include <algorithm> // shuffle
 #include <set>
 
 #define HAVE_SSE2
@@ -213,7 +213,7 @@ class Prandom{
         return src;
     }
     
-    // for std::random_shuffle
+    // for std::shuffle()
     result_type operator()(const argument_type arg) {return randrange(arg);}
     
   private:
