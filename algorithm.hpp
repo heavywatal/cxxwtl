@@ -401,13 +401,13 @@ double shannon_diversity(const V& v) {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
 template <class V, class U> inline
-void subscript(V* seq, const U& indices) {
-    V tmp;
-    tmp.reserve(indices.size());
+V subscript(const V& seq, const U& indices) {
+    V subset;
+    subset.reserve(indices.size());
     for (const auto i: indices) {
-        tmp.push_back((*seq)[i]);
+        subset.push_back(seq[i]);
     }
-    seq->swap(tmp);
+    return subset;
 }
 
 template <class T> inline
