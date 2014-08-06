@@ -5,15 +5,23 @@
 #include <mutex>
 #include <future>
 #include <condition_variable>
+#include <algorithm>
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 namespace wtl {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
+inline unsigned int num_threads() {
+    size_t n = std::thread::hardware_concurrency();
+    n = std::min(n, 12ul); // do not want to use HT in ilp15
+    return std::max(n, 1ul);
+}
+
+
 class Semaphore {
   public:
-    explicit Semaphore(const size_t n=max_count_)
-        : count_(n) {}
+    Semaphore() = default;
+    explicit Semaphore(const size_t n): count_(n) {}
 
     void lock() {
         std::unique_lock<std::mutex> lck(mutex_);
@@ -40,14 +48,15 @@ class Semaphore {
   private:
     std::mutex mutex_;
     std::condition_variable condition_;
-    size_t count_;
-    static const size_t max_count_ = 4;
+    size_t count_ = num_threads();
 };
 
 class Pool {
   public:
-    explicit Pool(const size_t n)
+    explicit Pool(const size_t n=num_threads())
         : semaphore_(n) {}
+
+    ~Pool() {join();}
 
     template <class Func> inline
     auto async_future (Func&& func) -> std::future<decltype(func())> {
@@ -59,17 +68,24 @@ class Pool {
         });
     }
 
-    template <class Func> inline
-    auto async_thread (Func&& func) -> std::thread {
+    template <class Func, class... Args> inline
+    void async_thread (Func&& func, Args&&... args) {
         semaphore_.lock();
-        return std::thread([&] {
-            func();
+        // TODO: move capture
+        workers_.emplace_back([&] {
+            func(args...);
             semaphore_.unlock();
         });
     }
 
+    void join() {
+        for (auto& x: workers_) {x.join();}
+        workers_.clear();
+    }
+
   private:
     Semaphore semaphore_;
+    std::vector<std::thread> workers_;
 };
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
