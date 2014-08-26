@@ -15,34 +15,36 @@ namespace wtl {
 
 class gzip {
   public:
-    gzip(): filter_(boost::iostreams::gzip_compressor()) {;}
-    gzip(std::ostream& ofs): gzip() {
+    gzip(std::ostream& ofs) {
         filter_.push(ofs);
     }
-    gzip(std::ostream&& ofs): gzip() {
+    gzip(std::ostream&& ofs) {
         filter_.push(ofs);
     }
+
     template <class T>
     gzip& operator<< (const T& x) {
         filter_ << x;
         return *this;
     }
 
+    operator std::ostream&() {return filter_;}
+
   private:
-    boost::iostreams::filtering_ostream filter_;
+    boost::iostreams::filtering_ostream filter_{boost::iostreams::gzip_compressor()};
     gzip(const gzip &) = delete;
     gzip &operator=(const gzip &) = delete;
 };
 
 class gunzip {
   public:
-    gunzip(): filter_(boost::iostreams::gzip_decompressor()) {;}
-    gunzip(std::istream& ifs): gunzip{} {
+    gunzip(std::istream& ifs) {
         filter_.push(ifs);
     }
-    gunzip(std::istream&& ifs): gunzip{} {
+    gunzip(std::istream&& ifs) {
         filter_.push(ifs);
     }
+
     template <class T>
     gunzip& operator>> (T& x) {
         filter_ >> x;
@@ -53,7 +55,6 @@ class gunzip {
         std::getline(filter_, buffer, delimiter);
         return buffer;
     }
-    
     std::vector<std::string> readlines(const char delimiter='\n') {
         std::vector<std::string> lines;
         std::string buffer;
@@ -62,11 +63,12 @@ class gunzip {
         }
         return lines;
     }
-    
     std::string read(const char delimiter='\0') {return readline(delimiter);}
 
+    operator std::istream&() {return filter_;}
+
   private:
-    boost::iostreams::filtering_istream filter_;
+    boost::iostreams::filtering_istream filter_ {boost::iostreams::gzip_decompressor()};
     gunzip(const gunzip &) = delete;
     gunzip &operator=(const gunzip &) = delete;
 };
