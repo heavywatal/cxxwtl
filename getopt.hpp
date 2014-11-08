@@ -4,6 +4,10 @@
 #include <sstream>
 #include <boost/program_options.hpp>
 
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
+namespace wtl {
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
+
 inline std::string flags_into_string(
             const boost::program_options::options_description& desc,
             const boost::program_options::variables_map& vm) {
@@ -44,3 +48,7 @@ inline std::string flags_into_string(
     }
     return oss.str();
 }
+
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
+} // namespace wtl
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
