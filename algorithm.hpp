@@ -58,9 +58,9 @@ typename Iter::value_type kahan_sum(Iter begin_, const Iter end_) {
     typedef typename Iter::value_type T;
     T result = *begin_;
     T left_behind = 0;
-    while (++begin_!=end_) {// 一時オブジェクトはコンパイラに任せるほうが速かった
-        T load = (*begin_) + left_behind;					// 積むべき荷物
-        left_behind = load - ((result + load) - result);	// 積めなかった分を取っとく
+    while (++begin_ != end_) {
+        T load = (*begin_) + left_behind;
+        left_behind = load - ((result + load) - result);
         result += load;
     }
     return result;
@@ -105,9 +105,9 @@ double gmean(const V& v) {
 template <class RandIter> inline
 double median(const RandIter begin_, const RandIter end_) {
     const size_t n = std::distance(begin_, end_);
-    const RandIter mid = begin_ + (n >> 1);// 奇数なら丁度、偶数なら大きい方
+    const RandIter mid = begin_ + (n >> 1); // larger one if n is even
     std::nth_element(begin_, mid, end_);
-    if (n&1) {// 1ビット目が1 -> 奇数
+    if (n&1) { // n is odd if the first bit is 1
         return *mid;
     } else {
         std::nth_element(begin_, mid - 1, end_);
@@ -119,8 +119,9 @@ double median(V* v) {return median(v->begin(), v->end());}
 
 
 // mode: the value that appears most often
+// Sort the container before applying this
 template <class Iter> inline
-typename Iter::value_type mode(Iter begin_, const Iter end_) {// 要事前sort
+typename Iter::value_type mode(Iter begin_, const Iter end_) {
     size_t score = 0;
     Iter resiter;
     while (begin_!=end_) {
@@ -199,8 +200,9 @@ double var_fast(Iter begin_, const Iter end_, const bool unbiased=true) {
     size_t n = std::distance(begin_, end_);
     n -= static_cast<size_t>(unbiased);
     typename Iter::value_type sq(0), s(0);
-    for (; begin_!=end_; ++begin_) {//一周で済むので高速だが
-        sq += (*begin_) * (*begin_); //整数型だとオーバーフローする危険大
+    // Be careful not to overflow if value_type is int
+    for (; begin_!=end_; ++begin_) {
+        sq += (*begin_) * (*begin_);
         s += *begin_;
     }
     return (sq - (1.0 / n) * s * s) / n;
@@ -211,7 +213,8 @@ double var_once(Iter begin_, const Iter end_, const bool unbiased=true) {
     size_t n = 0;
     double wmean = 0.0;
     double sqsum = 0.0;
-    for (; begin_!=end_; ++begin_) {//一周で済むが計算量が多くて遅い
+    // Only one loop, but many calculation steps -> slow
+    for (; begin_!=end_; ++begin_) {
         double d = *begin_;
         d -= wmean;
         wmean += d / (++n);
@@ -234,7 +237,7 @@ double sd(const V& v, const bool unbiased=true) {
 }
 
 
-// standard error of the mean（fpc: 有限母集団修正項）
+// standard error of the mean (fpc: finite population correction)
 template <class Iter> inline
 double sem(const Iter begin_, const Iter end_, const size_t& N=0) {
     const size_t n(std::distance(begin_, end_));
@@ -362,10 +365,7 @@ typename V::value_type squared_euclidean(const V& v, const U& u) {
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
-// それぞれの種の個体数を入れたvectorなどを渡す
-
-// シンプソンの多様度指数D。1.0から引いたり割ったりして使う
-// 上位種の影響が強く、下位種の影響が弱い
+// Simpson Diversity D
 template <class V> inline
 double simpson_diversity(const V& v) {
     const double square1_N = pow<2>(1.0 / sum(v));
@@ -379,8 +379,7 @@ double simpson_diversity(const V& v) {
     return d;
 }
 
-// シャノンの多様度指数H'
-// 種数とシンプソンの中間。
+// Shannon's diversity H'
 template <class V> inline
 double shannon_diversity(const V& v) {
     if (v.size() < 2) {return 0.0;}
@@ -427,14 +426,13 @@ Iter advance_return(Iter i, Distance d) {
 }
 
 
-// sortして重複を取り除く（vector, dequeのみ）
+// for vector and deque
 template <class V> inline
 typename V::iterator sort_unique_erase(V* v) {
     std::sort(begin(*v), end(*v));
     return v->erase(std::unique(begin(*v), end(*v)), end(*v));
 }
 
-// 二次元ベクタの転置
 template <class Matrix> inline
 void transpose(Matrix* A) {
     const size_t nrow = A->size();
@@ -472,14 +470,14 @@ std::vector<V> chunk(const V& src, const size_t unit) {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 // easy equal, sign equal, sign less
 
-// 符号が同じかゼロ同士なら等しいとみなす。
+// true if signs are the same or both 0
 template <class T> struct alike_sign {public:
     constexpr bool operator()(const T& x, const T& y) const {
         return (x * y > T()) || (x == y);
     }
 };
 
-// 左辺のほうが小さく、0を跨いでいればtrue
+// true if std::less(x, y) and signs are different 
 template <class T> struct less_sign {public:
     constexpr bool operator()(const T& x, const T& y) const {
         return (x < y) && (x * y <= T());
@@ -524,7 +522,7 @@ bool lexico_matrix_sign(const T& x, const T& y) {
 }
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
-// pair 対応版
+// <functional> for std::pair
 
 template <class P, int N> struct plus
 : public std::binary_function<const typename std::tuple_element<N, P>::type&, const P&, typename std::tuple_element<N, P>::type>{
@@ -693,7 +691,7 @@ std::pair<Iter, Iter> nth_pair(const Iter begin_, const Iter end_, const size_t 
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
-// ２のべき乗かどうか判別
+// 2^n?
 inline constexpr bool is_power_of_two(const int& num) {
     return num && !(num & (num - 1));
 }

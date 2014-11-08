@@ -145,7 +145,7 @@ std::ostream& operator<< (std::ostream& ost, const std::map<Key, T, Comp>& m) {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 namespace wtl {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
-////// std::stringの操作
+////// std::string manipulation
 
 inline std::vector<std::string> split_algorithm(const std::string& src, const std::string& delimiter=" \t\n") {
     std::vector<std::string> dst;
@@ -355,23 +355,6 @@ read_ini(const std::string& filename) {
 inline std::ostream& LINE(std::ostream& stream) {
     return stream << "----------------------------------------------------------------\n";
 }
-
-// << setw(x) << setfill('0') と同等だが、setfillは永続なので二回目以降は無駄がある
-class fillzero{
-  public:
-    fillzero(const unsigned int x): digits_(x) {}
-    friend std::ostream& operator<<(std::ostream& stream, const fillzero& obj) {
-        return obj(stream);
-    }
-    
-  private:
-    const unsigned int digits_;
-    std::ostream& operator()(std::ostream& stream) const {
-        stream.width(digits_);
-        stream.fill('0');
-        return stream;
-    }
-};
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 } // namespace wtl
