@@ -30,10 +30,23 @@ class Cls: public Singleton<Cls> {
     int get_x() const {return x_;}
     void print_x() const {std::cout << x_ << std::endl;}
   private:
-    Cls(): x_(42) {};
-    Cls(const int x): x_(x) {};
-    int x_;
+    Cls(const int x): x_(x) {HERE;};
+    int x_ = 42;
 };
+
+inline void test_integral() {HERE;
+    std::cerr << "y = 1: " << wtl::integrate([](const double x){return 1.0 + x*0;}, 0, 1) << std::endl;
+    std::cerr << "y = x: " << wtl::integrate([](const double x){return x;}, 0, 1) << std::endl;
+    std::cerr << "y = sin(x): "
+        << wtl::integrate([](const double x){return std::sin(x);}, 0, M_PI) << std::endl;
+    std::cerr << "y = cos(x): "
+        << wtl::integrate([](const double x){return std::cos(x);}, 0, M_PI) << std::endl;
+    std::cerr << "x^2 + y^2 = 1: "
+        << wtl::integrate([](const double x){return std::sqrt(1 - x * x);}, 0, 1) * 4 << std::endl;
+    std::cerr << "y = exp(-x^2) / sqrt(pi): "
+        << wtl::integrate([](const double x)
+            {return std::exp(- x * x);}, 0, 10, 100) * 2 / std::sqrt(M_PI) << std::endl;
+}
 
 inline void test_validity() {HERE;
     auto& ref = Cls::instance(1);
@@ -155,6 +168,7 @@ inline void test_function() {HERE;
     std::cerr << "pwd: " << wtl::pwd() << std::endl;
     std::cerr << wtl::LINE << wtl::strftime() << "\n" << wtl::LINE << std::endl;
 
+    test_integral();
     test_validity();
     test_speed();
     cxx11_regex();
