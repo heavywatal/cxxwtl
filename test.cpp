@@ -55,40 +55,32 @@ inline void test_validity() {HERE;
 }
 
 inline void test_speed() {HERE;
-    constexpr size_t n = 5 * 1000 * 1000;
-    std::vector<double> x(n);
+    constexpr size_t n = 2 * 1000 * 1000;
+    std::vector<size_t> x(n);
 
-    wtl::Fout dev_null("/dev/null");
-
-    double mu = 0.01;
-    auto dist = std::normal_distribution<>(mu);
+    double mu = 8.0;
+    auto dist = std::poisson_distribution<size_t>(mu);
 
     wtl::benchmark([&](){
         for (size_t j=0; j<n; ++j) {
-            x[j] = prandom().normal(mu);
+            x[j] = wtl::prandom().poisson(mu);
         }
     });
     std::cerr << wtl::mean(x) << std::endl;
 
     wtl::benchmark([&](){
-        auto gen = rng(dist);
         for (size_t j=0; j<n; ++j) {
-            x[j] = gen();
+            x[j] = dist(wtl::sfmt());
         }
     });
     std::cerr << wtl::mean(x) << std::endl;
 
     wtl::benchmark([&](){
-        auto gen = std_rng(dist);
         for (size_t j=0; j<n; ++j) {
-            x[j] = gen();
+            x[j] = dist(wtl::mt());
         }
     });
     std::cerr << wtl::mean(x) << std::endl;
-
-//    wtl::benchmark([&]() {
-//        ;
-//    });
 
     x.resize(6);
     std::cerr << x << std::endl;
@@ -108,11 +100,12 @@ inline void cxx11_regex() {HERE;
 }
 
 inline void cxx11_thread() {HERE;
+    const size_t concurrency = std::thread::hardware_concurrency();
     std::cerr << "std::thread::hardware_concurrency(): "
-              << std::thread::hardware_concurrency() << std::endl;
+              << concurrency << std::endl;
     std::mutex display_mutex;
-    constexpr size_t n = 10;
-    wtl::Pool pool(4);
+    constexpr size_t n = 4;
+    wtl::Pool pool(concurrency);
     for (size_t i=0; i<n; ++i) {
         pool.async_thread([&]()->void {
             display_mutex.lock();
@@ -124,7 +117,7 @@ inline void cxx11_thread() {HERE;
     pool.join();
 
     std::vector<std::thread> threads;
-    wtl::Semaphore sem(4);
+    wtl::Semaphore sem(concurrency);
     for (size_t i=0; i<n; ++i) {
         sem.lock();
         threads.emplace_back([&]()->void {
@@ -140,7 +133,7 @@ inline void cxx11_thread() {HERE;
     }
 
     auto dist = std::uniform_real_distribution<>();
-    auto gen = std_rng(dist);
+    auto gen = std::bind(dist, wtl::mt());
     std::vector<std::future<double> > results;
     for (size_t i=0; i<n; ++i) {
         results.push_back(pool.async_future(gen));

@@ -13,13 +13,11 @@
 
 #define HAVE_SSE2
 #define SFMT_MEXP 19937
-#define DSFMT_MEXP 19937
-#define DSFMT_DO_NOT_USE_OLD_NAMES
-#include <dSFMT.h>
-//#include <SFMT.h>
+#include <SFMT.h>
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
-// 
+namespace wtl {
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
 template <class Generator>
 class Prandom{
@@ -46,7 +44,7 @@ class Prandom{
     ////////////////////
     // integer
     
-    // [0.0, 2^32-1]
+    // [0, 2^32-1]
     result_type operator()() {return generator_();}
     // [0, n-1]
     unsigned int randrange(unsigned int n) {return static_cast<unsigned int>(uniform(n));}
@@ -231,14 +229,10 @@ class Prandom{
 ////// Generators
 
 
-class Sfmt{
+class sfmt19937{
   public:
     typedef unsigned int result_type;
-#ifdef DSFMT_H
-    typedef dsfmt_t state_type;
-#else
     typedef sfmt_t state_type;
-#endif
 
     static constexpr result_type min() {return 0U;}
     static constexpr result_type max() {
@@ -246,34 +240,22 @@ class Sfmt{
     }
 
     // constructors
-    explicit Sfmt(const result_type s) {seed(s);}
-    explicit Sfmt(const state_type& state): state_(state) {}
-    Sfmt(const Sfmt&) = delete;
+    explicit sfmt19937(const result_type s) {seed(s);}
+    explicit sfmt19937(const state_type& state): state_(state) {}
+    sfmt19937(const sfmt19937&) = delete;
 
     // [0, 2^32-1]
     result_type operator()() {
-#ifdef DSFMT_H
-        return dsfmt_genrand_uint32(&state_);
-#else
         return sfmt_genrand_uint32(&state_);
-#endif
     }
 
     // [0.0, 1.0)
     double canonical() {
-#ifdef DSFMT_H
-        return dsfmt_genrand_close_open(&state_);
-#else
         return sfmt_genrand_real2(&state_);
-#endif
     }
 
     void seed(const result_type s) {
-#ifdef DSFMT_H
-        dsfmt_init_gen_rand(&state_, s);
-#else
         sfmt_init_gen_rand(&state_, s);
-#endif
     }
 
     void discard(unsigned long long n) {
@@ -349,9 +331,8 @@ class XorShift {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 // Global typedef and declaration
 
-typedef Prandom<Sfmt> Random;
+typedef Prandom<sfmt19937> Random;
 
-namespace wtl {
 namespace detail {
     template <class T> class Holder {
       public:
@@ -361,10 +342,13 @@ namespace detail {
     };
     template <class T> T Holder<T>::instance_(std::random_device{}());
 } // namespace detail
-} // namespace wtl
 
 inline Random& prandom() {
     return wtl::detail::Holder<Random>{}();
+}
+
+inline sfmt19937& sfmt() {
+    return wtl::detail::Holder<sfmt19937>{}();
 }
 
 inline std::mt19937& mt() {
@@ -390,5 +374,9 @@ template<class Fn>
 std::function<typename Fn::result_type ()> rng(Fn& function) {
     return std::bind(function, std::ref(prandom()));
 }
+
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
+} // namespace wtl
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
 #endif /* PRANDOM_HPP_ */
