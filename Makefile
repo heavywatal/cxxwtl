@@ -1,6 +1,6 @@
 ## Programs and Options
 CXXFLAGS := -O3 -std=c++11 -isystem /usr/local/include -mfpmath=sse
-CPPFLAGS := -Wall -Wextra -fno-strict-aliasing
+CPPFLAGS := -Wall -Wextra -fno-strict-aliasing -pthread
 TARGET_ARCH := -march=core2 -m64 -msse -msse2 -msse3
 LDFLAGS := -L/usr/local/lib
 LDLIBS := -lsfmt

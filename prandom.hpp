@@ -10,6 +10,7 @@
 #include <limits> // numeric_limits
 #include <algorithm> // shuffle
 #include <set>
+#include <functional>
 
 #define HAVE_SSE2
 #define SFMT_MEXP 19937
