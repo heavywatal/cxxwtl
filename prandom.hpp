@@ -3,8 +3,8 @@
 #ifndef PRANDOM_HPP_
 #define PRANDOM_HPP_
 
-#define _USE_MATH_DEFINES /* #define M_constant in cmath (for VC++ compatibility) */
 #include <cmath> // sqrt, sin, cos
+#include <cstddef> // ptrdiff_t
 #include <cassert>
 #include <random>
 #include <limits> // numeric_limits
