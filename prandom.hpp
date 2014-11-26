@@ -311,7 +311,7 @@ class XorShift {
 
     // [0.0, 1.0)
     double canonical() {
-        return std::uniform_real_distribution<double>()(operator()());
+        return std::uniform_real_distribution<double>()(*this);
     }
     
     void seed(result_type s) {
