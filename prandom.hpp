@@ -8,7 +8,6 @@
 #include <cassert>
 #include <random>
 #include <limits> // numeric_limits
-#include <algorithm> // shuffle
 #include <set>
 #include <functional>
 
@@ -29,11 +28,11 @@ Iter choose(Iter begin_, Iter end_, RNG& rng) {
 
 template <class Container, class RNG>
 void sample(Container* src, const size_t k, RNG& rng) {
-    size_t n(src->size());
+    size_t n = src->size();
     assert(k <= n);
     Container dst;
     dst.reserve(k);
-    for (size_t i(0); i<k; ++i) {
+    for (size_t i=0; i<k; ++i) {
         size_t j = std::uniform_int_distribution<size_t>(0, n-i-1)(rng);
         dst.push_back((*src)[j]);
         (*src)[j] = (*src)[n-i-1];
@@ -47,197 +46,33 @@ Container sample(Container src, const size_t k, RNG& rng) {
     return src;
 }
 
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
+//! faster than sample() above when k << n
+template <class Container, class RNG>
+void sample_small(Container* src, const size_t k, RNG& rng) {
+    size_t n = src->size();
+    assert(k <= n);
+    std::set<size_t> selected_indices;
+    Container dst;
+    dst.reserve(k);
+    std::uniform_int_distribution<size_t> uniform(0, n-1);
+    for (size_t i=0; i<k; ++i) {
+        size_t j = 0;
+        do {
+            j = uniform(rng);
+        } while (!std::get<1>(selected_indices.insert(j)));
+        dst.push_back((*src)[j]);
+    }
+    src->swap(dst);
+}
 
-template <class Generator>
-class Prandom{
-  public:
-    // typedefs
-    typedef unsigned int result_type;
-    typedef result_type argument_type;
-
-    static constexpr result_type min() {return Generator::min();}
-    static constexpr result_type max() {return Generator::max();}
-    
-    // constructors
-    explicit Prandom(const result_type s=std::random_device{}())
-    : seed_(s), generator_(s), flag_(false), t_(0.0), u_(0.0) {seed(s);}
-    
-    Prandom(const Prandom&) = delete;
-    
-    ////////////////////////////////////////
-    // methods
-    
-    void seed(const result_type s) {seed_ = s; generator_.seed(seed_);}
-    void discard(unsigned long long n) {generator_.discard(n);}
-    
-    ////////////////////
-    // integer
-    
-    // [0, 2^32-1]
-    result_type operator()() {return generator_();}
-    // [0, n-1]
-    unsigned int randrange(unsigned int n) {return static_cast<unsigned int>(uniform(n));}
-    // [a, b-1]
-    int randrange(const int a, const int b) {return static_cast<int>(uniform(a, b));}
-    // [a, b]
-    int randint(const int a, int b) {return randrange(a, ++b);}
-    
-    ////////////////////
-    // uniform real
-    
-    // [0.0, 1.0)
-    double random() {return generator_.canonical();}
-    // (0.0, 1.0]
-    double random_oc() {return 1.0 - random();}
-    // [0.0, n)
-    double uniform(double n) {return n *= random();}
-    // [a, b)
-    double uniform(double a, double b) {
-        b -= a;
-        return a += uniform(b);
-    }
-    
-    ////////////////////
-    // continuous
-    
-    // E = 1/lambda, V = 1/lambda^2
-    double exponential(const double lambda=1.0) {
-        return -std::log(random_oc()) / lambda;
-    }
-    
-    // Scale-free: E = ?, V = ?
-    double power(const double k=1.0, const double min=1.0) {
-        return min*std::pow(random_oc(), -1.0 / k);
-    }
-    
-    // E = mu, V = sigma^2
-    double gauss(const double mu=0.0, const double sigma=1.0) {
-        // Box-Muller method
-        // generate two gaussian random numbers from 2 uniform (0,1] random numbers
-        if ((flag_ =! flag_)) {
-            t_ = std::sqrt(-2.0 * std::log(random_oc()));
-            u_ = 2.0 * M_PI * random();
-            return mu + sigma * t_ * std::cos(u_);
-        } else {
-            return mu + sigma * t_ * std::sin(u_);
-        }
-    }
-    double normal(const double mu=0.0, const double sigma=1.0) {return gauss(mu, sigma);}
-    
-    
-    ////////////////////
-    // discrete
-    
-    // return true with probability p
-    // E = p, V = p(1-p)
-    bool bernoulli(const double p=0.5) {return p > random();}
-    
-    // The number of true in n trials with probability p
-    // E = np, V = np(1-p)
-    unsigned int binomial(const unsigned int n, const double p=0.5) {
-        unsigned int cnt(0);
-        for (unsigned int i=0; i<n; ++i) {if(bernoulli(p)) ++cnt;}
-        return cnt;
-    }
-    
-    // The expected number of occurrences in an unit of time/space
-    // E = V = lambda
-    unsigned int poisson(double lambda) {
-        if (lambda < 256) {
-            lambda = std::exp(-lambda);
-            unsigned int k = 0;
-            double p = 1.0;
-            do {
-                ++k;
-                p *= random();
-            } while (p > lambda);
-            return --k;
-        } else {
-            const double sq = std::sqrt(2.0 * lambda);
-            const double alxm = std::log(lambda);
-            const double g = lambda * alxm - std::lgamma(lambda + 1.0);
-            double y = 0.0;
-            double em = 0.0;
-            do {
-                do {
-                    y = std::tan(M_PI * random());
-                    em = y;
-                    em *= sq;
-                    em += lambda;
-                } while (em < 0.0);
-                em = std::round(em);
-                y *= y;
-                y += 1.0;
-                y *= 0.9;
-                y *= std::exp(em * alxm - std::lgamma(em + 1.0) - g);
-            } while (random() > y);
-            return static_cast<unsigned int>(em);
-        }
-    }
-    
-    // The number of trials needed to get first true
-    // E = (1-p)/p, V = (1-p)/p^2
-    unsigned int geometric(const double p) {
-        return static_cast<unsigned int>(std::log(random_oc()) / std::log(1.0 - p));
-    }
-    
-    ////////////////////
-    // algorithm
-    
-    template <class Iter>
-    Iter choose(Iter begin_, Iter end_) {
-        return choose(begin_, end_, generator_);
-    }
-    
-    template <class Container>
-    void sample(Container* src, const size_t k) {
-        sample(src, k, generator_);
-    }
-    
-    template <class Container>
-    Container sample(Container src, const size_t k) {
-        sample(&src, k);
-        return src;
-    }
-    
-    // faster than sample() above when k << n
-    template <class Container>
-    void sample_small(Container* src, const size_t k) {
-        size_t n(src->size());
-        assert(k <= n);
-        std::set<size_t> selected_indices;
-        Container dst;
-        dst.reserve(k);
-        for (size_t i(0); i<k; ++i) {
-            size_t j(0);
-            do {
-                j = randrange(n);
-            } while (!std::get<1>(selected_indices.insert(j)));
-            dst.push_back((*src)[j]);
-        }
-        src->swap(dst);
-    }
-    
-    template <class Container>
-    Container sample_small(Container src, const size_t k) {
-        sample_small(&src, k);
-        return src;
-    }
-    
-  private:
-    unsigned int seed_;
-    Generator generator_;
-    
-    // for Box-Muller in gauss()
-    bool flag_;
-    double t_;
-    double u_;
-};
+template <class Container, class RNG>
+Container sample_small(Container src, const size_t k, RNG& rng) {
+    sample_small(&src, k, rng);
+    return src;
+}
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
-////// Generators
-
+// Generators
 
 class sfmt19937{
   public:
@@ -245,9 +80,7 @@ class sfmt19937{
     typedef sfmt_t state_type;
 
     static constexpr result_type min() {return 0U;}
-    static constexpr result_type max() {
-        return std::numeric_limits<result_type>::max();
-    }
+    static constexpr result_type max() {return 4294967295U;}
 
     // constructors
     explicit sfmt19937(const result_type s) {seed(s);}
@@ -313,7 +146,7 @@ class XorShift {
     double canonical() {
         return std::uniform_real_distribution<double>()(*this);
     }
-    
+
     void seed(result_type s) {
         for (unsigned int i=0; i<4; ++i) {
             state_[i] = s = 1812433253U * (s ^ (s >> 30)) + i;
@@ -341,9 +174,7 @@ class XorShift {
 };
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
-// Global typedef and declaration
-
-typedef Prandom<sfmt19937> Random;
+// Global definition/declaration
 
 namespace detail {
     template <class T> class Holder {
@@ -355,16 +186,165 @@ namespace detail {
     template <class T> T Holder<T>::instance_(std::random_device{}());
 } // namespace detail
 
-inline Random& prandom() {
-    return wtl::detail::Holder<Random>{}();
+inline std::mt19937& mt() {
+    return wtl::detail::Holder<std::mt19937>{}();
 }
 
 inline sfmt19937& sfmt() {
     return wtl::detail::Holder<sfmt19937>{}();
 }
 
-inline std::mt19937& mt() {
-    return wtl::detail::Holder<std::mt19937>{}();
+inline XorShift& xorshift() {
+    return wtl::detail::Holder<XorShift>{}();
+}
+
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
+
+//! @deprecated Use std::*_distribution instead
+template <class Generator>
+class Prandom{
+  public:
+    // typedefs
+    typedef unsigned int result_type;
+    typedef result_type argument_type;
+
+    static constexpr result_type min() {return Generator::min();}
+    static constexpr result_type max() {return Generator::max();}
+
+    // constructors
+    explicit Prandom(const result_type s=std::random_device{}())
+    : seed_(s), generator_(s), flag_(false), t_(0.0), u_(0.0) {seed(s);}
+
+    Prandom(const Prandom&) = delete;
+
+    ////////////////////////////////////////
+    // methods
+
+    void seed(const result_type s) {seed_ = s; generator_.seed(seed_);}
+    void discard(unsigned long long n) {generator_.discard(n);}
+
+    ////////////////////
+    // integer
+
+    // [0, 2^32-1]
+    result_type operator()() {return generator_();}
+    // [0, n-1]
+    unsigned int randrange(unsigned int n) {return static_cast<unsigned int>(uniform(n));}
+    // [a, b-1]
+    int randrange(const int a, const int b) {return static_cast<int>(uniform(a, b));}
+    // [a, b]
+    int randint(const int a, int b) {return randrange(a, ++b);}
+
+    ////////////////////
+    // uniform real
+
+    // [0.0, 1.0)
+    double random() {return generator_.canonical();}
+    // (0.0, 1.0]
+    double random_oc() {return 1.0 - random();}
+    // [0.0, n)
+    double uniform(double n) {return n *= random();}
+    // [a, b)
+    double uniform(double a, double b) {
+        b -= a;
+        return a += uniform(b);
+    }
+
+    ////////////////////
+    // continuous
+
+    // E = 1/lambda, V = 1/lambda^2
+    double exponential(const double lambda=1.0) {
+        return -std::log(random_oc()) / lambda;
+    }
+
+    // Scale-free: E = ?, V = ?
+    double power(const double k=1.0, const double min=1.0) {
+        return min*std::pow(random_oc(), -1.0 / k);
+    }
+
+    // E = mu, V = sigma^2
+    double gauss(const double mu=0.0, const double sigma=1.0) {
+        // Box-Muller method
+        // generate two gaussian random numbers from 2 uniform (0,1] random numbers
+        if ((flag_ =! flag_)) {
+            t_ = std::sqrt(-2.0 * std::log(random_oc()));
+            u_ = 2.0 * M_PI * random();
+            return mu + sigma * t_ * std::cos(u_);
+        } else {
+            return mu + sigma * t_ * std::sin(u_);
+        }
+    }
+    double normal(const double mu=0.0, const double sigma=1.0) {return gauss(mu, sigma);}
+
+    ////////////////////
+    // discrete
+
+    // return true with probability p
+    // E = p, V = p(1-p)
+    bool bernoulli(const double p=0.5) {return p > random();}
+    
+    // The number of true in n trials with probability p
+    // E = np, V = np(1-p)
+    unsigned int binomial(const unsigned int n, const double p=0.5) {
+        unsigned int cnt(0);
+        for (unsigned int i=0; i<n; ++i) {if(bernoulli(p)) ++cnt;}
+        return cnt;
+    }
+
+    // The expected number of occurrences in an unit of time/space
+    // E = V = lambda
+    unsigned int poisson(double lambda) {
+        if (lambda < 256) {
+            lambda = std::exp(-lambda);
+            unsigned int k = 0;
+            double p = 1.0;
+            do {
+                ++k;
+                p *= random();
+            } while (p > lambda);
+            return --k;
+        } else {
+            const double sq = std::sqrt(2.0 * lambda);
+            const double alxm = std::log(lambda);
+            const double g = lambda * alxm - std::lgamma(lambda + 1.0);
+            double y = 0.0;
+            double em = 0.0;
+            do {
+                do {
+                    y = std::tan(M_PI * random());
+                    em = y;
+                    em *= sq;
+                    em += lambda;
+                } while (em < 0.0);
+                em = std::round(em);
+                y *= y;
+                y += 1.0;
+                y *= 0.9;
+                y *= std::exp(em * alxm - std::lgamma(em + 1.0) - g);
+            } while (random() > y);
+            return static_cast<unsigned int>(em);
+        }
+    }
+
+    // The number of trials needed to get first true
+    // E = (1-p)/p, V = (1-p)/p^2
+    unsigned int geometric(const double p) {
+        return static_cast<unsigned int>(std::log(random_oc()) / std::log(1.0 - p));
+    }
+
+  private:
+    unsigned int seed_;
+    Generator generator_;
+
+    // for Box-Muller in gauss()
+    bool flag_;
+    double t_;
+    double u_;
+};
+
+inline Prandom<sfmt19937>& prandom() {
+    return wtl::detail::Holder<Prandom<sfmt19937> >{}();
 }
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
