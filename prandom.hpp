@@ -20,6 +20,35 @@
 namespace wtl {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
+template <class Iter, class RNG>
+Iter choose(Iter begin_, Iter end_, RNG& rng) {
+    std::uniform_int_distribution<ptrdiff_t> uniform(0, std::distance(begin_, end_) - 1);
+    std::advance(begin_, uniform(rng));
+    return begin_;
+}
+
+template <class Container, class RNG>
+void sample(Container* src, const size_t k, RNG& rng) {
+    size_t n(src->size());
+    assert(k <= n);
+    Container dst;
+    dst.reserve(k);
+    for (size_t i(0); i<k; ++i) {
+        size_t j = std::uniform_int_distribution<size_t>(0, n-i-1)(rng);
+        dst.push_back((*src)[j]);
+        (*src)[j] = (*src)[n-i-1];
+    }
+    src->swap(dst);
+}
+
+template <class Container, class RNG>
+Container sample(Container src, const size_t k, RNG& rng) {
+    sample(&src, k, rng);
+    return src;
+}
+
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
+
 template <class Generator>
 class Prandom{
   public:
@@ -157,29 +186,13 @@ class Prandom{
     // algorithm
     
     template <class Iter>
-    void shuffle(Iter begin_, Iter end_) {std::shuffle(begin_, end_, *this);}
-
-    template <class T>
-    void shuffle(T* x) {std::shuffle(begin(*x), end(*x), *this);}
-    
-    template <class Iter>
-    Iter choice(Iter begin_, Iter end_) {
-        std::advance(begin_, randrange(std::distance(begin_, end_)));
-        return begin_;
+    Iter choose(Iter begin_, Iter end_) {
+        return choose(begin_, end_, generator_);
     }
     
     template <class Container>
     void sample(Container* src, const size_t k) {
-        size_t n(src->size());
-        assert(k <= n);
-        Container dst;
-        dst.reserve(k);
-        for (size_t i(0); i<k; ++i) {
-            size_t j(randrange(n-i));
-            dst.push_back((*src)[j]);
-            (*src)[j] = (*src)[n-i-1];
-        }
-        src->swap(dst);
+        sample(src, k, generator_);
     }
     
     template <class Container>
@@ -212,9 +225,6 @@ class Prandom{
         return src;
     }
     
-    // for std::shuffle()
-    result_type operator()(const argument_type arg) {return randrange(arg);}
-    
   private:
     unsigned int seed_;
     Generator generator_;
@@ -224,7 +234,6 @@ class Prandom{
     double t_;
     double u_;
 };
-
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 ////// Generators
@@ -301,7 +310,9 @@ class XorShift {
     }
 
     // [0.0, 1.0)
-    double canonical() {return (1.0 / max()) * operator()();}
+    double canonical() {
+        return std::uniform_real_distribution<double>()(operator()());
+    }
     
     void seed(result_type s) {
         for (unsigned int i=0; i<4; ++i) {
@@ -354,26 +365,6 @@ inline sfmt19937& sfmt() {
 
 inline std::mt19937& mt() {
     return wtl::detail::Holder<std::mt19937>{}();
-}
-
-template<class Fn>
-std::function<typename Fn::result_type ()> std_rng(Fn&& function) {
-    return std::bind(function, std::ref(mt()));
-}
-
-template<class Fn>
-std::function<typename Fn::result_type ()> std_rng(Fn& function) {
-    return std::bind(function, std::ref(mt()));
-}
-
-template<class Fn>
-std::function<typename Fn::result_type ()> rng(Fn&& function) {
-    return std::bind(function, std::ref(prandom()));
-}
-
-template<class Fn>
-std::function<typename Fn::result_type ()> rng(Fn& function) {
-    return std::bind(function, std::ref(prandom()));
 }
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
