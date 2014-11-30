@@ -13,8 +13,8 @@ namespace wtl {
 
 inline unsigned int num_threads() {
     unsigned int n = std::thread::hardware_concurrency();
-    n = std::min(n, 12u); // do not want to use HT in ilp15
-    return std::max(n, 1u);
+    n = std::min(n, 12U); // do not want to use HT in ilp15
+    return std::max(n, 1U);
 }
 
 

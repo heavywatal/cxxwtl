@@ -148,7 +148,7 @@ class XorShift {
     }
 
     void seed(result_type s) {
-        for (unsigned int i=0; i<4; ++i) {
+        for (unsigned int i=0; i<4U; ++i) {
             state_[i] = s = 1812433253U * (s ^ (s >> 30)) + i;
         }
     }
@@ -164,7 +164,7 @@ class XorShift {
 
     const state_type& getstate() const {return state_;}
     void setstate(const state_type& state) {
-        for (unsigned int i=0; i<4; ++i) {
+        for (unsigned int i=0; i<4U; ++i) {
             state_[i] = state[i];
         }
     }
