@@ -20,7 +20,7 @@ namespace wtl {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
 template <class Iter, class RNG>
-Iter choose(Iter begin_, Iter end_, RNG& rng) {
+Iter choice(Iter begin_, Iter end_, RNG& rng) {
     std::uniform_int_distribution<ptrdiff_t> uniform(0, std::distance(begin_, end_) - 1);
     std::advance(begin_, uniform(rng));
     return begin_;
@@ -200,7 +200,7 @@ inline XorShift& xorshift() {
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
-//! @deprecated Use std::*_distribution instead
+//! Pythonic RNG object
 template <class Generator>
 class Prandom{
   public:
@@ -213,7 +213,7 @@ class Prandom{
 
     // constructors
     explicit Prandom(const result_type s=std::random_device{}())
-    : seed_(s), generator_(s), flag_(false), t_(0.0), u_(0.0) {seed(s);}
+    : seed_(s), generator_(s) {seed(s);}
 
     Prandom(const Prandom&) = delete;
 
@@ -227,27 +227,36 @@ class Prandom{
     // integer
 
     // [0, 2^32-1]
-    result_type operator()() {return generator_();}
+    result_type operator()() {return generator_;}
     // [0, n-1]
-    unsigned int randrange(unsigned int n) {return static_cast<unsigned int>(uniform(n));}
+    unsigned int randrange(unsigned int n) {
+        return std::uniform_int_distribution<unsigned int>(0, --n)(generator_);
+    }
     // [a, b-1]
-    int randrange(const int a, const int b) {return static_cast<int>(uniform(a, b));}
+    int randrange(const int a, int b) {
+        return randint(a, --b);
+    }
     // [a, b]
-    int randint(const int a, int b) {return randrange(a, ++b);}
+    int randint(const int a, const int b) {
+        return std::uniform_int_distribution<int>(a, b)(generator_);
+    }
 
     ////////////////////
     // uniform real
 
     // [0.0, 1.0)
-    double random() {return generator_.canonical();}
+    double random() {
+        return std::uniform_real_distribution<double>()(generator_);
+    }
     // (0.0, 1.0]
     double random_oc() {return 1.0 - random();}
     // [0.0, n)
-    double uniform(double n) {return n *= random();}
+    double uniform(double n) {
+        return std::uniform_real_distribution<double>(0, n)(generator_);
+    }
     // [a, b)
     double uniform(double a, double b) {
-        b -= a;
-        return a += uniform(b);
+        return std::uniform_real_distribution<double>(a, b)(generator_);
     }
 
     ////////////////////
@@ -255,7 +264,7 @@ class Prandom{
 
     // E = 1/lambda, V = 1/lambda^2
     double exponential(const double lambda=1.0) {
-        return -std::log(random_oc()) / lambda;
+        return std::exponential_distribution<double>(lambda)(generator_);
     }
 
     // Scale-free: E = ?, V = ?
@@ -265,15 +274,7 @@ class Prandom{
 
     // E = mu, V = sigma^2
     double gauss(const double mu=0.0, const double sigma=1.0) {
-        // Box-Muller method
-        // generate two gaussian random numbers from 2 uniform (0,1] random numbers
-        if ((flag_ =! flag_)) {
-            t_ = std::sqrt(-2.0 * std::log(random_oc()));
-            u_ = 2.0 * M_PI * random();
-            return mu + sigma * t_ * std::cos(u_);
-        } else {
-            return mu + sigma * t_ * std::sin(u_);
-        }
+        return std::normal_distribution<double>(mu, sigma)(generator_);
     }
     double normal(const double mu=0.0, const double sigma=1.0) {return gauss(mu, sigma);}
 
@@ -282,65 +283,44 @@ class Prandom{
 
     // return true with probability p
     // E = p, V = p(1-p)
-    bool bernoulli(const double p=0.5) {return p > random();}
+    bool bernoulli(const double p=0.5) {
+        return std::bernoulli_distribution(p)(generator_);
+    }
     
     // The number of true in n trials with probability p
     // E = np, V = np(1-p)
     unsigned int binomial(const unsigned int n, const double p=0.5) {
-        unsigned int cnt(0);
-        for (unsigned int i=0; i<n; ++i) {if(bernoulli(p)) ++cnt;}
-        return cnt;
+        return std::binomial_distribution<unsigned int>(n, p)(generator_);
     }
 
     // The expected number of occurrences in an unit of time/space
     // E = V = lambda
-    unsigned int poisson(double lambda) {
-        if (lambda < 256) {
-            lambda = std::exp(-lambda);
-            unsigned int k = 0;
-            double p = 1.0;
-            do {
-                ++k;
-                p *= random();
-            } while (p > lambda);
-            return --k;
-        } else {
-            const double sq = std::sqrt(2.0 * lambda);
-            const double alxm = std::log(lambda);
-            const double g = lambda * alxm - std::lgamma(lambda + 1.0);
-            double y = 0.0;
-            double em = 0.0;
-            do {
-                do {
-                    y = std::tan(M_PI * random());
-                    em = y;
-                    em *= sq;
-                    em += lambda;
-                } while (em < 0.0);
-                em = std::round(em);
-                y *= y;
-                y += 1.0;
-                y *= 0.9;
-                y *= std::exp(em * alxm - std::lgamma(em + 1.0) - g);
-            } while (random() > y);
-            return static_cast<unsigned int>(em);
-        }
+    unsigned int poisson(const double lambda) {
+        return std::poisson_distribution<unsigned int>(lambda)(generator_);
     }
 
     // The number of trials needed to get first true
     // E = (1-p)/p, V = (1-p)/p^2
     unsigned int geometric(const double p) {
-        return static_cast<unsigned int>(std::log(random_oc()) / std::log(1.0 - p));
+        return std::geometric_distribution<unsigned int>(p)(generator_);
+    }
+
+    ////////////////////
+    // sequence
+    template <class Iter>
+    Iter choice(Iter begin_, Iter end_) {
+        return choice(begin_, end_, generator_);
+    }
+
+    template <class Container>
+    Container sample(Container src, const size_t k) {
+        sample(&src, k, generator_);
+        return src;
     }
 
   private:
     unsigned int seed_;
     Generator generator_;
-
-    // for Box-Muller in gauss()
-    bool flag_;
-    double t_;
-    double u_;
 };
 
 inline Prandom<sfmt19937>& prandom() {
