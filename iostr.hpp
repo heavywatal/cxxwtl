@@ -277,16 +277,11 @@ inline std::string iso8601datetime() {return strftime("%FT%T%z");}
 // fstream wrapper for binary mode and exceptions
 // boost::serialization requires binary mode
 
-class Fin: public std::ifstream{
+class Fin: public std::ifstream {
   public:
-    explicit Fin(
-#ifdef BOOST_FILESYSTEM_PATH_HPP
-            const boost::filesystem::path& filepath,
-#else
-            const std::string& filepath,
-#endif
-            const std::ios::openmode mode=std::ios::in)
-    : std::ifstream(filepath.c_str(), mode | std::ios::binary)
+    explicit Fin(const std::string& filepath,
+                 const std::ios::openmode mode=std::ios::in):
+        std::ifstream(filepath.c_str(), mode | std::ios::binary)
     {exceptions(std::ios::badbit);}
 
     std::string readline(const char delimiter='\n') {
@@ -307,17 +302,11 @@ class Fin: public std::ifstream{
     std::string read(const char delimiter='\0') {return readline(delimiter);}
 };
 
-class Fout: public std::ofstream{
+class Fout: public std::ofstream {
   public:
-    Fout() = default;
-    explicit Fout(
-#ifdef BOOST_FILESYSTEM_PATH_HPP
-            const boost::filesystem::path& filepath,
-#else
-            const std::string& filepath,
-#endif
-            const std::ios::openmode mode=std::ios::out)
-    : std::ofstream(filepath.c_str(), mode | std::ios::binary)
+    explicit Fout(const std::string& filepath,
+                  const std::ios::openmode mode=std::ios::out):
+        std::ofstream(filepath.c_str(), mode | std::ios::binary)
     {exceptions(std::ios::failbit);}
 
     template <class Iter>
@@ -347,13 +336,6 @@ read_ini(const std::string& filename) {
         dst.emplace_back(rstrip(pair_[0]), lstrip(pair_[1]));
     }
     return dst;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-//// monipulator
-
-inline std::ostream& LINE(std::ostream& stream) {
-    return stream << "----------------------------------------------------------------\n";
 }
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////

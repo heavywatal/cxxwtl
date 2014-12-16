@@ -159,7 +159,10 @@ inline void test_function() {HERE;
     std::cerr << "hostname: " << wtl::gethostname() << std::endl;
     std::cerr << "pid: " << ::getpid() << std::endl;
     std::cerr << "pwd: " << wtl::pwd() << std::endl;
-    std::cerr << wtl::LINE << wtl::strftime() << "\n" << wtl::LINE << std::endl;
+    std::cerr << "--------------------------------------------------\n"
+              << wtl::strftime() << "\n"
+              << "--------------------------------------------------\n"
+              << std::endl;
 
     test_integral();
     test_validity();
