@@ -3,13 +3,12 @@
 #ifndef PRANDOM_HPP_
 #define PRANDOM_HPP_
 
-#include <cmath> // sqrt, sin, cos
 #include <cstddef> // ptrdiff_t
 #include <cassert>
 #include <random>
 #include <limits> // numeric_limits
+#include <functional> // bind
 #include <set>
-#include <functional>
 
 #define HAVE_SSE2
 #define SFMT_MEXP 19937

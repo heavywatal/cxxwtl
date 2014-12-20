@@ -21,13 +21,54 @@
 #include <algorithm>
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
-////// prior declaration
+// prior declaration
 
-template <class F, class S> extern
-std::ostream& operator<< (std::ostream& ost, const std::pair<F, S>& p);
-
+namespace wtl {
 template <class T> extern
-std::ostream& operator<< (std::ostream& ost, const std::vector<T>& v);
+std::string str_join(const T& v,
+                     const std::string& sep=",",
+                     const unsigned int digits=std::cout.precision(),
+                     const bool fixed=false);
+}
+
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
+// global operator<< for containers
+
+template <class T> inline
+std::ostream& operator<< (std::ostream& ost, const std::vector<T>& v) {
+    return ost << '[' << wtl::str_join(v, ", ", ost.precision()) << ']';
+}
+
+template <> inline
+std::ostream& operator<< (std::ostream& ost, const std::vector<std::string>& v) {
+    if (v.empty()) {return ost << "[]";}
+    return ost << "['" << wtl::str_join(v, "', '") << "']";
+}
+
+template <class T> inline
+std::ostream& operator<< (std::ostream& ost, const std::set<T>& v) {
+    return ost << "set([" << wtl::str_join(v, ", ", ost.precision()) << "])";
+}
+
+template <class F, class S> inline
+std::ostream& operator<< (std::ostream& ost, const std::pair<F, S>& p) {
+    return ost << '(' << std::get<0>(p)
+               << ": " << std::get<1>(p) << ')';
+}
+
+// map
+template <class Key, class T, class Comp> inline
+std::ostream& operator<< (std::ostream& ost, const std::map<Key, T, Comp>& m) {
+    ost << '{';
+    if (!m.empty()) {
+        auto it(begin(m));
+        ost << std::get<0>(*it) << ": " << std::get<1>(*it);
+        while (++it != end(m)) {
+            ost << ", " << std::get<0>(*it) << ": " << std::get<1>(*it);
+        }
+    }
+    return ost << '}';
+}
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 namespace wtl {
@@ -46,8 +87,8 @@ std::string str_join(Iter begin_, const Iter end_, const std::string& sep=",",
 }
 
 template <class T> inline
-std::string str_join(const T& v, const std::string& sep=",",
-                     const unsigned int digits=std::cout.precision(), const bool fixed=false) {
+std::string str_join(const T& v, const std::string& sep,
+                     const unsigned int digits, const bool fixed) {
     return str_join(begin(v), end(v), sep, digits, fixed);
 }
 
@@ -102,50 +143,7 @@ std::string str_pair_cols(const Map& m, const std::string& sep=",", const unsign
 }
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
-} // namespace wtl
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
-//// global operator
-
-template <class F, class S> inline
-std::ostream& operator<< (std::ostream& ost, const std::pair<F, S>& p) {
-    return ost << '(' << std::get<0>(p)
-               << ": " << std::get<1>(p) << ')';
-}
-
-template <class T> inline
-std::ostream& operator<< (std::ostream& ost, const std::vector<T>& v) {
-    return ost << '[' << wtl::str_join(v, ", ", ost.precision()) << ']';
-}
-
-template <> inline
-std::ostream& operator<< (std::ostream& ost, const std::vector<std::string>& v) {
-    if (v.empty()) {return ost << "[]";}
-    return ost << "['" << wtl::str_join(v, "', '") << "']";
-}
-
-template <class T> inline
-std::ostream& operator<< (std::ostream& ost, const std::set<T>& v) {
-    return ost << "set([" << wtl::str_join(v, ", ", ost.precision()) << "])";
-}
-
-// map
-template <class Key, class T, class Comp> inline
-std::ostream& operator<< (std::ostream& ost, const std::map<Key, T, Comp>& m) {
-    ost << '{';
-    if (!m.empty()) {
-        auto it(begin(m));
-        ost << std::get<0>(*it) << ": " << std::get<1>(*it);
-        while (++it != end(m)) {
-            ost << ", " << std::get<0>(*it) << ": " << std::get<1>(*it);
-        }
-    }
-    return ost << '}';
-}
-
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
-namespace wtl {
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
-////// std::string manipulation
+// std::string manipulation
 
 inline std::vector<std::string> split_algorithm(const std::string& src, const std::string& delimiter=" \t\n") {
     std::vector<std::string> dst;

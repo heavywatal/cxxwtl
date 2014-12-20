@@ -11,13 +11,6 @@
 namespace wtl {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
-inline unsigned int num_threads() {
-    unsigned int n = std::thread::hardware_concurrency();
-    n = std::min(n, 12U); // do not want to use HT in ilp15
-    return std::max(n, 1U);
-}
-
-
 class Semaphore {
   public:
     Semaphore() = default;
@@ -48,12 +41,12 @@ class Semaphore {
   private:
     std::mutex mutex_;
     std::condition_variable condition_;
-    size_t count_ = num_threads();
+    size_t count_ = std::thread::hardware_concurrency();
 };
 
 class Pool {
   public:
-    explicit Pool(const size_t n=num_threads())
+    explicit Pool(const size_t n=std::thread::hardware_concurrency())
         : semaphore_(n) {}
 
     ~Pool() {join();}
