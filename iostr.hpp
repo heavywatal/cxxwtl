@@ -74,6 +74,40 @@ std::ostream& operator<< (std::ostream& ost, const std::map<Key, T, Comp>& m) {
 namespace wtl {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
+struct identity {
+    template<class T>
+    constexpr T operator()(T&& x) const noexcept {
+        return std::forward<T>(x);
+    }
+};
+
+template <class Iter, class Func=identity> inline
+std::string oss_join(std::ostringstream& oss, Iter begin_, const Iter end_,
+                     const std::string& sep=",", Func func=Func()) {
+    if (begin_ == end_) return "";
+    oss << func(*begin_);
+    while (++begin_ != end_) {oss << sep << func(*begin_);}
+    return oss.str();
+}
+
+template <class Iter, class Func=identity> inline
+std::string oss_join(Iter begin_, const Iter end_, const std::string& sep=",", Func func=Func()) {
+    std::ostringstream oss;
+    return oss_join(oss, begin_, end_, sep, func);
+}
+
+template <class T, class Func=identity> inline
+std::string oss_join(std::ostringstream& oss, const T& v,
+                     const std::string& sep=",", Func func=Func()) {
+    return oss_join(oss, begin(v), end(v), sep, func);
+}
+
+template <class T, class Func=identity> inline
+std::string oss_join(const T& v, const std::string& sep=",", Func func=Func()) {
+    std::ostringstream oss;
+    return oss_join(oss, v, sep, func);
+}
+
 template <class Iter> inline
 std::string str_join(Iter begin_, const Iter end_, const std::string& sep=",",
                      const unsigned int digits=std::cout.precision(), const bool fixed=false) {
