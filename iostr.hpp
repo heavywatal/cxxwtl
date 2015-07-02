@@ -82,30 +82,32 @@ struct identity {
 };
 
 template <class Iter, class Func=identity> inline
-std::string oss_join(std::ostringstream& oss, Iter begin_, const Iter end_,
-                     const std::string& sep=",", Func func=Func()) {
-    if (begin_ == end_) return "";
-    oss << func(*begin_);
-    while (++begin_ != end_) {oss << sep << func(*begin_);}
-    return oss.str();
+std::ostream& ost_join(std::ostream& ost, Iter begin_, const Iter end_,
+                       const std::string& sep=",", Func func=Func()) {
+    if (begin_ == end_) return ost;
+    ost << func(*begin_);
+    while (++begin_ != end_) {ost << sep << func(*begin_);}
+    return ost;
+}
+
+template <class T, class Func=identity> inline
+std::ostream& ost_join(std::ostream& ost, const T& v,
+                       const std::string& sep=",", Func func=Func()) {
+    return ost_join(ost, begin(v), end(v), sep, func);
 }
 
 template <class Iter, class Func=identity> inline
 std::string oss_join(Iter begin_, const Iter end_, const std::string& sep=",", Func func=Func()) {
     std::ostringstream oss;
-    return oss_join(oss, begin_, end_, sep, func);
-}
-
-template <class T, class Func=identity> inline
-std::string oss_join(std::ostringstream& oss, const T& v,
-                     const std::string& sep=",", Func func=Func()) {
-    return oss_join(oss, begin(v), end(v), sep, func);
+    ost_join(oss, begin_, end_, sep, func);
+    return oss.str();
 }
 
 template <class T, class Func=identity> inline
 std::string oss_join(const T& v, const std::string& sep=",", Func func=Func()) {
     std::ostringstream oss;
-    return oss_join(oss, v, sep, func);
+    ost_join(oss, v, sep, func);
+    return oss.str();
 }
 
 template <class Iter> inline
