@@ -226,7 +226,7 @@ class Prandom{
     // integer
 
     // [0, 2^32-1]
-    result_type operator()() {return generator_;}
+    result_type operator()() {return generator_();}
     // [0, n-1]
     unsigned int randrange(unsigned int n) {
         return std::uniform_int_distribution<unsigned int>(0, --n)(generator_);
@@ -268,7 +268,7 @@ class Prandom{
 
     // Scale-free: E = ?, V = ?
     double power(const double k=1.0, const double min=1.0) {
-        return min*std::pow(random_oc(), -1.0 / k);
+        return min * std::pow(random_oc(), -1.0 / k);
     }
 
     // E = mu, V = sigma^2
@@ -308,12 +308,12 @@ class Prandom{
     // sequence
     template <class Iter>
     Iter choice(Iter begin_, Iter end_) {
-        return choice(begin_, end_, generator_);
+        return wtl::choice(begin_, end_, generator_);
     }
 
     template <class Container>
     Container sample(Container src, const size_t k) {
-        sample(&src, k, generator_);
+        wtl::sample(&src, k, generator_);
         return src;
     }
 
