@@ -17,6 +17,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <unordered_map>
 #include <set>
 #include <algorithm>
 
@@ -56,18 +57,31 @@ std::ostream& operator<< (std::ostream& ost, const std::pair<F, S>& p) {
                << ": " << std::get<1>(p) << ')';
 }
 
+namespace wtl { namespace detail {
+    template <class Map> inline
+    std::ostream& operator_ost_map(std::ostream& ost, const Map& m) {
+        ost << '{';
+        if (!m.empty()) {
+            auto it(begin(m));
+            ost << std::get<0>(*it) << ": " << std::get<1>(*it);
+            while (++it != end(m)) {
+                ost << ", " << std::get<0>(*it) << ": " << std::get<1>(*it);
+            }
+        }
+        return ost << '}';
+    }
+}} // namespace
+
 // map
 template <class Key, class T, class Comp> inline
 std::ostream& operator<< (std::ostream& ost, const std::map<Key, T, Comp>& m) {
-    ost << '{';
-    if (!m.empty()) {
-        auto it(begin(m));
-        ost << std::get<0>(*it) << ": " << std::get<1>(*it);
-        while (++it != end(m)) {
-            ost << ", " << std::get<0>(*it) << ": " << std::get<1>(*it);
-        }
-    }
-    return ost << '}';
+    return wtl::detail::operator_ost_map(ost, m);
+}
+
+// unordered_map
+template <class Key, class T, class Hash> inline
+std::ostream& operator<< (std::ostream& ost, const std::unordered_map<Key, T, Hash>& m) {
+    return wtl::detail::operator_ost_map(ost, m);
 }
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
