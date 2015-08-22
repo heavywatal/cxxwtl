@@ -26,11 +26,16 @@
 // prior declaration
 
 namespace wtl {
-template <class T> extern
-std::string str_join(const T& v,
-                     const std::string& sep=",",
-                     const unsigned int digits=std::cout.precision(),
-                     const bool fixed=false);
+struct identity {
+    template<class T>
+    constexpr T operator()(T&& x) const noexcept {
+        return std::forward<T>(x);
+    }
+};
+
+template <class Ostream, class Iter, class Func=identity> extern
+Ostream& ost_join(Ostream& ost, Iter begin_, const Iter end_,
+                  const std::string& sep=",", Func func=Func());
 }
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
@@ -38,23 +43,23 @@ std::string str_join(const T& v,
 
 template <class T> inline
 std::ostream& operator<< (std::ostream& ost, const std::vector<T>& v) {
-    return ost << '[' << wtl::str_join(v, ", ", ost.precision()) << ']';
+    return wtl::ost_join(ost << '[', v.begin(), v.end(), ", ") << ']';
 }
 
 template <> inline
 std::ostream& operator<< (std::ostream& ost, const std::vector<std::string>& v) {
     if (v.empty()) {return ost << "[]";}
-    return ost << "['" << wtl::str_join(v, "', '") << "']";
+    return wtl::ost_join(ost << "['", v.begin(), v.end(), "', '") << "']";
 }
 
 template <class T> inline
 std::ostream& operator<< (std::ostream& ost, const std::set<T>& v) {
-    return ost << "set([" << wtl::str_join(v, ", ", ost.precision()) << "])";
+    return wtl::ost_join(ost << "set([", v.begin(), v.end(), ", ") << "])";
 }
 
 template <class T> inline
 std::ostream& operator<< (std::ostream& ost, const std::unordered_set<T>& v) {
-    return ost << "set([" << wtl::str_join(v, ", ", ost.precision()) << "])";
+    return wtl::ost_join(ost << "set([", v.begin(), v.end(), ", ") << "])";
 }
 
 template <class F, class S> inline
@@ -94,104 +99,76 @@ std::ostream& operator<< (std::ostream& ost, const std::unordered_map<Key, T, Ha
 namespace wtl {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
-struct identity {
-    template<class T>
-    constexpr T operator()(T&& x) const noexcept {
-        return std::forward<T>(x);
-    }
-};
-
-template <class Iter, class Func=identity> inline
-std::ostream& ost_join(std::ostream& ost, Iter begin_, const Iter end_,
-                       const std::string& sep=",", Func func=Func()) {
+template <class Ostream, class Iter, class Func> inline
+Ostream& ost_join(Ostream& ost, Iter begin_, const Iter end_,
+                  const std::string& sep, Func func) {
     if (begin_ == end_) return ost;
     ost << func(*begin_);
     while (++begin_ != end_) {ost << sep << func(*begin_);}
     return ost;
 }
 
-template <class T, class Func=identity> inline
-std::ostream& ost_join(std::ostream& ost, const T& v,
-                       const std::string& sep=",", Func func=Func()) {
+template <class Ostream, class T, class Func=identity> inline
+Ostream& ost_join(Ostream& ost, const T& v,
+                  const std::string& sep=",", Func func=Func()) {
     return ost_join(ost, begin(v), end(v), sep, func);
 }
 
-template <class Iter, class Func=identity> inline
-std::string oss_join(Iter begin_, const Iter end_, const std::string& sep=",", Func func=Func()) {
+inline std::ostringstream
+make_oss(const unsigned int precision=std::cout.precision(),
+         const std::ios_base::fmtflags fmtfl=0) {
     std::ostringstream oss;
-    ost_join(oss, begin_, end_, sep, func);
-    return oss.str();
+    oss.precision(precision);
+    oss.setf(fmtfl);
+    return oss;
+}
+
+template <class Iter, class Func=identity> inline
+std::string str_join(Iter begin_, const Iter end_, const std::string& sep=",",
+                     std::ostringstream&& oss=make_oss(), Func func=Func()) {
+    return ost_join(oss, begin_, end_, sep, func).str();
 }
 
 template <class T, class Func=identity> inline
-std::string oss_join(const T& v, const std::string& sep=",", Func func=Func()) {
-    std::ostringstream oss;
-    ost_join(oss, v, sep, func);
-    return oss.str();
+std::string str_join(const T& v, const std::string& sep=",",
+                     std::ostringstream&& oss=make_oss(), Func func=Func()) {
+    return str_join(begin(v), end(v), sep, std::move(oss), func);
 }
 
-template <class Iter> inline
-std::string str_join(Iter begin_, const Iter end_, const std::string& sep=",",
-                     const unsigned int digits=std::cout.precision(), const bool fixed=false) {
-    if (begin_ == end_) return "";
-    std::ostringstream oss;
-    oss.precision(digits);
-    if (fixed) {oss << std::fixed;}
-    oss << *begin_;
-    while (++begin_ != end_) {oss << sep << *begin_;}
-    return oss.str();
-}
-
-template <class T> inline
-std::string str_join(const T& v, const std::string& sep,
-                     const unsigned int digits, const bool fixed) {
-    return str_join(begin(v), end(v), sep, digits, fixed);
-}
-
-template <class T> inline
-std::string str_matrix(const T& m, const std::string& sep=",", const unsigned int digits=std::cout.precision()) {
-    std::string s;
+template <class T, class Func=identity> inline
+std::string str_matrix(const T& m, const std::string& sep=",",
+                       std::ostringstream&& oss=make_oss(), Func func=Func()) {
     for (const auto& row: m) {
-        s += str_join(row, sep, digits);
-        s += '\n';
+        ost_join(oss, row, sep, func) << '\n';
     }
-    return s;
-}
-
-template <class T> inline
-std::string str_map(const T& m, const unsigned int digits=std::cout.precision()) {
-    std::ostringstream oss;
-    oss.precision(digits);
-    oss << m;
     return oss.str();
 }
 
 template <int N, class Iter> inline
-std::string str_pairs(Iter begin_, const Iter end_, const std::string& sep=",", const unsigned int digits=std::cout.precision()) {
-    if (begin_ == end_) return "";
-    std::ostringstream oss;
-    oss.precision(digits);
-    oss << std::get<N>(*begin_);
-    while (++begin_ != end_) {oss << sep << std::get<N>(*begin_);}
-    return oss.str();
+std::string str_pairs(Iter begin_, const Iter end_, const std::string& sep=",",
+                      std::ostringstream&& oss=make_oss()) {
+    return str_join(begin_, end_, sep, std::move(oss),
+        [](const typename Iter::value_type& p) {return std::get<N>(p);});
 }
 template <int N, class Map> inline
-std::string str_pairs(const Map& m, const std::string& sep=",", const unsigned int digits=std::cout.precision()) {
-    return str_pairs<N>(begin(m), end(m), sep, digits);
+std::string str_pairs(const Map& m, const std::string& sep=",",
+                      std::ostringstream&& oss=make_oss()) {
+    return str_pairs<N>(begin(m), end(m), sep, std::move(oss));
 }
 
 template <class Map> inline
-std::string str_pair_rows(const Map& m, const std::string& sep=",", const unsigned int digits=std::cout.precision()) {
-    std::string s = str_pairs<0>(m, sep, digits);
+std::string str_pair_rows(const Map& m, const std::string& sep=",",
+                          std::ostringstream&& oss=make_oss()) {
+    auto oss1 = make_oss(oss.precision(), oss.flags());
+    std::string s = str_pairs<0>(m, sep, std::move(oss));
     s += '\n';
-    s += str_pairs<1>(m, sep, digits);
+    s += str_pairs<1>(m, sep, std::move(oss1));
     return s += '\n';
 }
 
 template <class Map> inline
-std::string str_pair_cols(const Map& m, const std::string& sep=",", const unsigned int digits=std::cout.precision()) {
-    std::ostringstream oss;
-    oss.precision(digits);
+std::string str_pair_cols(const Map& m, const std::string& sep=",",
+                          std::ostringstream&& oss=make_oss()) {
     for (const auto& p: m) {
         oss << std::get<0>(p) << sep << std::get<1>(p) << '\n';
     }
