@@ -19,6 +19,7 @@
 #include <map>
 #include <unordered_map>
 #include <set>
+#include <unordered_set>
 #include <algorithm>
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
@@ -48,6 +49,11 @@ std::ostream& operator<< (std::ostream& ost, const std::vector<std::string>& v) 
 
 template <class T> inline
 std::ostream& operator<< (std::ostream& ost, const std::set<T>& v) {
+    return ost << "set([" << wtl::str_join(v, ", ", ost.precision()) << "])";
+}
+
+template <class T> inline
+std::ostream& operator<< (std::ostream& ost, const std::unordered_set<T>& v) {
     return ost << "set([" << wtl::str_join(v, ", ", ost.precision()) << "])";
 }
 
