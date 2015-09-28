@@ -57,8 +57,8 @@ std::ostream& operator<< (std::ostream& ost, const std::set<T>& v) {
     return wtl::ost_join(ost << "set([", v.begin(), v.end(), ", ") << "])";
 }
 
-template <class T> inline
-std::ostream& operator<< (std::ostream& ost, const std::unordered_set<T>& v) {
+template <class T, class Pred> inline
+std::ostream& operator<< (std::ostream& ost, const std::unordered_set<T, std::hash<T>, Pred>& v) {
     return wtl::ost_join(ost << "set([", v.begin(), v.end(), ", ") << "])";
 }
 
