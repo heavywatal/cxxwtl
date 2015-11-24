@@ -116,7 +116,7 @@ Ostream& ost_join(Ostream& ost, const T& v,
 
 inline std::ostringstream
 make_oss(const unsigned int precision=std::cout.precision(),
-         const std::ios_base::fmtflags fmtfl=0) {
+         const std::ios_base::fmtflags fmtfl=std::cout.flags()) {
     std::ostringstream oss;
     oss.precision(precision);
     oss.setf(fmtfl);
