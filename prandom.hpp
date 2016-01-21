@@ -8,7 +8,7 @@
 #include <random>
 #include <limits> // numeric_limits
 #include <functional> // bind
-#include <set>
+#include <unordered_set>
 
 #define HAVE_SSE2
 #define SFMT_MEXP 19937
@@ -18,56 +18,73 @@
 namespace wtl {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
-template <class Iter, class RNG>
+template <class Iter, class RNG> inline
 Iter choice(Iter begin_, Iter end_, RNG& rng) {
     std::uniform_int_distribution<ptrdiff_t> uniform(0, std::distance(begin_, end_) - 1);
     std::advance(begin_, uniform(rng));
     return begin_;
 }
 
-template <class Container, class RNG>
-void sample(Container* src, const size_t k, RNG& rng) {
-    size_t n = src->size();
-    assert(k <= n);
-    Container dst;
-    dst.reserve(k);
-    for (size_t i=0; i<k; ++i) {
-        size_t j = std::uniform_int_distribution<size_t>(0, n-i-1)(rng);
-        dst.push_back((*src)[j]);
-        (*src)[j] = (*src)[n-i-1];
-    }
-    src->swap(dst);
+template <class Container, class RNG> inline
+Container sample(const Container& src, const size_t k, RNG& rng) {
+    const size_t n = src.size();
+    if (100 * k < n) {return sample_set(src, k, rng);}
+    else if (5 * k < n) {return sample_shuffle(src, k, rng);}
+    else {return sample_knuth(src, k, rng);}
 }
 
-template <class Container, class RNG>
-Container sample(Container src, const size_t k, RNG& rng) {
-    sample(&src, k, rng);
-    return src;
-}
-
-//! faster than sample() above when k << n
-template <class Container, class RNG>
-void sample_small(Container* src, const size_t k, RNG& rng) {
-    size_t n = src->size();
-    assert(k <= n);
-    std::set<size_t> selected_indices;
+//! fast if k << n
+template <class Container, class RNG> inline
+Container sample_set(const Container& src, const size_t k, RNG& rng) {
+    const size_t n = src.size();
+    assert(k < n);
+    std::unordered_set<size_t> existing_indices;
     Container dst;
     dst.reserve(k);
-    std::uniform_int_distribution<size_t> uniform(0, n-1);
+    std::uniform_int_distribution<size_t> uniform(0, n - 1);
+    size_t idx = 0;
     for (size_t i=0; i<k; ++i) {
-        size_t j = 0;
         do {
-            j = uniform(rng);
-        } while (!std::get<1>(selected_indices.insert(j)));
-        dst.push_back((*src)[j]);
+            idx = uniform(rng);
+        } while (!std::get<1>(existing_indices.insert(idx)));
+        dst.push_back(src[idx]);
     }
-    src->swap(dst);
+    return dst;
 }
 
-template <class Container, class RNG>
-Container sample_small(Container src, const size_t k, RNG& rng) {
-    sample_small(&src, k, rng);
-    return src;
+//! consistently fast; note that whole src is copied first
+template <class Container, class RNG> inline
+Container sample_shuffle(Container src, const size_t k, RNG& rng) {
+    size_t n = src.size();
+    assert(k < n);
+    Container dst;
+    dst.reserve(k);
+    for (size_t i=0; i<k; ++i) {
+        --n;
+        size_t idx = std::uniform_int_distribution<size_t>(0, n)(rng);
+        dst.push_back(std::move(src[idx]));
+        src[idx] = std::move(src[n]);
+    }
+    return dst;
+}
+
+//! fast if k / n is large
+template <class Container, class RNG> inline
+Container sample_knuth(const Container& src, const size_t k, RNG& rng) {
+    const size_t n = src.size();
+    assert(k <= n);
+    Container samples;
+    samples.reserve(k);
+    size_t i = 0;
+    std::uniform_int_distribution<size_t> uniform(0, k - 1);
+    for (const auto& item: src) {
+        if (++i <= k) {
+            samples.push_back(item);
+        } else if (std::bernoulli_distribution((1.0 / i) * k)(rng)) {
+            samples[uniform(rng)] = item;
+        }
+    }
+    return samples;
 }
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
@@ -285,7 +302,7 @@ class Prandom{
     bool bernoulli(const double p=0.5) {
         return std::bernoulli_distribution(p)(generator_);
     }
-    
+
     // The number of true in n trials with probability p
     // E = np, V = np(1-p)
     unsigned int binomial(const unsigned int n, const double p=0.5) {

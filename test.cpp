@@ -63,13 +63,6 @@ inline void test_speed() {HERE;
 
     wtl::benchmark([&](){
         for (size_t j=0; j<n; ++j) {
-            x[j] = wtl::prandom().poisson(mu);
-        }
-    });
-    std::cerr << wtl::mean(x) << std::endl;
-
-    wtl::benchmark([&](){
-        for (size_t j=0; j<n; ++j) {
             x[j] = dist(wtl::sfmt());
         }
     });
@@ -81,6 +74,32 @@ inline void test_speed() {HERE;
         }
     });
     std::cerr << wtl::mean(x) << std::endl;
+
+    wtl::benchmark([&](){
+        for (size_t j=0; j<n; ++j) {
+            x[j] = wtl::prandom().poisson(mu);
+        }
+    });
+    std::cerr << wtl::mean(x) << std::endl;
+
+    size_t k = n / 50;
+    size_t trash = 0;
+    wtl::benchmark([&](){
+        trash += wtl::sample(x, k, wtl::prandom())[0];
+    });
+    std::cerr << trash << std::endl;
+    wtl::benchmark([&](){
+        trash += wtl::sample_set(x, k, wtl::prandom())[0];
+    });
+    std::cerr << trash << std::endl;
+    wtl::benchmark([&](){
+        trash += wtl::sample_shuffle(x, k, wtl::prandom())[0];
+    });
+    std::cerr << trash << std::endl;
+    wtl::benchmark([&](){
+        trash += wtl::sample_knuth(x, k, wtl::prandom())[0];
+    });
+    std::cerr << trash << std::endl;
 
     x.resize(6);
     std::cerr << x << std::endl;
@@ -177,12 +196,10 @@ int main(int argc, char* argv[]) {
     std::cin.tie(0);
     std::cout.precision(16);
     std::cerr.precision(6);
-    
     try {
         std::cerr << "argc: " << argc << std::endl;
         std::cerr << "argv: " << wtl::str_join(argv, argv + argc, " ") << std::endl;
         test_function();
-        
         std::cerr << "EXIT_SUCCESS" << std::endl;
         return EXIT_SUCCESS;
     }
@@ -199,6 +216,5 @@ int main(int argc, char* argv[]) {
         std::cerr << "\nUNKNOWN ERROR OCCURED!!\nerrno "
                   << errno << ": " << std::strerror(errno) << std::endl;
     }
-    
     return EXIT_FAILURE;
 }
