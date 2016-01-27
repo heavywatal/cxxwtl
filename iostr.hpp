@@ -42,6 +42,11 @@ Ostream& ost_join(Ostream& ost, Iter begin_, const Iter end_,
 // global operator<< for containers
 
 template <class T> inline
+std::ostream& operator<< (std::ostream& ost, const std::valarray<T>& v) {
+    return wtl::ost_join(ost << '[', std::begin(v), std::end(v), ", ") << ']';
+}
+
+template <class T> inline
 std::ostream& operator<< (std::ostream& ost, const std::vector<T>& v) {
     return wtl::ost_join(ost << '[', v.begin(), v.end(), ", ") << ']';
 }
