@@ -29,7 +29,7 @@ template <class Container, class RNG> inline
 Container sample(const Container& src, const size_t k, RNG& rng) {
     const size_t n = src.size();
     if (100 * k < n) {return sample_set(src, k, rng);}
-    else if (5 * k < n) {return sample_shuffle(src, k, rng);}
+    else if (5 * k < n) {return sample_fisher(src, k, rng);}
     else {return sample_knuth(src, k, rng);}
 }
 
@@ -52,23 +52,23 @@ Container sample_set(const Container& src, const size_t k, RNG& rng) {
     return dst;
 }
 
+//! Fisher-Yates algorithm; Durstenfeld; Knuth's P
 //! consistently fast; note that whole src is copied first
 template <class Container, class RNG> inline
-Container sample_shuffle(Container src, const size_t k, RNG& rng) {
-    size_t n = src.size();
-    assert(k < n);
-    Container dst;
-    dst.reserve(k);
+Container sample_fisher(Container src, const size_t k, RNG& rng) {
+    const size_t n = src.size();
+    assert(k <= n);
+    const size_t last = n - 1;
     for (size_t i=0; i<k; ++i) {
-        --n;
-        size_t idx = std::uniform_int_distribution<size_t>(0, n)(rng);
-        dst.push_back(std::move(src[idx]));
-        src[idx] = std::move(src[n]);
+        std::swap(src[std::uniform_int_distribution<size_t>(i, last)(rng)], src[i]);
     }
-    return dst;
+    src.resize(k);
+    return src;
 }
 
+//! Knuth's algorithm S
 //! fast if k / n is large
+//! The order is not random
 template <class Container, class RNG> inline
 Container sample_knuth(const Container& src, const size_t k, RNG& rng) {
     const size_t n = src.size();
@@ -76,12 +76,13 @@ Container sample_knuth(const Container& src, const size_t k, RNG& rng) {
     Container samples;
     samples.reserve(k);
     size_t i = 0;
+    for (; i<k; ++i) {
+        samples.push_back(src[i]);
+    }
     std::uniform_int_distribution<size_t> uniform(0, k - 1);
-    for (const auto& item: src) {
-        if (++i <= k) {
-            samples.push_back(item);
-        } else if (std::bernoulli_distribution((1.0 / i) * k)(rng)) {
-            samples[uniform(rng)] = item;
+    while (i < n) {
+        if (std::bernoulli_distribution((1.0 / ++i) * k)(rng)) {
+            samples[uniform(rng)] = src[i - 1];
         }
     }
     return samples;

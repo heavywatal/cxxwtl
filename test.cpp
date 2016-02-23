@@ -59,7 +59,7 @@ inline void test_speed() {HERE;
     std::vector<size_t> x(n);
 
     double mu = 8.0;
-    auto dist = std::poisson_distribution<size_t>(mu);
+    std::poisson_distribution<size_t> dist(mu);
 
     wtl::benchmark([&](){
         for (size_t j=0; j<n; ++j) {
@@ -85,22 +85,21 @@ inline void test_speed() {HERE;
     size_t k = n / 50;
     size_t trash = 0;
     wtl::benchmark([&](){
-        trash += wtl::sample(x, k, wtl::prandom())[0];
+        trash += wtl::sample(x, k, wtl::sfmt())[0];
     });
     std::cerr << trash << std::endl;
     wtl::benchmark([&](){
-        trash += wtl::sample_set(x, k, wtl::prandom())[0];
+        trash += wtl::sample_set(x, k, wtl::sfmt())[0];
     });
     std::cerr << trash << std::endl;
     wtl::benchmark([&](){
-        trash += wtl::sample_shuffle(x, k, wtl::prandom())[0];
+        trash += wtl::sample_fisher(x, k, wtl::sfmt())[0];
     });
     std::cerr << trash << std::endl;
     wtl::benchmark([&](){
-        trash += wtl::sample_knuth(x, k, wtl::prandom())[0];
+        trash += wtl::sample_knuth(x, k, wtl::sfmt())[0];
     });
     std::cerr << trash << std::endl;
-
     x.resize(6);
     std::cerr << x << std::endl;
 }
