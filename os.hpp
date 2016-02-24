@@ -6,7 +6,6 @@
 #include <unistd.h> // chdir, getcwd, unlink, access, getpid, gethostname
 #include <dirent.h> // opendir
 #include <sys/stat.h> // mkdir, stat
-#include <cxxabi.h> // demangle
 
 #include <cerrno>
 #include <cstdio> // remove
@@ -135,16 +134,6 @@ class Pushd{
   private:
     std::vector<std::string> stack_;
 };
-
-inline std::string demangle(const char * type_info_name) {
-    int status(0);
-    return std::string(abi::__cxa_demangle(type_info_name, 0, 0, &status));
-}
-
-template <class T>
-inline std::string typestr(const T& x) {
-    return demangle(typeid(x).name());
-}
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 // random seed generator

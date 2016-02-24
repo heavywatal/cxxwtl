@@ -19,6 +19,7 @@
 #include "mixin.hpp"
 #include "omp.hpp"
 #include "os.hpp"
+#include "demangle.hpp"
 #include "prandom.hpp"
 #include "multiprocessing.hpp"
 
