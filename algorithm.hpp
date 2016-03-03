@@ -16,28 +16,10 @@
 namespace wtl {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
-namespace detail {
-
-template <unsigned int N, class T> struct Pow {
-    constexpr T operator()(const T x) const {
-        return x * Pow<N - 1, T>()(x);
-    }
-};
-
-template <class T> struct Pow<1, T> {
-    constexpr T operator()(const T& x) const {return x;}
-};
-
-template <class T> struct Pow<0, T> {
-    constexpr T operator()(const T& x) const {return x * 0 + 1;}
-};
-
-} // namespace detail
-
 // interger powers at compile time
-template <unsigned int N, class T> inline constexpr
-T pow(const T& x) {
-    return detail::Pow<N, T>()(x);
+template <class T>
+constexpr T pow(T base, unsigned int exponent) noexcept {
+    return exponent == 0 ? 1 : base * pow(base, --exponent);
 }
 
 // factorial at compile time
@@ -477,7 +459,7 @@ template <class T> struct alike_sign {public:
     }
 };
 
-// true if std::less(x, y) and signs are different 
+// true if std::less(x, y) and signs are different
 template <class T> struct less_sign {public:
     constexpr bool operator()(const T& x, const T& y) const {
         return (x < y) && (x * y <= T());
@@ -499,7 +481,7 @@ bool equal_matrix(const V& v, const V& u, Fn&& fn) {
            );
 }
 
-template <class T> inline 
+template <class T> inline
 bool equal_sign(const T& x, const T& y) {
         return wtl::equal(x, y, wtl::alike_sign<typename T::value_type>{});
 }
