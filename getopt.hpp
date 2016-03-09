@@ -35,7 +35,7 @@ flags_into_stream(std::ostream& ost,
             ost << boost::any_cast<bool>(value);
         }
         else if (value.type() == typeid(std::string)) {
-            ost << '"' << boost::any_cast<std::string>(value) << '"';
+            ost << boost::any_cast<std::string>(value);
         }
         else {
             ost << boost::any_cast<unsigned long>(value);
