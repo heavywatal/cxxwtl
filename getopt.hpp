@@ -9,19 +9,16 @@
 namespace wtl {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
-inline std::ostream& flags_into_stream(
-            std::ostream& ost,
-            const boost::program_options::options_description& desc,
-            const boost::program_options::variables_map& vm) {
-    for (const auto shared_ptr_opt: desc.options()) {
-        std::string long_name = shared_ptr_opt.get()->long_name();
-        boost::any value = vm[long_name].value();
-        if (!vm.count(long_name)) {continue;}
+inline std::ostream&
+flags_into_stream(std::ostream& ost,
+                  const boost::program_options::variables_map& vm) {
+    for (const auto& pair: vm) {
+        boost::any value = pair.second.value();
         if (value.type() == typeid(std::string)
             && boost::any_cast<std::string>(value).empty()) {
             ost << '#';
         }
-        ost << long_name << " = ";
+        ost << pair.first << " = ";
         if (value.type() == typeid(int)) {
             ost << boost::any_cast<int>(value);
         }
@@ -48,12 +45,11 @@ inline std::ostream& flags_into_stream(
     return ost;
 }
 
-inline std::string flags_into_string(
-            const boost::program_options::options_description& desc,
-            const boost::program_options::variables_map& vm) {
+inline std::string
+flags_into_string(const boost::program_options::variables_map& vm) {
     std::ostringstream oss;
     oss.precision(std::numeric_limits<double>::max_digits10);
-    flags_into_stream(oss, desc, vm);
+    flags_into_stream(oss, vm);
     return oss.str();
 }
 
