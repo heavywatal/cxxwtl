@@ -39,7 +39,7 @@ inline std::string flags_into_string(
             oss << boost::any_cast<bool>(value);
         }
         else if (value.type() == typeid(std::string)) {
-            oss << boost::any_cast<std::string>(value);
+            oss << '"' << boost::any_cast<std::string>(value) << '"';
         }
         else {
             oss << boost::any_cast<unsigned long>(value);
