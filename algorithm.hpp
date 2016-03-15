@@ -350,7 +350,7 @@ typename V::value_type squared_euclidean(const V& v, const U& u) {
 // Simpson Diversity D
 template <class V> inline
 double simpson_diversity(const V& v) {
-    const double square1_N = pow<2>(1.0 / sum(v));
+    const double square1_N = pow(1.0 / sum(v), 2);
     double d = 0.0;
     for (const auto& x: v) {
         auto tmp = square1_N;
