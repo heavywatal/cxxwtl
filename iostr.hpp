@@ -36,28 +36,38 @@ struct identity {
 };
 
 namespace detail {
+    template <class Iter, class Char, class Func> class JoinHelper;
+}
+
+template <class Iter, class Char, class Func> extern std::ostream&
+operator<<(std::ostream& ost, wtl::detail::JoinHelper<Iter, Char, Func>&& j);
+
+namespace detail {
     template <class Iter, class Char, class Func>
     class JoinHelper {
       public:
         JoinHelper(Iter b, Iter e, const Char* d, Func f):
             begin(b), end(e), delim(d), func(f) {}
+      private:
         Iter begin;
         const Iter end;
         const Char* delim;
         Func func;
+
+        friend std::ostream& operator<< <Iter, Char, Func>
+        (std::ostream& ost, wtl::detail::JoinHelper<Iter, Char, Func>&& j);
     };
-}
+}  // namespace detail
 
 template <class Iter, class Char=char, class Func=identity> extern
 detail::JoinHelper<Iter, Char, Func> join(Iter begin, const Iter end, const Char* delim="\t", Func func=Func());
 
-}
-
-template <class Iter, class Char, class Func> extern
-std::ostream& operator<<(std::ostream& ost, wtl::detail::JoinHelper<Iter, Char, Func>&& j);
+}  // namespace wtl
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 // global operator<< for containers
+
+namespace std{
 
 template <class T> inline
 std::ostream& operator<< (std::ostream& ost, const std::valarray<T>& v) {
@@ -118,17 +128,19 @@ std::ostream& operator<< (std::ostream& ost, const std::unordered_map<Key, T, Ha
     return wtl::detail::operator_ost_map(ost, m);
 }
 
-template <class Iter, class Char, class Func> inline
-std::ostream& operator<<(std::ostream& ost, wtl::detail::JoinHelper<Iter, Char, Func>&& x) {
+}  // namespace std
+
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
+namespace wtl {
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
+
+template <class Iter, class Char, class Func> inline std::ostream&
+operator<<(std::ostream& ost, wtl::detail::JoinHelper<Iter, Char, Func>&& x) {
     if (x.begin == x.end) return ost;
     ost << x.func(*x.begin);
     while (++x.begin != x.end) {ost << x.delim << x.func(*x.begin);}
     return ost;
 }
-
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
-namespace wtl {
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
 template <class Iter, class Char, class Func>
 detail::JoinHelper<Iter, Char, Func>
