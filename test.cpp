@@ -206,7 +206,6 @@ int main(int argc, char* argv[]) {
     catch (const std::exception& e) {
         std::cerr << "\n" << wtl::typestr(e) << ": " << e.what() << std::endl;
     }
-    catch (const char* const e) {std::cerr << "\nEXCEPTION:\n" << e << std::endl;}
     catch (const char* e) {std::cerr << "\nEXCEPTION:\n" << e << std::endl;}
     catch (const int e) {
         std::cerr << "\nint " << e << " was thrown.\nIf it is errno: "
