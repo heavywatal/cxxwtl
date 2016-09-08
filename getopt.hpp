@@ -10,6 +10,32 @@ namespace wtl {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
 inline std::ostream&
+ost_any(std::ostream& ost, const boost::any& value) {
+    if (value.type() == typeid(int)) {
+        ost << boost::any_cast<int>(value);
+    }
+    else if (value.type() == typeid(unsigned int)) {
+        ost << boost::any_cast<unsigned int>(value);
+    }
+    else if (value.type() == typeid(size_t)) {
+        ost << boost::any_cast<size_t>(value);
+    }
+    else if (value.type() == typeid(double)) {
+        ost << boost::any_cast<double>(value);
+    }
+    else if (value.type() == typeid(bool)) {
+        ost << boost::any_cast<bool>(value);
+    }
+    else if (value.type() == typeid(std::string)) {
+        ost << boost::any_cast<std::string>(value);
+    }
+    else {
+        ost << boost::any_cast<unsigned long>(value);
+    }
+    return ost;
+}
+
+inline std::ostream&
 flags_into_stream(std::ostream& ost,
                   const boost::program_options::variables_map& vm) {
     for (const auto& pair: vm) {
@@ -18,29 +44,7 @@ flags_into_stream(std::ostream& ost,
             && boost::any_cast<std::string>(value).empty()) {
             ost << '#';
         }
-        ost << pair.first << " = ";
-        if (value.type() == typeid(int)) {
-            ost << boost::any_cast<int>(value);
-        }
-        else if (value.type() == typeid(unsigned int)) {
-            ost << boost::any_cast<unsigned int>(value);
-        }
-        else if (value.type() == typeid(size_t)) {
-            ost << boost::any_cast<size_t>(value);
-        }
-        else if (value.type() == typeid(double)) {
-            ost << boost::any_cast<double>(value);
-        }
-        else if (value.type() == typeid(bool)) {
-            ost << boost::any_cast<bool>(value);
-        }
-        else if (value.type() == typeid(std::string)) {
-            ost << boost::any_cast<std::string>(value);
-        }
-        else {
-            ost << boost::any_cast<unsigned long>(value);
-        }
-        ost << '\n';
+        ost_any(ost << pair.first << " = ", value) << "\n";
     }
     return ost;
 }
