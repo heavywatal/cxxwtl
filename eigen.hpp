@@ -17,6 +17,11 @@ Eigen::IOFormat tsv(const std::string& sep="\t") {
 }
 
 template <class T>
+std::vector<T> as_vector(const Eigen::Matrix<T, Eigen::Dynamic, 1>& vec) {
+    return std::vector<T>(vec.data(), vec.data() + vec.size());
+}
+
+template <class T>
 Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> read_matrix(const std::string& path, const char sep='\t') {
     std::ifstream fin0(path.c_str());
     std::string buffer;
