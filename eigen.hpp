@@ -4,6 +4,7 @@
 #define WTL_EIGEN_HPP_
 
 #include <vector>
+#include <valarray>
 #include <string>
 #include <fstream>
 #include <Eigen/Core>
@@ -19,6 +20,11 @@ Eigen::IOFormat tsv(const std::string& sep="\t") {
 template <class T>
 std::vector<T> as_vector(const Eigen::Matrix<T, Eigen::Dynamic, 1>& vec) {
     return std::vector<T>(vec.data(), vec.data() + vec.size());
+}
+
+template <class T>
+std::valarray<T> as_valarray(const Eigen::Matrix<T, Eigen::Dynamic, 1>& vec) {
+    return std::valarray<T>(vec.data(), vec.size());
 }
 
 template <class T>
