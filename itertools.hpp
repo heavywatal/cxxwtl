@@ -5,6 +5,7 @@
 
 #include <vector>
 #include <type_traits>
+#include <limits>
 #include <boost/coroutine2/coroutine.hpp>
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
@@ -53,6 +54,37 @@ class Product {
 template <class value_type>
 Product<value_type> product(const std::vector<value_type>& columns) {
     return Product<value_type>(columns);
+}
+
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
+
+template <class value_type>
+class Simplex {
+    typedef boost::coroutines2::coroutine<value_type> coro_t;
+    Simplex() = delete;
+  public:
+    explicit Simplex(const std::vector<value_type>& columns): product_(columns) {}
+
+    typename coro_t::pull_type operator()(void) {
+        return typename coro_t::pull_type([this](typename coro_t::push_type& yield){source(yield);});
+    }
+
+  private:
+    bool equals_one(double x) {
+        return std::fabs(x -= 1.0) < std::numeric_limits<double>::epsilon();
+    }
+
+    void source(typename coro_t::push_type& yield) {
+        for (const auto& v: product_()) {
+            if (equals_one(v.sum())) {yield(v);}
+        }
+    }
+    Product<value_type> product_;
+};
+
+template <class value_type>
+Simplex<value_type> simplex(const std::vector<value_type>& columns) {
+    return Simplex<value_type>(columns);
 }
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
