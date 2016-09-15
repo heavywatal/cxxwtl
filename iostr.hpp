@@ -122,6 +122,12 @@ std::ostream& operator<< (std::ostream& ost, const std::map<Key, T, Comp>& m) {
     return wtl::detail::operator_ost_map(ost, m);
 }
 
+// multimap
+template <class Key, class T, class Comp> inline
+std::ostream& operator<< (std::ostream& ost, const std::multimap<Key, T, Comp>& m) {
+    return wtl::detail::operator_ost_map(ost, m);
+}
+
 // unordered_map
 template <class Key, class T, class Hash> inline
 std::ostream& operator<< (std::ostream& ost, const std::unordered_map<Key, T, Hash>& m) {
@@ -352,9 +358,10 @@ inline std::string iso8601datetime() {return strftime("%FT%T%z");}
 class Fin: public std::ifstream {
   public:
     explicit Fin(const std::string& filepath,
-                 const std::ios::openmode mode=std::ios::in):
-        std::ifstream(filepath.c_str(), mode | std::ios::binary)
-    {exceptions(std::ios::badbit);}
+                 const std::ios::openmode mode=std::ios::in) {
+        exceptions(std::ios::failbit);
+        open(filepath.c_str(), mode | std::ios::binary);
+    }
 
     std::string readline(const char delimiter='\n') {
         std::string buffer;
