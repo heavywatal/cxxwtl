@@ -6,6 +6,8 @@
 #include <vector>
 #include <type_traits>
 #include <limits>
+#include <cmath>
+
 #include <boost/coroutine2/coroutine.hpp>
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
@@ -63,28 +65,30 @@ class Simplex {
     typedef boost::coroutines2::coroutine<value_type> coro_t;
     Simplex() = delete;
   public:
-    explicit Simplex(const std::vector<value_type>& columns): product_(columns) {}
+    explicit Simplex(const std::vector<value_type>& columns, const double sum=1.0):
+        product_(columns), sum_(sum) {}
 
     typename coro_t::pull_type operator()(void) {
         return typename coro_t::pull_type([this](typename coro_t::push_type& yield){source(yield);});
     }
 
   private:
-    bool equals_one(double x) {
-        return std::fabs(x -= 1.0) < std::numeric_limits<double>::epsilon();
+    bool equals(double x) const {
+        return std::fabs(x -= sum_) < std::numeric_limits<double>::epsilon();
     }
 
     void source(typename coro_t::push_type& yield) {
         for (const auto& v: product_()) {
-            if (equals_one(v.sum())) {yield(v);}
+            if (equals(v.sum())) {yield(v);}
         }
     }
     Product<value_type> product_;
+    const double sum_;
 };
 
 template <class value_type>
-Simplex<value_type> simplex(const std::vector<value_type>& columns) {
-    return Simplex<value_type>(columns);
+Simplex<value_type> simplex(const std::vector<value_type>& columns, const double sum=1.0) {
+    return Simplex<value_type>(columns, sum);
 }
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////

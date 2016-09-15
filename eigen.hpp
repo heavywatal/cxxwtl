@@ -6,7 +6,7 @@
 #include <vector>
 #include <valarray>
 #include <string>
-#include <fstream>
+#include <istream>
 #include <Eigen/Core>
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
@@ -28,15 +28,14 @@ std::valarray<T> as_valarray(const Eigen::Matrix<T, Eigen::Dynamic, 1>& vec) {
 }
 
 template <class T>
-Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> read_matrix(const std::string& path, const char sep='\t') {
-    std::ifstream fin0(path.c_str());
+Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> read_matrix(std::istream& fin, const char sep='\t') {
     std::string buffer;
-    std::getline(fin0, buffer, '\n');
+    std::getline(fin, buffer, '\n');
     size_t ncol = std::count(buffer.begin(), buffer.end(), sep) + 1;
-    std::ifstream fin(path.c_str());
+    fin.seekg(0);
     std::vector<T> vec{std::istream_iterator<T>(fin), std::istream_iterator<T>()};
     assert(vec.size() % ncol == 0);
-    return Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>::Map(vec.data(), vec.size() / ncol, ncol);
+    return Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>::Map(vec.data(), vec.size() / ncol, ncol);
 }
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
