@@ -97,8 +97,8 @@ std::ostream& operator<< (std::ostream& ost, const std::unordered_set<T, std::ha
 
 template <class F, class S> inline
 std::ostream& operator<< (std::ostream& ost, const std::pair<F, S>& p) {
-    return ost << '(' << std::get<0>(p)
-               << ": " << std::get<1>(p) << ')';
+    return ost << '['  << std::get<0>(p)
+               << ", " << std::get<1>(p) << ']';
 }
 
 namespace wtl { namespace detail {
