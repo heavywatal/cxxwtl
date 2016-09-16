@@ -385,8 +385,10 @@ class Fout: public std::ofstream {
   public:
     explicit Fout(const std::string& filepath,
                   const std::ios::openmode mode=std::ios::out):
-        std::ofstream(filepath.c_str(), mode | std::ios::binary)
-    {exceptions(std::ios::failbit);}
+                  std::ofstream(filepath.c_str(), mode | std::ios::binary) {
+        exceptions(std::ios::failbit);
+        precision(std::cout.precision());
+    }
 
     template <class Iter>
     Fout& writelines(Iter begin_, const Iter end_, const char sep='\n') {
