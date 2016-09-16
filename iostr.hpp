@@ -419,6 +419,13 @@ read_ini(const std::string& filename) {
     return dst;
 }
 
+inline std::vector<std::string>
+read_header(std::istream& fin, const char* sep="\t") {
+    std::string buffer;
+    std::getline(fin, buffer, '\n');
+    return split(buffer, sep);
+}
+
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 } // namespace wtl
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
