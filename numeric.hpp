@@ -6,24 +6,13 @@
 #include <cmath>
 
 #include <map>
-#include <functional>
 #include <numeric>
+
+#include "functional.hpp"
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 namespace wtl {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
-
-// interger powers at compile time
-template <class T>
-constexpr T pow(T base, unsigned int exponent) noexcept {
-    return exponent == 0 ? 1 : base * pow(base, --exponent);
-}
-
-// factorial at compile time
-constexpr unsigned int factorial(unsigned int n) {
-    return n ? (n * factorial(n - 1)) : 1;
-}
-
 // sum
 template <class Iter> inline
 typename Iter::value_type sum(const Iter begin_, const Iter end_) {
@@ -251,6 +240,24 @@ double cov(const V& v, const U& u, const bool unbiased=true) {
     return cov(v.cbegin(), v.cend(), u.cbegin(), u.cend(), unbiased);
 }
 
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
+// for pairs
+
+template <int N, class Iter> inline
+typename std::tuple_element<N, typename Iter::value_type>::type
+sum(const Iter begin_, const Iter end_) {
+    typedef typename Iter::value_type pair_t;
+    typedef typename std::tuple_element<N, pair_t>::trait_t T;
+    return std::accumulate(begin_, end_, T(0), wtl::plus<pair_t, N>());
+}
+
+template <int N, class Iter> inline
+double mean(const Iter begin_, const Iter end_) {
+    double x(sum<N>(begin_, end_));
+    return x /= std::distance(begin_, end_);
+}
+
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 // rank
 template <class Iter> inline
 std::vector<double> rank(const Iter begin_, const Iter end_) {
@@ -387,99 +394,6 @@ void transpose(Matrix* A) {
     }
     A->swap(tmp);
 }
-
-// ceilint of integer division
-template <class T> inline
-T ceil_int_div(T lhs, const T rhs) {
-    lhs += rhs;
-    return --lhs /= rhs;
-}
-
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
-
-// nPr
-inline unsigned int permutation(unsigned int n, unsigned int r) {
-    unsigned int answer = n;
-    while (--r) {
-        answer *= --n;
-    }
-    return answer;
-}
-
-// nCr
-inline unsigned int combination(unsigned int n, unsigned int r) {
-    unsigned int numerator = n;
-    unsigned int denominator = r;
-    while (--r) {
-        numerator *= --n;
-        denominator *= r;
-    }
-    return numerator /= denominator;
-}
-
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
-
-// 2^n?
-inline constexpr bool is_power_of_two(const int& num) {
-    return num && !(num & (num - 1));
-}
-
-// xy; sign = (+ - - -)
-template <class T> inline
-T and_mul(T x, const T y) {
-    if (x < 0 && y < 0) {
-        x *= -1;
-    }
-    x *= y;
-    return x;
-}
-
-// step function: sign, heaviside
-template <class T> inline
-constexpr int sign(const T& x) {return (x < 0) ? -1 : (x == 0) ? 0 : 1;}
-
-template <class T> inline
-constexpr int heaviside0(const T& x) {return (x <= 0) ? 0 : 1;}
-template <class T> inline
-constexpr int heaviside1(const T& x) {return (x < 0) ? 0 : 1;}
-template <class T> inline
-constexpr double heaviside1_2(const T& x) {return (x < 0) ? 0 : (x == 0) ? 0.5 : 1;}
-
-template <class Ret, class Arg>
-class Heaviside: public std::unary_function<Arg, Ret>{
-  public:
-    explicit Heaviside(const Ret& a=0): a_(a) {}
-    constexpr Ret operator()(const Arg& x) const {
-        return (x < 0) ? 0 : (x == 0) ? a_ : 1;
-    }
-  private:
-    const Ret a_;
-};
-
-
-// x(-∞,∞) -> y(0,1)
-inline double sigmoid(const double& x, const double& gain=1.0) {
-    return 1.0 / (1.0 + std::exp(-gain * x));
-}
-// (0, 1)
-class Sigmoid: public std::unary_function<double, double> {
-  public:
-    Sigmoid(const double& gain): gain_(gain) {}
-    double operator()(const double& x) const {
-        return 1.0 / (1.0 + std::exp(-gain_ * x));
-    }
-  private:
-    const double gain_;
-};
-
-// (-1, 1)
-class Tanh: public std::unary_function<double, double> {
-  public:
-    Tanh(const double& a): a_(a) {}
-    double operator()(const double& x) const {return std::tanh(a_ * x);}
-  private:
-    const double a_;
-};
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 // numerical integration

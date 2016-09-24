@@ -7,10 +7,9 @@
 
 #include <utility>
 #include <algorithm>
-#include <functional>
 #include <stdexcept>
 
-#include "numeric.hpp"
+#include "functional.hpp"
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 namespace wtl {
@@ -50,6 +49,13 @@ typename V::iterator sort_unique_erase(V* v) {
     return v->erase(std::unique(begin(*v), end(*v)), end(*v));
 }
 
+// ceiling of integer division
+template <class T> inline constexpr
+T ceil_int_div(T lhs, const T rhs) {
+    --lhs /= rhs;
+    return ++lhs;
+}
+
 // split a sequence into the equally sized pieces
 template <class V> inline
 std::vector<V> chunk(const V& src, const size_t unit) {
@@ -61,24 +67,6 @@ std::vector<V> chunk(const V& src, const size_t unit) {
     }
     return dst;
 }
-
-
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
-// easy equal, sign equal, sign less
-
-// true if signs are the same or both 0
-template <class T> struct alike_sign {public:
-    constexpr bool operator()(const T& x, const T& y) const {
-        return (x * y > T()) || (x == y);
-    }
-};
-
-// true if std::less(x, y) and signs are different
-template <class T> struct less_sign {public:
-    constexpr bool operator()(const T& x, const T& y) const {
-        return (x < y) && (x * y <= T());
-    }
-};
 
 template <class V, class Fn> inline
 bool equal(const V& v, const V& u, Fn&& fn) {
@@ -115,79 +103,6 @@ template <class T> inline
 bool lexico_matrix_sign(const T& x, const T& y) {
     return std::lexicographical_compare(begin(x), end(x), begin(y), end(y),
                     wtl::lexico_sign<typename T::value_type>);
-}
-
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
-// <functional> for std::pair
-
-template <class P, int N> struct plus
-: public std::binary_function<const typename std::tuple_element<N, P>::type&, const P&, typename std::tuple_element<N, P>::type>{
-    typedef typename std::tuple_element<N, P>::type T;
-    T operator()(const T& x, const P& y) const {return x + std::get<N>(y);}
-};
-
-template <class P, int N> struct minus
-: public std::binary_function<const typename std::tuple_element<N, P>::type&, const P&, typename std::tuple_element<N, P>::type>{
-    typedef typename std::tuple_element<N, P>::type T;
-    T operator()(const T& x, const P& y) const {return x - std::get<N>(y);}
-};
-
-template <class P, int N> struct multiplies
-: public std::binary_function<const typename std::tuple_element<N, P>::type&, const P&, typename std::tuple_element<N, P>::type>{
-    typedef typename std::tuple_element<N, P>::type T;
-    T operator()(const T& x, const P& y) const {return x * std::get<N>(y);}
-};
-
-template <class P, int N> struct divides
-: public std::binary_function<const typename std::tuple_element<N, P>::type&, const P&, typename std::tuple_element<N, P>::type>{
-    typedef typename std::tuple_element<N, P>::type T;
-    T operator()(const T& x, const P& y) const {return x / std::get<N>(y);}
-};
-
-template <class P, int N> struct equal_to
-: public std::binary_function<const P&, const P&, bool>{
-    bool operator()(const P& lhs, const P& rhs) const {
-        return std::get<N>(lhs) == std::get<N>(rhs);
-    }
-};
-
-template <class P, int N> struct less
-: public std::binary_function<const P&, const P&, bool>{
-    bool operator()(const P& lhs, const P& rhs) const {
-        return std::get<N>(lhs) < std::get<N>(rhs);
-    }
-};
-
-template <int N, class Iter> inline
-typename std::tuple_element<N, typename Iter::value_type>::type
-sum(const Iter begin_, const Iter end_) {
-    typedef typename Iter::value_type pair_t;
-    typedef typename std::tuple_element<N, pair_t>::trait_t T;
-    return std::accumulate(begin_, end_, T(0), wtl::plus<pair_t, N>());
-}
-
-template <int N, class Iter> inline
-double mean(const Iter begin_, const Iter end_) {
-    double x(sum<N>(begin_, end_));
-    return x /= std::distance(begin_, end_);
-}
-
-template <int N, class Iter1, class Iter2> inline
-bool equal(const Iter1 begin1, const Iter1 end1, const Iter2 begin2) {
-    return std::inner_product(begin1, end1, begin2, true, std::logical_and<bool>(), wtl::equal_to<typename Iter1::value_type,N>());
-}
-
-template <int N, class Iter> inline
-Iter max_element(const Iter begin_, const Iter end_) {
-    return std::max_element(begin_, end_, wtl::less<typename Iter::value_type,N>());
-}
-
-template <int N, class IterMap, class IterVec> inline
-IterVec copy(const IterMap begin_, const IterMap end_, IterVec dst) {
-    return std::transform(begin_, end_, dst,
-        [](const typename IterMap::value_type& x) {
-            return std::get<N>(x);
-        });
 }
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
@@ -248,7 +163,8 @@ OutputIter pairwise_transform(const InputIter begin_, const InputIter end_, Outp
 template <class Iter, class BinaryOperator> inline
 std::vector<typename BinaryOperator::result_type> pairwise_transform(const Iter begin_, const Iter end_, BinaryOperator op) {
     const size_t n = std::distance(begin_, end_);
-    std::vector<typename BinaryOperator::result_type> result(combination(n, 2));
+    const size_t combinations = n * (n - 1) / 2;
+    std::vector<typename BinaryOperator::result_type> result(combinations);
     pairwise_transform(begin_, end_, begin(result), op);
     return result;
 }

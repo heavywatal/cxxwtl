@@ -9,6 +9,7 @@
 #include <regex>
 
 #include "algorithm.hpp"
+#include "numeric.hpp"
 #include "cow.hpp"
 #include "debug.hpp"
 #include "genetic.hpp"
