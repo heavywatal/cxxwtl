@@ -1,7 +1,7 @@
 // -*- mode: c++; coding: utf-8 -*-
 #pragma once
-#ifndef DEMANGLE_HPP_
-#define DEMANGLE_HPP_
+#ifndef WTL_DEMANGLE_HPP_
+#define WTL_DEMANGLE_HPP_
 
 #include <cxxabi.h> // demangle
 
@@ -25,4 +25,4 @@ inline std::string typestr(const T& x) {
 } // namespace wtl
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
-#endif /* DEMANGLE_HPP_ */
+#endif /* WTL_DEMANGLE_HPP_ */

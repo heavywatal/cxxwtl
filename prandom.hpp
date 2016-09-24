@@ -1,7 +1,7 @@
 // -*- mode: c++; coding: utf-8 -*-
 #pragma once
-#ifndef PRANDOM_HPP_
-#define PRANDOM_HPP_
+#ifndef WTL_PRANDOM_HPP_
+#define WTL_PRANDOM_HPP_
 
 #include <cstddef> // ptrdiff_t
 #include <cassert>
@@ -348,4 +348,4 @@ inline Prandom<sfmt19937>& prandom() {
 } // namespace wtl
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
-#endif /* PRANDOM_HPP_ */
+#endif /* WTL_PRANDOM_HPP_ */

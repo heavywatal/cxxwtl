@@ -1,7 +1,7 @@
 // -*- mode: c++; coding: utf-8 -*-
 #pragma once
-#ifndef EXCEPTION_HPP_
-#define EXCEPTION_HPP_
+#ifndef WTL_EXCEPTION_HPP_
+#define WTL_EXCEPTION_HPP_
 
 #include <exception>
 
@@ -19,4 +19,4 @@ class ExitSuccess: public std::exception {
 } // namespace wtl
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
-#endif // EXCEPTION_HPP_
+#endif // WTL_EXCEPTION_HPP_

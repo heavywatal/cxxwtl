@@ -1,7 +1,7 @@
 // -*- mode: c++; coding: utf-8 -*-
 #pragma once
-#ifndef OMP_HPP_
-#define OMP_HPP_
+#ifndef WTL_OMP_HPP_
+#define WTL_OMP_HPP_
 
 #if defined(_OPENMP)
 #  include <omp.h>
@@ -17,4 +17,4 @@
 #  define IF_OMP(x)
 #endif
 
-#endif /* OMP_HPP_ */
+#endif /* WTL_OMP_HPP_ */

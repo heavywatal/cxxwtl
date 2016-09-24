@@ -1,7 +1,7 @@
 // -*- mode: c++; coding: utf-8 -*-
 #pragma once
-#ifndef GRN_HPP_
-#define GRN_HPP_
+#ifndef WTL_GRN_HPP_
+#define WTL_GRN_HPP_
 
 #include <string>
 #include <sstream>
@@ -108,7 +108,7 @@ class double_writer {
 };
 template <class M1, class M2> inline
 double_writer<M1, M2>
-make_double_writer(const M1& m1, const std::string& key1, 
+make_double_writer(const M1& m1, const std::string& key1,
                    const M2& m2, const std::string& key2) {
     return double_writer<M1, M2>(m1, key1, m2, key2);
 }
@@ -123,7 +123,7 @@ std::ostream& write_graphviz(std::ostream& ost,
 {
     Graph graph = make_graph(adj_matrix);
     for (size_t i=0; i<normal_input.size(); ++i) {
-        boost::put(boost::vertex_index1, graph, 
+        boost::put(boost::vertex_index1, graph,
                    boost::vertex(i, graph), normal_input[i]);
     }
     for (size_t i=0; i<novel_input.size(); ++i) {
@@ -156,4 +156,4 @@ std::string str_graphml(GraphType& graph) {
 } // namespace wtl
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
-#endif // GRN_HPP_
+#endif // WTL_GRN_HPP_

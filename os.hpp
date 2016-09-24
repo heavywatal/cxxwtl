@@ -1,7 +1,7 @@
 // -*- mode: c++; coding: utf-8 -*-
 #pragma once
-#ifndef OS_HPP_
-#define OS_HPP_
+#ifndef WTL_OS_HPP_
+#define WTL_OS_HPP_
 
 #include <unistd.h> // chdir, getcwd, unlink, access, getpid, gethostname
 #include <dirent.h> // opendir
@@ -153,4 +153,4 @@ inline unsigned int dev_urandom_handmade() {
 } // namespace wtl
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
-#endif /* OS_HPP_ */
+#endif /* WTL_OS_HPP_ */

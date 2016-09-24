@@ -1,7 +1,7 @@
 // -*- mode: c++; coding: utf-8 -*-
 #pragma once
-#ifndef ALGORITHM_HPP_
-#define ALGORITHM_HPP_
+#ifndef WTL_ALGORITHM_HPP_
+#define WTL_ALGORITHM_HPP_
 
 #include <cmath>
 
@@ -791,4 +791,4 @@ double integrate(Func func, const double lower, const double upper, const size_t
 } // namespace wtl
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
-#endif /* ALGORITHM_HPP_ */
+#endif /* WTL_ALGORITHM_HPP_ */

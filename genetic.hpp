@@ -1,7 +1,7 @@
 // -*- mode: c++; coding: utf-8 -*-
 #pragma once
-#ifndef GENETIC_HPP_
-#define GENETIC_HPP_
+#ifndef WTL_GENETIC_HPP_
+#define WTL_GENETIC_HPP_
 
 #include <vector>
 #include <algorithm>
@@ -28,7 +28,7 @@ std::vector<size_t> roulette_select(const std::vector<double>& fitnesses,
     // elite selection
     if (elites) {
         const size_t i = std::distance(
-                begin(fitnesses), 
+                begin(fitnesses),
                 std::max_element(begin(fitnesses), end(fitnesses))
                 );
         children.assign(elites, i);
@@ -64,4 +64,4 @@ std::vector<size_t> roulette_select(const std::vector<double>& fitnesses,
 } // namespace wtl
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
-#endif /* GENETIC_HPP_ */
+#endif /* WTL_GENETIC_HPP_ */

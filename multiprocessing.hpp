@@ -1,5 +1,7 @@
 // -*- mode: c++; coding: utf-8 -*-
 #pragma once
+#ifndef WTL_MULTIPROCESSING_HPP_
+#define WTL_MULTIPROCESSING_HPP_
 
 #include <thread>
 #include <mutex>
@@ -84,3 +86,5 @@ class Pool {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 } // namespace wtl
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
+
+#endif /* WTL_MULTIPROCESSING_HPP_ */

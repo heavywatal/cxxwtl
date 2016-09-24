@@ -1,7 +1,7 @@
 // -*- mode: c++; coding: utf-8 -*-
 #pragma once
-#ifndef IOSTR_HPP_
-#define IOSTR_HPP_
+#ifndef WTL_IOSTR_HPP_
+#define WTL_IOSTR_HPP_
 
 #include <cstring>
 #include <cerrno>
@@ -430,4 +430,4 @@ read_header(std::istream& fin, const char* sep="\t") {
 } // namespace wtl
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
-#endif /* IOSTR_HPP_ */
+#endif /* WTL_IOSTR_HPP_ */

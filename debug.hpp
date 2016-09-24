@@ -1,7 +1,7 @@
 // -*- mode: c++; coding: utf-8 -*-
 #pragma once
-#ifndef DEBUG_HPP_
-#define DEBUG_HPP_
+#ifndef WTL_DEBUG_HPP_
+#define WTL_DEBUG_HPP_
 
 #include <cstdio>
 #include <cstring>
@@ -73,4 +73,4 @@ void benchmark(Fn&& fn, const std::string& label="", size_t times=3) {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
 
-#endif // DEBUG_HPP_
+#endif // WTL_DEBUG_HPP_

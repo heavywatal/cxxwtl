@@ -1,7 +1,7 @@
 // -*- mode: c++; coding: utf-8 -*-
 #pragma once
-#ifndef MIXIN_HPP_
-#define MIXIN_HPP_
+#ifndef WTL_MIXIN_HPP_
+#define WTL_MIXIN_HPP_
 
 #include <mutex>
 
@@ -45,4 +45,4 @@ template <class T> std::unique_ptr<T> Singleton<T>::instance_ = nullptr;
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
-#endif /* MIXIN_HPP_ */
+#endif /* WTL_MIXIN_HPP_ */

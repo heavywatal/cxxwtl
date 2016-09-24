@@ -1,7 +1,7 @@
 // -*- mode: c++; coding: utf-8 -*-
 #pragma once
-#ifndef GZ_HPP_
-#define GZ_HPP_
+#ifndef WTL_GZ_HPP_
+#define WTL_GZ_HPP_
 
 #include <string>
 #include <ostream>
@@ -77,4 +77,4 @@ class gunzip {
 } // namespace wtl
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
-#endif // GZ_HPP_
+#endif // WTL_GZ_HPP_
