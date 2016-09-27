@@ -4,7 +4,6 @@
 #define WTL_PRANDOM_HPP_
 
 #include <cstddef> // ptrdiff_t
-#include <cassert>
 #include <random>
 #include <limits> // numeric_limits
 #include <functional> // bind
@@ -37,7 +36,7 @@ Container sample(const Container& src, const size_t k, RNG& rng) {
 template <class Container, class RNG> inline
 Container sample_set(const Container& src, const size_t k, RNG& rng) {
     const size_t n = src.size();
-    assert(k < n);
+    if (n < k) throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + ": n < k");
     std::unordered_set<size_t> existing_indices;
     Container dst;
     dst.reserve(k);
@@ -57,7 +56,7 @@ Container sample_set(const Container& src, const size_t k, RNG& rng) {
 template <class Container, class RNG> inline
 Container sample_fisher(Container src, const size_t k, RNG& rng) {
     const size_t n = src.size();
-    assert(k <= n);
+    if (n < k) throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + ": n < k");
     const size_t last = n - 1;
     for (size_t i=0; i<k; ++i) {
         std::swap(src[std::uniform_int_distribution<size_t>(i, last)(rng)], src[i]);
@@ -72,7 +71,7 @@ Container sample_fisher(Container src, const size_t k, RNG& rng) {
 template <class Container, class RNG> inline
 Container sample_knuth(const Container& src, const size_t k, RNG& rng) {
     const size_t n = src.size();
-    assert(k <= n);
+    if (n < k) throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + ": n < k");
     Container samples;
     samples.reserve(k);
     size_t i = 0;
