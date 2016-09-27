@@ -5,7 +5,6 @@
 
 #include <cstring>
 #include <cerrno>
-#include <cassert>
 #include <cstdarg>
 #include <ctime>
 
@@ -312,7 +311,6 @@ inline std::string replace_all(const std::string& patt, const std::string& repl,
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
 inline std::string strprintf(const char* const format, ...) {
-    assert(format);
     va_list args;
     std::string buffer;
     va_start(args, format);

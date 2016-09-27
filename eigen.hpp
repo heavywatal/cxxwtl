@@ -31,7 +31,10 @@ template <class T>
 Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>
 read_matrix(std::istream& fin, const size_t ncol) {
     std::vector<T> vec{std::istream_iterator<T>(fin), std::istream_iterator<T>()};
-    assert(vec.size() % ncol == 0);
+    if (vec.size() % ncol > 0) {
+        std::string msg = std::string(__PRETTY_FUNCTION__);
+        throw std::runtime_error(msg + ": vec.size() % ncol > 0");
+    }
     return Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>::Map(vec.data(), vec.size() / ncol, ncol);
 }
 
