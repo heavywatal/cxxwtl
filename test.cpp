@@ -148,9 +148,7 @@ inline void cxx11_thread() {HERE;
             sem.unlock();
         });
     }
-    for (auto& x: threads) {
-        x.join();
-    }
+    for (auto& x: threads) {x.join();}
 
     auto dist = std::uniform_real_distribution<>();
     auto gen = std::bind(dist, wtl::mt());
@@ -171,26 +169,11 @@ inline void cxx11_thread() {HERE;
     }
 }
 
-inline void test_function() {HERE;
-    const std::string homedir(std::getenv("HOME"));
-    const std::string tmpdir = homedir + "/tmp";
-    wtl::mkdir(tmpdir);
-
-    std::cerr << "hostname: " << wtl::gethostname() << std::endl;
-    std::cerr << "pid: " << ::getpid() << std::endl;
-    std::cerr << "pwd: " << wtl::pwd() << std::endl;
-    std::cerr << "--------------------------------------------------\n"
-              << wtl::strftime() << "\n"
-              << "--------------------------------------------------\n"
-              << std::endl;
-
-    test_integral();
-    test_validity();
-    test_speed();
-    cxx11_regex();
-    cxx11_thread();
+inline void test_temporal() {HERE;
+    std::cout << std::numeric_limits<size_t>::max() << std::endl;
+    std::cout << std::log2(std::numeric_limits<size_t>::max()) << std::endl;
+    std::cout << std::log10(std::numeric_limits<size_t>::max()) << std::endl;
 }
-
 
 int main(int argc, char* argv[]) {
     std::ios::sync_with_stdio(false);
@@ -198,23 +181,18 @@ int main(int argc, char* argv[]) {
     std::cout.precision(16);
     std::cerr.precision(6);
     try {
-        std::cerr << "argc: " << argc << std::endl;
-        std::cerr << "argv: " << wtl::str_join(argv, argv + argc, " ") << std::endl;
-        test_function();
+        std::cerr << wtl::str_join(argv, argv + argc, " ") << std::endl;
+        // test_integral();
+        // test_validity();
+        // test_speed();
+        // cxx11_regex();
+        // cxx11_thread();
+        test_temporal();
         std::cerr << "EXIT_SUCCESS" << std::endl;
         return EXIT_SUCCESS;
     }
     catch (const std::exception& e) {
         std::cerr << "\n" << wtl::typestr(e) << ": " << e.what() << std::endl;
-    }
-    catch (const char* e) {std::cerr << "\nEXCEPTION:\n" << e << std::endl;}
-    catch (const int e) {
-        std::cerr << "\nint " << e << " was thrown.\nIf it is errno: "
-                  << std::strerror(e) << std::endl;
-    }
-    catch (...) {
-        std::cerr << "\nUNKNOWN ERROR OCCURED!!\nerrno "
-                  << errno << ": " << std::strerror(errno) << std::endl;
     }
     return EXIT_FAILURE;
 }
