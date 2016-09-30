@@ -9,6 +9,7 @@
 #include <cmath>
 
 #include <boost/coroutine2/coroutine.hpp>
+#include <boost/multiprecision/cpp_int.hpp>
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 namespace wtl { namespace itertools {
@@ -28,6 +29,13 @@ class Product {
         return typename coro_t::pull_type([this](typename coro_t::push_type& yield){source(yield);});
     }
 
+    boost::multiprecision::cpp_int count() const {return cnt_;}
+    boost::multiprecision::cpp_int count_max() const {
+        boost::multiprecision::cpp_int i = 1;
+        for (const auto& c: columns_) {i *= c.size();}
+        return i;
+    }
+
   private:
     void source(typename coro_t::push_type& yield) {
         if (--col_ > 0) {
@@ -41,6 +49,7 @@ class Product {
             const size_type n = columns_[col_].size();
             for (size_type i=0; i<n; ++i) {
                 value_[col_] = columns_[col_][i];
+                ++cnt_;
                 yield(value_type(value_));
             }
             ++col_;
@@ -50,6 +59,7 @@ class Product {
     const std::vector<value_type> columns_;
     value_type value_;
     size_t col_;
+    boost::multiprecision::cpp_int cnt_ = 0;
     typedef typename std::remove_const<decltype(value_.size())>::type size_type;
 };
 
@@ -72,6 +82,10 @@ class Simplex {
         return typename coro_t::pull_type([this](typename coro_t::push_type& yield){source(yield);});
     }
 
+    boost::multiprecision::cpp_int count() const {return cnt_;}
+    boost::multiprecision::cpp_int count_all() const {return product_.count();}
+    boost::multiprecision::cpp_int count_max() const {return product_.count_max();}
+
   private:
     bool equals(double x) const {
         return std::fabs(x -= sum_) < std::numeric_limits<double>::epsilon();
@@ -79,11 +93,15 @@ class Simplex {
 
     void source(typename coro_t::push_type& yield) {
         for (const auto& v: product_()) {
-            if (equals(v.sum())) {yield(v);}
+            if (equals(v.sum())) {
+                ++cnt_;
+                yield(v);
+            }
         }
     }
     Product<value_type> product_;
     const double sum_;
+    boost::multiprecision::cpp_int cnt_ = 0;
 };
 
 template <class value_type>
