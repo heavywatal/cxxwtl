@@ -13,7 +13,7 @@
 namespace wtl { namespace eigen {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
-Eigen::IOFormat tsv(const std::string& sep="\t") {
+inline Eigen::IOFormat tsv(const std::string& sep="\t") {
     return {Eigen::StreamPrecision, Eigen::DontAlignCols, sep, "", "", "\n"};
 }
 
