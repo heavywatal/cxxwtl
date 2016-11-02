@@ -1,5 +1,5 @@
 ## Programs and Options
-CXXFLAGS := -O3 -std=c++14 -isystem ${HOME}/local/include -mfpmath=sse
+CXXFLAGS := -O3 -std=c++14 -I${HOME}/local/include -mfpmath=sse
 CPPFLAGS := -Wall -Wextra -fno-strict-aliasing -pthread
 TARGET_ARCH := -m64 -msse -msse2 -msse3
 LDFLAGS := -L${HOME}/local/lib
