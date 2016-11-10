@@ -5,6 +5,7 @@
 
 #include <cmath>
 
+#include <vector>
 #include <map>
 #include <numeric>
 
@@ -13,6 +14,15 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 namespace wtl {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
+
+// Generate integer vector with increasing values
+template <class T=size_t> inline
+typename std::vector<T> seq_len(const size_t size, const T init=0) {
+    typename std::vector<T> v(size);
+    std::iota(std::begin(v), std::end(v), init);
+    return v;
+}
+
 // sum
 template <class Iter> inline
 typename Iter::value_type sum(const Iter begin_, const Iter end_) {
