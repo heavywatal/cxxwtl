@@ -31,6 +31,15 @@ constexpr unsigned int choose(unsigned int n, unsigned int r) {
     return permut(n, r) / factorial(r);
 }
 
+template <class T>
+inline unsigned int polynomial(const T& v) {
+    unsigned int out = factorial(v.sum());
+    for (const auto x: v) {
+        out /= factorial(x);
+    }
+    return out;
+}
+
 inline unsigned int permut_runtime(unsigned int n, unsigned int r) {
     unsigned int answer = n;
     while (--r) {
