@@ -18,27 +18,17 @@ inline Eigen::IOFormat tsv(const std::string& sep="\t") {
 }
 
 template <class T>
-std::vector<T> as_vector(const Eigen::Matrix<T, Eigen::Dynamic, 1>& vec) {
-    return std::vector<T>(vec.data(), vec.data() + vec.size());
+std::vector<typename T::Scalar> as_vector(const T& vec) {
+    return std::vector<typename T::Scalar>(vec.data(), vec.data() + vec.size());
 }
 
 template <class T>
-std::vector<T> as_vector(const Eigen::Array<T, Eigen::Dynamic, 1>& vec) {
-    return std::vector<T>(vec.data(), vec.data() + vec.size());
+std::valarray<typename T::Scalar> as_valarray(const T& vec) {
+    return std::valarray<typename T::Scalar>(vec.data(), vec.size());
 }
 
 template <class T>
-std::valarray<T> as_valarray(const Eigen::Matrix<T, Eigen::Dynamic, 1>& vec) {
-    return std::valarray<T>(vec.data(), vec.size());
-}
-
-template <class T>
-std::valarray<T> as_valarray(const Eigen::Array<T, Eigen::Dynamic, 1>& vec) {
-    return std::valarray<T>(vec.data(), vec.size());
-}
-
-template <class T>
-Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>
+Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>
 read_matrix(std::istream& fin, const size_t ncol) {
     std::vector<T> vec{std::istream_iterator<T>(fin), std::istream_iterator<T>()};
     if (vec.size() % ncol > 0) {
@@ -46,6 +36,17 @@ read_matrix(std::istream& fin, const size_t ncol) {
         throw std::runtime_error(msg + ": vec.size() % ncol > 0");
     }
     return Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>::Map(vec.data(), vec.size() / ncol, ncol);
+}
+
+template <class T>
+Eigen::Array<T, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>
+read_array(std::istream& fin, const size_t ncol) {
+    std::vector<T> vec{std::istream_iterator<T>(fin), std::istream_iterator<T>()};
+    if (vec.size() % ncol > 0) {
+        std::string msg = std::string(__PRETTY_FUNCTION__);
+        throw std::runtime_error(msg + ": vec.size() % ncol > 0");
+    }
+    return Eigen::Array<T, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>::Map(vec.data(), vec.size() / ncol, ncol);
 }
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
