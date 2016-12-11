@@ -393,16 +393,17 @@ double shannon_diversity(const V& v) {
 }
 
 template <class Matrix> inline
-void transpose(Matrix* A) {
-    const size_t nrow = A->size();
-    const size_t ncol = A->begin()->size();
-    Matrix tmp(ncol, typename Matrix::value_type(nrow));
+Matrix transpose(const Matrix& A) {
+    const size_t nrow = A.size();
+    if (nrow == 0) return A;
+    const size_t ncol = A[0].size();
+    Matrix out(ncol, typename Matrix::value_type(nrow));
     for (size_t row=0; row<nrow; ++row) {
         for (size_t col=0; col<ncol; ++col) {
-            tmp[col][row] = A->operator[](row)[col];
+            out[col][row] = A[row][col];
         }
     }
-    A->swap(tmp);
+    return out;
 }
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
