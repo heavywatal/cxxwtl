@@ -1,11 +1,9 @@
-cxxwtils
-========
+## cxxwtils
 
 Personal C++ library
 
 
-Dependency
-----------
+### Dependency
 
 - C++14 compiler
 - `math.hpp` uses [boost::math](http://www.boost.org/doc/libs/release/libs/math/doc/)
