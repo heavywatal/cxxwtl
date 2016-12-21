@@ -12,4 +12,4 @@ Personal C++ library
 - `gz.hpp` uses [boost::iostreams](http://www.boost.org/doc/libs/release/libs/iostreams/doc/)
 - `grn.hpp` uses [boost::graph](http://www.boost.org/doc/libs/release/libs/graph/doc/)
 - `eigen.hpp` uses [Eigen](https://eigen.tuxfamily.org/)
-- `prandom.hpp` uses [SFMT](https://github.com/heavywatal/sfmt-installer)
+- `prandom.hpp` uses [sfmt-class](https://github.com/heavywatal/sfmt-class)
