@@ -25,7 +25,7 @@ std::vector<size_t> which(const Vector& predicate) {
 }
 
 template <class T, class Vector> inline
-T slice(const Eigen::MatrixBase<T>& orig, const Vector& indices) {
+T slice(const Eigen::DenseBase<T>& orig, const Vector& indices) {
     const size_t n = indices.size();
     T result(n, orig.cols());
     for (size_t i=0; i<n; ++i) {
@@ -35,7 +35,7 @@ T slice(const Eigen::MatrixBase<T>& orig, const Vector& indices) {
 }
 
 template <class T, class Vector> inline
-T slice_cols(const Eigen::MatrixBase<T>& orig, const Vector& indices) {
+T slice_cols(const Eigen::DenseBase<T>& orig, const Vector& indices) {
     const size_t n = indices.size();
     T result(orig.rows(), n);
     for (size_t i=0; i<n; ++i) {
@@ -45,12 +45,12 @@ T slice_cols(const Eigen::MatrixBase<T>& orig, const Vector& indices) {
 }
 
 template <class T, class Vector> inline
-T filter(const Eigen::MatrixBase<T>& orig, const Vector& predicate) {
+T filter(const Eigen::DenseBase<T>& orig, const Vector& predicate) {
     return slice(orig, which(predicate));
 }
 
 template <class T, class Vector> inline
-T select(const Eigen::MatrixBase<T>& orig, const Vector& predicate) {
+T select(const Eigen::DenseBase<T>& orig, const Vector& predicate) {
     return slice_cols(orig, which(predicate));
 }
 
