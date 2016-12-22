@@ -13,6 +13,47 @@
 namespace wtl { namespace eigen {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
+template <class Vector> inline
+std::vector<size_t> which(const Vector& predicate) {
+    std::vector<size_t> indices;
+    const size_t n = predicate.size();
+    indices.reserve(n);
+    for (size_t i=0; i<n; ++i) {
+        if (predicate[i] > 0) {indices.push_back(i);}
+    }
+    return indices;
+}
+
+template <class T, class Vector> inline
+T slice(const Eigen::MatrixBase<T>& orig, const Vector& indices) {
+    const size_t n = indices.size();
+    T result(n, orig.cols());
+    for (size_t i=0; i<n; ++i) {
+        result.row(i) = orig.row(indices[i]);
+    }
+    return result;
+}
+
+template <class T, class Vector> inline
+T slice_cols(const Eigen::MatrixBase<T>& orig, const Vector& indices) {
+    const size_t n = indices.size();
+    T result(orig.rows(), n);
+    for (size_t i=0; i<n; ++i) {
+        result.col(i) = orig.col(indices[i]);
+    }
+    return result;
+}
+
+template <class T, class Vector> inline
+T filter(const Eigen::MatrixBase<T>& orig, const Vector& predicate) {
+    return slice(orig, which(predicate));
+}
+
+template <class T, class Vector> inline
+T select(const Eigen::MatrixBase<T>& orig, const Vector& predicate) {
+    return slice_cols(orig, which(predicate));
+}
+
 inline Eigen::IOFormat tsv(const std::string& sep="\t") {
     return {Eigen::StreamPrecision, Eigen::DontAlignCols, sep, "", "", "\n"};
 }
