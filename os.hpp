@@ -63,7 +63,7 @@ inline std::string pwd() {
     if (::getcwd(dir, sizeof(dir))==nullptr) {FLPF; throw wtl::strerror();}
     return std::string(dir);
 }
-#define PWD derr("pwd: " << wtl::pwd() << std::endl)
+#define PWD DCERR("pwd: " << wtl::pwd() << std::endl)
 
 inline void cd(const std::string& dir) {
     if (::chdir(dir.c_str())) {FLPF; throw wtl::strerror(dir);}
