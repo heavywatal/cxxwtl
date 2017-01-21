@@ -52,7 +52,6 @@ std::vector<size_t> roulette_select(
     const size_t elites=0) {
 
     const std::vector<double> ubounds = partial_sum(fitnesses);
-    const double sum_fitness = ubounds.back();
 
     std::vector<size_t> candidates(pop_size);
     std::iota(begin(candidates), end(candidates), 0);
@@ -61,15 +60,12 @@ std::vector<size_t> roulette_select(
 
     // elite selection
     if (elites) {
-        const size_t i = std::distance(
-                begin(fitnesses),
-                std::max_element(begin(fitnesses), end(fitnesses))
-                );
-        children.assign(elites, i);
+        const auto fittest = std::max_element(fitnesses.begin(), fitnesses.end());
+        children.assign(elites, fittest - fitnesses.begin());
     }
 
     // poisson selection
-    const double num_fittest_children = pop_size / sum_fitness;
+    const double num_fittest_children = pop_size / ubounds.back();
     for (size_t i=0; i<pop_size; ++i) {
         double expected = fitnesses[i];
         expected *= num_fittest_children;
@@ -83,7 +79,7 @@ std::vector<size_t> roulette_select(
         children.resize(pop_size);
     }
     else {
-        std::uniform_real_distribution<double> uniform(0.0, sum_fitness);
+        std::uniform_real_distribution<double> uniform(0.0, ubounds.back());
         while (children.size() < pop_size) {
             children.push_back(pocket_idx(ubounds, uniform(rng)));
         }
