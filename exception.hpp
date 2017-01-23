@@ -3,16 +3,15 @@
 #ifndef WTL_EXCEPTION_HPP_
 #define WTL_EXCEPTION_HPP_
 
-#include <exception>
+#include <stdexcept>
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 namespace wtl {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
-class ExitSuccess: public std::exception {
+class ExitSuccess: public std::runtime_error {
   public:
-    ExitSuccess() noexcept: std::exception() {}
-    const char* what() const noexcept {return "EXIT_SUCCESS";}
+    ExitSuccess(const char* msg="EXIT_SUCCESS"): std::runtime_error(msg) {}
 };
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
