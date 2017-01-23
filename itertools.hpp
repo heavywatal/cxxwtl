@@ -17,16 +17,22 @@ namespace wtl { namespace itertools {
 
 template <class value_type>
 class Product {
+  private:
     typedef boost::coroutines2::coroutine<value_type> coro_t;
-    Product() = delete;
+    const std::vector<value_type> columns_;
+    value_type value_;
+    typedef typename std::remove_const<decltype(value_.size())>::type size_type;
+    size_type col_;
+    boost::multiprecision::cpp_int cnt_ = 0;
   public:
+    Product() = delete;
     explicit Product(const std::vector<value_type>& columns):
         columns_(columns),
         value_(columns_.size()),
         col_(columns_.size()) {}
 
-    typename coro_t::pull_type operator()(void) {
-        return typename coro_t::pull_type([this](typename coro_t::push_type& yield){source(yield);});
+    typename coro_t::pull_type operator()(const size_type start=0) {
+        return typename coro_t::pull_type([this,start](typename coro_t::push_type& yield){source(yield, start);});
     }
 
     boost::multiprecision::cpp_int count() const {return cnt_;}
@@ -37,30 +43,25 @@ class Product {
     }
 
   private:
-    void source(typename coro_t::push_type& yield) {
+    void source(typename coro_t::push_type& yield, const size_type start) {
         if (--col_ > 0) {
             const size_type n = columns_[col_].size();
             for (size_type i=0; i<n; ++i) {
                 value_[col_] = columns_[col_][i];
-                source(yield);
+                source(yield, start);
             }
             ++col_;
         } else {
             const size_type n = columns_[col_].size();
             for (size_type i=0; i<n; ++i) {
                 value_[col_] = columns_[col_][i];
-                ++cnt_;
-                yield(value_type(value_));
+                if (cnt_++ >= start) {
+                    yield(value_type(value_));
+                }
             }
             ++col_;
         }
     }
-
-    const std::vector<value_type> columns_;
-    value_type value_;
-    size_t col_;
-    boost::multiprecision::cpp_int cnt_ = 0;
-    typedef typename std::remove_const<decltype(value_.size())>::type size_type;
 };
 
 template <class value_type>
