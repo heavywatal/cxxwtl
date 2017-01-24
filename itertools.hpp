@@ -35,6 +35,7 @@ class Product {
         return typename coro_t::pull_type([this,start](typename coro_t::push_type& yield){source(yield, start);});
     }
 
+    void reset() {col_ = columns_.size();}
     boost::multiprecision::cpp_int count() const {return cnt_;}
     boost::multiprecision::cpp_int count_max() const {
         boost::multiprecision::cpp_int i = 1;
@@ -83,6 +84,7 @@ class Simplex {
         return typename coro_t::pull_type([this](typename coro_t::push_type& yield){source(yield);});
     }
 
+    void reset() {product_.reset();}
     boost::multiprecision::cpp_int count() const {return cnt_;}
     boost::multiprecision::cpp_int count_all() const {return product_.count();}
     boost::multiprecision::cpp_int count_max() const {return product_.count_max();}
