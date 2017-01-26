@@ -58,17 +58,29 @@ inline Eigen::IOFormat tsv(const std::string& sep="\t") {
     return {Eigen::StreamPrecision, Eigen::DontAlignCols, sep, "", "", "\n"};
 }
 
-template <class T>
-std::vector<typename T::Scalar> as_vector(const T& vec) {
-    return std::vector<typename T::Scalar>(vec.data(), vec.data() + vec.size());
+template <class T> inline
+std::vector<typename T::value_type> as_vector(const T& vec) {
+    return std::vector<typename T::value_type>(vec.data(), vec.data() + vec.size());
 }
 
-template <class T>
-std::valarray<typename T::Scalar> as_valarray(const T& vec) {
-    return std::valarray<typename T::Scalar>(vec.data(), vec.size());
+template <class T> inline
+std::valarray<typename T::value_type> as_valarray(const T& vec) {
+    return std::valarray<typename T::value_type>(vec.data(), vec.size());
 }
 
-template <class T>
+template <class T> inline
+std::vector<Eigen::Array<typename T::value_type, Eigen::Dynamic, 1, Eigen::ColMajor>>
+columns(const Eigen::DenseBase<T>& matrix) {
+    const size_t n = matrix.cols();
+    std::vector<Eigen::Array<typename T::value_type, Eigen::Dynamic, 1, Eigen::ColMajor>> result;
+    result.reserve(n);
+    for (size_t i=0; i<n; ++i) {
+        result.push_back(matrix.col(i));
+    }
+    return result;
+}
+
+template <class T> inline
 Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>
 read_matrix(std::istream& fin, const size_t ncol) {
     std::vector<T> vec{std::istream_iterator<T>(fin), std::istream_iterator<T>()};
@@ -79,7 +91,7 @@ read_matrix(std::istream& fin, const size_t ncol) {
     return Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>::Map(vec.data(), vec.size() / ncol, ncol);
 }
 
-template <class T>
+template <class T> inline
 Eigen::Array<T, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>
 read_array(std::istream& fin, const size_t ncol) {
     std::vector<T> vec{std::istream_iterator<T>(fin), std::istream_iterator<T>()};
