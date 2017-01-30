@@ -108,6 +108,19 @@ bool lexico_matrix_sign(const T& x, const T& y) {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 // std::map
 
+template <class Key, class Value> inline
+std::map<Key, Value>
+map(const std::vector<Key>& keys, const std::vector<Value>& values) {
+    if (keys.size() != values.size()) {
+        throw std::runtime_error("keys.size() != values.size()");
+    }
+    std::map<Key, Value> output;
+    for (size_t i=0; i<keys.size(); ++i) {
+        output[keys[i]] = values[i];
+    }
+    return output;
+}
+
 template <size_t I, class T> inline
 std::vector<typename std::remove_const<typename std::tuple_element<I, typename T::value_type>::type>::type>
 unmap(const T& map_) {
