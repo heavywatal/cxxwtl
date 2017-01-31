@@ -31,7 +31,7 @@ class Product {
         value_(axes_.size()),
         pos_(axes_.size()) {}
 
-    typename coro_t::pull_type operator()(const size_type start=0) {
+    typename coro_t::pull_type operator()(const boost::multiprecision::cpp_int start=0) {
         return typename coro_t::pull_type([this,start](typename coro_t::push_type& yield){source(yield, start);});
     }
 
@@ -44,7 +44,7 @@ class Product {
     }
 
   private:
-    void source(typename coro_t::push_type& yield, const size_type start) {
+    void source(typename coro_t::push_type& yield, const boost::multiprecision::cpp_int start) {
         if (--pos_ > 0) {
             const size_type n = axes_[pos_].size();
             for (size_type i=0; i<n; ++i) {
