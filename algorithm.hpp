@@ -5,6 +5,8 @@
 
 #include <cmath>
 
+#include <vector>
+#include <map>
 #include <utility>
 #include <algorithm>
 #include <stdexcept>

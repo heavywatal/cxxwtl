@@ -27,39 +27,33 @@ template <class T> struct less_sign {public:
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 // for std::pair
 
-template <class P, int N> struct plus
-: public std::binary_function<const typename std::tuple_element<N, P>::type&, const P&, typename std::tuple_element<N, P>::type>{
+template <class P, int N> struct plus {
     typedef typename std::tuple_element<N, P>::type T;
     T operator()(const T& x, const P& y) const {return x + std::get<N>(y);}
 };
 
-template <class P, int N> struct minus
-: public std::binary_function<const typename std::tuple_element<N, P>::type&, const P&, typename std::tuple_element<N, P>::type>{
+template <class P, int N> struct minus {
     typedef typename std::tuple_element<N, P>::type T;
     T operator()(const T& x, const P& y) const {return x - std::get<N>(y);}
 };
 
-template <class P, int N> struct multiplies
-: public std::binary_function<const typename std::tuple_element<N, P>::type&, const P&, typename std::tuple_element<N, P>::type>{
+template <class P, int N> struct multiplies {
     typedef typename std::tuple_element<N, P>::type T;
     T operator()(const T& x, const P& y) const {return x * std::get<N>(y);}
 };
 
-template <class P, int N> struct divides
-: public std::binary_function<const typename std::tuple_element<N, P>::type&, const P&, typename std::tuple_element<N, P>::type>{
+template <class P, int N> struct divides {
     typedef typename std::tuple_element<N, P>::type T;
     T operator()(const T& x, const P& y) const {return x / std::get<N>(y);}
 };
 
-template <class P, int N> struct equal_to
-: public std::binary_function<const P&, const P&, bool>{
+template <class P, int N> struct equal_to {
     bool operator()(const P& lhs, const P& rhs) const {
         return std::get<N>(lhs) == std::get<N>(rhs);
     }
 };
 
-template <class P, int N> struct less
-: public std::binary_function<const P&, const P&, bool>{
+template <class P, int N> struct less {
     bool operator()(const P& lhs, const P& rhs) const {
         return std::get<N>(lhs) < std::get<N>(rhs);
     }

@@ -5,11 +5,11 @@
 
 #include <vector>
 #include <type_traits>
-#include <limits>
-#include <cmath>
 
 #include <boost/coroutine2/coroutine.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
+
+#include "math.hpp"
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 namespace wtl { namespace itertools {
@@ -37,7 +37,7 @@ class Product {
 
     void reset() {pos_ = axes_.size();}
     boost::multiprecision::cpp_int count() const {return cnt_;}
-    boost::multiprecision::cpp_int count_max() const {
+    boost::multiprecision::cpp_int max_count() const {
         boost::multiprecision::cpp_int i = 1;
         for (const auto& c: axes_) {i *= c.size();}
         return i;
@@ -86,17 +86,13 @@ class Simplex {
 
     void reset() {product_.reset();}
     boost::multiprecision::cpp_int count() const {return cnt_;}
-    boost::multiprecision::cpp_int count_all() const {return product_.count();}
-    boost::multiprecision::cpp_int count_max() const {return product_.count_max();}
+    boost::multiprecision::cpp_int raw_count() const {return product_.count();}
+    boost::multiprecision::cpp_int max_count() const {return product_.max_count();}
 
   private:
-    bool equals(double x) const {
-        return std::fabs(x -= sum_) < std::numeric_limits<double>::epsilon();
-    }
-
     void source(typename coro_t::push_type& yield) {
         for (const auto& v: product_()) {
-            if (equals(v.sum())) {
+            if (wtl::equal(sum_, v.sum())) {
                 ++cnt_;
                 yield(v);
             }

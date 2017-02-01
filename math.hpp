@@ -4,13 +4,16 @@
 #define WTL_MATH_HPP_
 
 #include <cmath>
-
-#include <boost/math/distributions/normal.hpp>
-namespace bmath = boost::math;
+#include <limits>
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 namespace wtl {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
+
+template <class T> inline
+bool equal(T lhs, const T rhs) {
+    return std::fabs(lhs -= rhs) <= std::numeric_limits<T>::epsilon();
+}
 
 // interger powers at compile time
 template <class T>
@@ -70,7 +73,7 @@ template <class T> inline
 constexpr double heaviside1_2(const T& x) {return (x < 0) ? 0 : (x == 0) ? 0.5 : 1;}
 
 template <class Ret, class Arg>
-class Heaviside: public std::unary_function<Arg, Ret>{
+class Heaviside {
   public:
     explicit Heaviside(const Ret& a=0): a_(a) {}
     constexpr Ret operator()(const Arg& x) const {
@@ -86,7 +89,7 @@ inline double sigmoid(const double& x, const double& gain=1.0) {
     return 1.0 / (1.0 + std::exp(-gain * x));
 }
 // (0, 1)
-class Sigmoid: public std::unary_function<double, double> {
+class Sigmoid {
   public:
     Sigmoid(const double& gain): gain_(gain) {}
     double operator()(const double& x) const {
@@ -97,7 +100,7 @@ class Sigmoid: public std::unary_function<double, double> {
 };
 
 // (-1, 1)
-class Tanh: public std::unary_function<double, double> {
+class Tanh {
   public:
     Tanh(const double& a): a_(a) {}
     double operator()(const double& x) const {return std::tanh(a_ * x);}
@@ -108,18 +111,6 @@ class Tanh: public std::unary_function<double, double> {
 // 2^n?
 inline constexpr bool is_power_of_two(const int& num) {
     return num && !(num & (num - 1));
-}
-
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
-
-inline double normal_cdf(const double x, const double mean, const double sd) {
-    if (sd == 0.0) {return 0.0;}
-    return bmath::cdf(bmath::normal(mean, sd), x);
-}
-
-inline double normal_ccdf(const double x, const double mean, const double sd) {
-    if (sd == 0.0) {return 0.0;}
-    return bmath::cdf(bmath::complement(bmath::normal(mean, sd), x));
 }
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
