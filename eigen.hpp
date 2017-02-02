@@ -13,6 +13,33 @@
 namespace wtl { namespace eigen {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
+template <class T> inline
+std::vector<typename T::value_type> vector(const T& vec) {
+    return std::vector<typename T::value_type>(vec.data(), vec.data() + vec.size());
+}
+
+template <class T> inline
+std::valarray<typename T::value_type> valarray(const T& vec) {
+    return std::valarray<typename T::value_type>(vec.data(), vec.size());
+}
+
+template <class T> inline
+Eigen::Array<typename T::value_type, Eigen::Dynamic, 1> ArrayX(const T& vec) {
+    return Eigen::Array<typename T::value_type, Eigen::Dynamic, 1>::Map(vec.data(), vec.size());
+}
+
+template <class T> inline
+Eigen::Matrix<typename T::value_type, Eigen::Dynamic, 1> VectorX(const T& vec) {
+    return Eigen::Matrix<typename T::value_type, Eigen::Dynamic, 1>::Map(vec.data(), vec.size());
+}
+
+template <class T> inline
+Eigen::Matrix<typename T::value_type, 1, Eigen::Dynamic> RowVectorX(const T& vec) {
+    return Eigen::Matrix<typename T::value_type, 1, Eigen::Dynamic>::Map(vec.data(), vec.size());
+}
+
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
+
 template <class Vector> inline
 std::vector<size_t> which(const Vector& predicate) {
     std::vector<size_t> indices;
@@ -56,16 +83,6 @@ T select(const Eigen::DenseBase<T>& orig, const Vector& predicate) {
 
 inline Eigen::IOFormat tsv(const std::string& sep="\t") {
     return {Eigen::StreamPrecision, Eigen::DontAlignCols, sep, "", "", "\n"};
-}
-
-template <class T> inline
-std::vector<typename T::value_type> as_vector(const T& vec) {
-    return std::vector<typename T::value_type>(vec.data(), vec.data() + vec.size());
-}
-
-template <class T> inline
-std::valarray<typename T::value_type> as_valarray(const T& vec) {
-    return std::valarray<typename T::value_type>(vec.data(), vec.size());
 }
 
 template <class T> inline
