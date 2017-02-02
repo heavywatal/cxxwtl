@@ -51,7 +51,10 @@ class Product final: public Generator<value_type> {
         pos_(axes_.size()) {}
     ~Product() = default;
 
-    void reset() {pos_ = axes_.size();}
+    void reset() {
+        pos_ = axes_.size();
+        this->cnt_ = 0;
+    }
     virtual size_type max_count() const override {
         size_type n = 1;
         for (const auto& c: axes_) {n *= c.size();}
@@ -112,7 +115,7 @@ class UniAxis final: public Generator<value_type> {
     virtual void source(typename coro_t::push_type& yield, const size_type start) override {
         for (size_t i=0; i<axes_.size(); ++i) {
             auto value = center_;
-            const auto axis = axes_[i];
+            const auto& axis = axes_[i];
             const auto l = axis.size();
             for (value_size_t j=0; j<l; ++j) {
                 value[i] = axis[j];
