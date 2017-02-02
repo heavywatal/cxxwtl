@@ -134,34 +134,28 @@ UniAxis<value_type> uniaxis(const std::vector<value_type>& axes, const value_typ
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
 template <class value_type>
-class Simplex {
-    typedef boost::coroutines2::coroutine<value_type> coro_t;
-    Simplex() = delete;
+class Simplex  final: public Generator<value_type> {
   public:
+    using typename Generator<value_type>::coro_t;
+    using typename Generator<value_type>::size_type;
+    Simplex() = delete;
     explicit Simplex(const std::vector<value_type>& axes, const double sum=1.0):
         product_(axes), sum_(sum) {}
 
-    typename coro_t::pull_type operator()(void) {
-        return typename coro_t::pull_type([this](typename coro_t::push_type& yield){source(yield);});
-    }
-
     void reset() {product_.reset();}
-    boost::multiprecision::cpp_int count() const {return cnt_;}
-    boost::multiprecision::cpp_int raw_count() const {return product_.count();}
-    boost::multiprecision::cpp_int max_count() const {return product_.max_count();}
+    size_type raw_count() const {return product_.count();}
+    virtual size_type max_count() const override {return product_.max_count();}
 
   private:
-    void source(typename coro_t::push_type& yield) {
+    virtual void source(typename coro_t::push_type& yield, const size_type start) override {
         for (const auto& v: product_()) {
             if (wtl::equal(sum_, v.sum())) {
-                ++cnt_;
-                yield(v);
+                if (this->cnt_++ >= start) yield(v);
             }
         }
     }
     Product<value_type> product_;
     const double sum_;
-    boost::multiprecision::cpp_int cnt_ = 0;
 };
 
 template <class value_type>
