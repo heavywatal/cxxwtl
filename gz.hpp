@@ -3,8 +3,8 @@
 #ifndef WTL_GZ_HPP_
 #define WTL_GZ_HPP_
 
+#include <fstream>
 #include <string>
-#include <ostream>
 #include <vector>
 
 #include <boost/iostreams/filtering_stream.hpp>
@@ -26,8 +26,8 @@ class ogzstream: public boost::iostreams::filtering_ostream {
 class igzstream: public boost::iostreams::filtering_istream {
   public:
     igzstream(const std::string& path):
-        boost::iostreams::filtering_istream(boost::iostreams::gzip_decompressor()) {
-        this->push(boost::iostreams::file_descriptor_source(path));
+        boost::iostreams::filtering_istream(boost::iostreams::gzip_decompressor()), ifs_(path) {
+        this->push(ifs_);
     }
     std::string readline(const char delimiter='\n') {
         std::string buffer;
@@ -43,6 +43,11 @@ class igzstream: public boost::iostreams::filtering_istream {
         return lines;
     }
     std::string read(const char delimiter='\0') {return readline(delimiter);}
+
+    // WORKAROUND: inherited one does not work
+    bool operator !() const {return !ifs_;}
+  private:
+    std::ifstream ifs_;
 };
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
