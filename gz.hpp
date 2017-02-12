@@ -5,12 +5,46 @@
 
 #include <string>
 #include <ostream>
+#include <vector>
 
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
+#include <boost/iostreams/device/file_descriptor.hpp>
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 namespace wtl {
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
+
+class ogzstream: public boost::iostreams::filtering_ostream {
+  public:
+    ogzstream(const std::string& path):
+        boost::iostreams::filtering_ostream(boost::iostreams::gzip_compressor()) {
+        this->push(boost::iostreams::file_descriptor_sink(path));
+    }
+};
+
+class igzstream: public boost::iostreams::filtering_istream {
+  public:
+    igzstream(const std::string& path):
+        boost::iostreams::filtering_istream(boost::iostreams::gzip_decompressor()) {
+        this->push(boost::iostreams::file_descriptor_source(path));
+    }
+    std::string readline(const char delimiter='\n') {
+        std::string buffer;
+        std::getline(*this, buffer, delimiter);
+        return buffer;
+    }
+    std::vector<std::string> readlines(const char delimiter='\n') {
+        std::vector<std::string> lines;
+        std::string buffer;
+        while (std::getline(*this, buffer, delimiter)) {
+            lines.push_back(buffer);
+        }
+        return lines;
+    }
+    std::string read(const char delimiter='\0') {return readline(delimiter);}
+};
+
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
 class gzip {
