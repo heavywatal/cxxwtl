@@ -81,7 +81,7 @@ class Product final: public Generator<value_type> {
             ++pos_;
         }
     }
-    const std::vector<value_type> axes_;
+    const std::vector<value_type>& axes_;
     value_type value_;
     value_size_t pos_;
 };
@@ -125,7 +125,7 @@ class UniAxis final: public Generator<value_type> {
             }
         }
     }
-    const std::vector<value_type> axes_;
+    const std::vector<value_type>& axes_;
     const value_type center_;
 };
 
