@@ -17,16 +17,16 @@ namespace wtl {
 
 class ogzstream: public boost::iostreams::filtering_ostream {
   public:
-    ogzstream(const std::string& path):
+    ogzstream(const std::string& path, std::ios::openmode mode=std::ios::out):
         boost::iostreams::filtering_ostream(boost::iostreams::gzip_compressor()) {
-        this->push(boost::iostreams::file_descriptor_sink(path));
+        this->push(boost::iostreams::file_descriptor_sink(path, mode));
     }
 };
 
 class igzstream: public boost::iostreams::filtering_istream {
   public:
-    igzstream(const std::string& path):
-        boost::iostreams::filtering_istream(boost::iostreams::gzip_decompressor()), ifs_(path) {
+    igzstream(const std::string& path, std::ios::openmode mode=std::ios::in):
+        boost::iostreams::filtering_istream(boost::iostreams::gzip_decompressor()), ifs_(path, mode) {
         this->push(ifs_);
     }
     std::string readline(const char delimiter='\n') {
