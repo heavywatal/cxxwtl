@@ -273,24 +273,15 @@ inline std::string strip(std::string src, const std::string& chars=" ") {
     return rstrip(lstrip(src, chars), chars);
 }
 
-inline bool startswith(const std::string& full, const std::string& sub) {
-    const size_t full_size = full.size();
-    const size_t sub_size = sub.size();
-    if (full_size > sub_size) {
-        return full.compare(0, sub_size, sub) == 0;
-    } else {
-        return false;
-    }
+inline bool startswith(const std::string& str, const std::string& prefix) {
+    return (str.size() >= prefix.size()) &&
+           (str.compare(0, prefix.size(), prefix) == 0);
 }
 
-inline bool endswith(const std::string& full, const std::string& sub) {
-    const size_t full_size = full.size();
-    const size_t sub_size = sub.size();
-    if (full_size > sub_size) {
-        return full.compare(full_size - sub_size, sub_size, sub) == 0;
-    } else {
-        return false;
-    }
+inline bool endswith(const std::string& str, const std::string& suffix) {
+    size_t str_size = str.size();
+    return (str_size >= suffix.size()) &&
+           (str.compare(str_size -= suffix.size(), suffix.size(), suffix) == 0);
 }
 
 inline std::string replace_all(const std::string& patt, const std::string& repl, const std::string& src) {
