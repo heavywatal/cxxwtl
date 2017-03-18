@@ -16,26 +16,27 @@
 namespace wtl {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
-class ozfstream: public boost::iostreams::filtering_ostream {
+namespace bios = boost::iostreams;
+
+class ozfstream: public bios::filtering_ostream {
   public:
     ozfstream(const std::string& path, std::ios::openmode mode=std::ios::out):
-      boost::iostreams::filtering_ostream() {
+      bios::filtering_ostream() {
         if (std::regex_search(path, std::regex("\\.gz$"))) {
-            push(boost::iostreams::gzip_compressor());
+            push(bios::gzip_compressor());
         }
-        push(boost::iostreams::file_descriptor_sink(path, mode));
+        push(bios::file_descriptor_sink(path, mode));
     }
 };
 
-class izfstream: public boost::iostreams::filtering_istream {
+class izfstream: public bios::filtering_istream {
   public:
     izfstream(const std::string& path, std::ios::openmode mode=std::ios::in):
-      boost::iostreams::filtering_istream(),
-      ifs_(path, mode) {
+      bios::filtering_istream() {
         if (std::regex_search(path, std::regex("\\.gz$"))) {
-            push(boost::iostreams::gzip_decompressor());
+            push(bios::gzip_decompressor());
         }
-        push(ifs_);
+        push(bios::file_descriptor_source(path, mode));
     }
     std::string readline(const char delimiter='\n') {
         std::string buffer;
@@ -52,11 +53,6 @@ class izfstream: public boost::iostreams::filtering_istream {
     }
     std::string read(const char delimiter='\0') {return readline(delimiter);}
     void close() {pop();}
-
-    // WORKAROUND: inherited one does not work
-    bool operator !() const {return !ifs_;}
-  private:
-    std::ifstream ifs_;
 };
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
