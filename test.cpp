@@ -1,24 +1,11 @@
 // -*- mode: c++; coding: utf-8 -*-
-
-#include <iostream>
-
-#include <chrono>
-#include <random>
 #include <thread>
 #include <future>
-#include <regex>
 
-#include "algorithm.hpp"
 #include "numeric.hpp"
-#include "cow.hpp"
 #include "debug.hpp"
-#include "genetic.hpp"
-//#include "getopt.hpp" // needs boost/program_options
-//#include "grn.hpp" // needs boost/graph
-//#include "gz.hpp" // needs boost/iostreams
 #include "iostr.hpp"
 #include "mixin.hpp"
-#include "omp.hpp"
 #include "os.hpp"
 #include "demangle.hpp"
 #include "prandom.hpp"
@@ -106,19 +93,6 @@ inline void test_speed() {HERE;
     std::cerr << x << std::endl;
 }
 
-inline void cxx11_regex() {HERE;
-    std::regex patt{"(\\w+)(file)"};
-    std::smatch match;
-    auto entries = wtl::ls(".");
-    for (const auto& entry: entries) {
-        if (std::regex_search(entry, match, patt)) {
-            for (const auto& sm: match) {
-                std::cerr << sm << std::endl;
-            }
-        }
-    }
-}
-
 inline void cxx11_thread() {HERE;
     const size_t concurrency = std::thread::hardware_concurrency();
     std::cerr << "std::thread::hardware_concurrency(): "
@@ -185,7 +159,6 @@ int main(int argc, char* argv[]) {
         // test_integral();
         // test_validity();
         // test_speed();
-        // cxx11_regex();
         // cxx11_thread();
         test_temporal();
         std::cerr << "EXIT_SUCCESS" << std::endl;

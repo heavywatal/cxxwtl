@@ -3,11 +3,11 @@
 #ifndef WTL_MULTIPROCESSING_HPP_
 #define WTL_MULTIPROCESSING_HPP_
 
+#include <vector>
 #include <thread>
 #include <mutex>
 #include <future>
 #include <condition_variable>
-#include <algorithm>
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 namespace wtl {
