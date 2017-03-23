@@ -81,8 +81,8 @@ T select(const Eigen::DenseBase<T>& orig, const Vector& predicate) {
     return slice_cols(orig, which(predicate));
 }
 
-inline Eigen::IOFormat tsv(const std::string& sep="\t") {
-    return {Eigen::StreamPrecision, Eigen::DontAlignCols, sep, "", "", "\n"};
+inline Eigen::IOFormat tsv(const int precision=Eigen::StreamPrecision, const std::string& sep="\t") {
+    return {precision, Eigen::DontAlignCols, sep, "\n"};
 }
 
 template <class T> inline
