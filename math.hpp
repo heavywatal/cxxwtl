@@ -35,7 +35,7 @@ constexpr unsigned int choose(unsigned int n, unsigned int r) {
 }
 
 template <class T>
-inline unsigned int polynomial(const T& v) {
+inline unsigned int multinomial(const T& v) {
     unsigned int out = factorial(v.sum());
     for (const auto x: v) {
         out /= factorial(x);
