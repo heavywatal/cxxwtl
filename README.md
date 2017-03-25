@@ -1,6 +1,6 @@
-## cxxwtils
+## cxxwtl
 
-Personal C++ library
+Personal C++ header library
 
 
 ### Dependency
@@ -13,3 +13,33 @@ Personal C++ library
 - `eigen.hpp` uses [Eigen](https://eigen.tuxfamily.org/)
 - `prandom.hpp` uses [sfmt-class](https://github.com/heavywatal/sfmt-class)
 - `zfstream.hpp` uses [boost::iostreams](http://www.boost.org/doc/libs/release/libs/iostreams/doc/)
+
+
+### Installation and Usage
+
+You can put the header files anywhere you want.
+For examle, I usualy clone them into `~/local/include/wtl`.
+It is consistent with the namespace `wtl` in which most of functions and classes are defined.
+
+```sh
+% cd ~/local/include/
+% git clone https://github.com/heavywatal/cxxwtl.git wtl
+```
+
+```c++
+// example.cpp
+#include <iostream>
+#include <wtl/math.hpp>
+
+int main() {
+    std::cout << wtl::factorial(5) << std::endl;
+}
+```
+
+Additional include path can be specified with `-I` option or `CPATH` environment variable.
+
+```sh
+% clang++ -O2 -Wall -Wextra -std=c++14 -I${HOME}/local/include example.cpp
+% ./a.out
+120
+```
