@@ -3,6 +3,7 @@
 #ifndef WTL_EIGEN_HPP_
 #define WTL_EIGEN_HPP_
 
+#include <cstdint>
 #include <vector>
 #include <valarray>
 #include <string>
@@ -36,6 +37,21 @@ Eigen::Matrix<typename T::value_type, Eigen::Dynamic, 1> VectorX(const T& vec) {
 template <class T> inline
 Eigen::Matrix<typename T::value_type, 1, Eigen::Dynamic> RowVectorX(const T& vec) {
     return Eigen::Matrix<typename T::value_type, 1, Eigen::Dynamic>::Map(vec.data(), vec.size());
+}
+
+template <class T> inline
+Eigen::Array<T, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>
+ArrayXX(const std::vector<std::string>& rows) {
+    const size_t nrow = rows.size();
+    const size_t ncol = rows[0].length();
+    Eigen::Array<T, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> array(nrow, ncol);
+    for (size_t i=0; i<nrow; ++i) {
+        const std::string& s = rows[i];
+        const auto bytes = std::vector<uint8_t>(s.begin(), s.end());
+        array.row(i) = RowVectorX(bytes).cast<T>();
+    }
+    // ASCII: char(0, 1) <=> int(48, 49)
+    return array -= 48;
 }
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
