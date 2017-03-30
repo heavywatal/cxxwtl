@@ -9,8 +9,6 @@
 #include <map>
 #include <numeric>
 
-#include "functional.hpp"
-
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 namespace wtl {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
@@ -258,7 +256,8 @@ typename std::tuple_element<N, typename Iter::value_type>::type
 sum(const Iter begin_, const Iter end_) {
     typedef typename Iter::value_type pair_t;
     typedef typename std::tuple_element<N, pair_t>::trait_t T;
-    return std::accumulate(begin_, end_, T(0), wtl::plus<pair_t, N>());
+    return std::accumulate(begin_, end_, T(0),
+        [](const T& x, const pair_t& p){return x + std::get<N>(p);});
 }
 
 template <int N, class Iter> inline
