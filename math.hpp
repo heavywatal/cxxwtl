@@ -4,16 +4,10 @@
 #define WTL_MATH_HPP_
 
 #include <cmath>
-#include <limits>
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 namespace wtl {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
-
-template <class T> inline
-bool equal(T lhs, const T rhs) {
-    return std::fabs(lhs -= rhs) <= std::numeric_limits<T>::epsilon();
-}
 
 // interger powers at compile time
 template <class T>

@@ -9,7 +9,7 @@
 #include <boost/coroutine2/coroutine.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
 
-#include "math.hpp"
+#include "numeric.hpp"
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 namespace wtl { namespace itertools {
@@ -198,7 +198,7 @@ class Simplex  final: public Generator<value_type> {
   private:
     virtual void source(typename coro_t::push_type& yield, const size_type skip) override {
         for (const auto& v: product_()) {
-            if (wtl::equal(sum_, v.sum())) {
+            if (wtl::approx(sum_, v.sum())) {
                 if (++this->cnt_ > skip) yield(v);
             }
         }

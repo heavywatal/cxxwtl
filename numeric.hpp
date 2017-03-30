@@ -5,13 +5,20 @@
 
 #include <cmath>
 
+#include <numeric>
+#include <limits>
 #include <vector>
 #include <map>
-#include <numeric>
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 namespace wtl {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
+
+template <class T> inline
+bool approx(const T x, const T y) {
+    return std::abs(x - y) <
+           std::numeric_limits<T>::epsilon() * (std::abs(x) + std::abs(y));
+}
 
 // Generate integer vector with increasing values
 template <class T=size_t> inline
