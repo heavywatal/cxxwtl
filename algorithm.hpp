@@ -13,6 +13,19 @@
 namespace wtl {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
+template<class T> inline
+void rstrip(std::vector<T>* seq, const T& value=T(0)) {
+    auto rit = std::find_if(seq->rbegin(), seq->rend(),
+                           [&](const T& x){return x != value;});
+    seq->resize(seq->rend() - rit);
+}
+
+template<class T> inline
+std::vector<T> rstrip(std::vector<T> seq, const T& value=T(0)) {
+    rstrip(&seq, value);
+    return seq;
+}
+
 template <class V, class U> inline
 V subscript(const V& seq, const U& indices) {
     V subset;
