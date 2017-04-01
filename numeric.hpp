@@ -20,6 +20,20 @@ bool approx(const T x, const T y) {
            std::numeric_limits<T>::epsilon() * (std::abs(x) + std::abs(y));
 }
 
+template <class T>
+class Approx {
+  public:
+    Approx(const T value): value_(value) {}
+    bool operator()(const T x) const {
+        return approx<T>(x, value_);
+    }
+  private:
+    const T value_;
+};
+
+template <class T> inline
+Approx<T> approx(const T value) {return Approx<T>(value);}
+
 // Generate integer vector with increasing values
 template <class T=size_t> inline
 typename std::vector<T> seq_len(const size_t size, const T init=0) {
