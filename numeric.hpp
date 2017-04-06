@@ -8,6 +8,7 @@
 #include <numeric>
 #include <limits>
 #include <vector>
+#include <valarray>
 #include <map>
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
@@ -40,6 +41,23 @@ typename std::vector<T> seq_len(const size_t size, const T init=0) {
     typename std::vector<T> v(size);
     std::iota(std::begin(v), std::end(v), init);
     return v;
+}
+
+// Generage valarray with equally spaced values
+inline std::valarray<double>
+lin_spaced(const size_t size, const double low=0.0, const double high=1.0) {
+    const double step = (high - low) / (size - 1);
+    std::valarray<double> x(step, size);
+    for (size_t i=0; i<size; ++i) {
+        x[i] *= i;
+    }
+    return x += low;
+}
+
+// Imperfect but convenient rounding
+inline std::valarray<double>
+round(const std::valarray<double> x, const double precision=1) {
+    return (x * precision).apply(std::round) / precision;
 }
 
 // sum

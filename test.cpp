@@ -147,6 +147,10 @@ inline void test_temporal() {HERE;
     std::cout << std::numeric_limits<size_t>::max() << std::endl;
     std::cout << std::log2(std::numeric_limits<size_t>::max()) << std::endl;
     std::cout << std::log10(std::numeric_limits<size_t>::max()) << std::endl;
+    std::cout << wtl::lin_spaced(11) << std::endl;
+    std::cout << wtl::round(wtl::lin_spaced(11), 100) << std::endl;
+    std::cout << wtl::lin_spaced(51) << std::endl;
+    std::cout << wtl::round(wtl::lin_spaced(51), 100) << std::endl;
 }
 
 int main(int argc, char* argv[]) {
