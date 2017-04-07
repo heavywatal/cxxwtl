@@ -35,13 +35,8 @@ class Approx {
 template <class T> inline
 Approx<T> approx(const T value) {return Approx<T>(value);}
 
-// Generate integer vector with increasing values
-template <class T=size_t> inline
-typename std::vector<T> seq_len(const size_t size, const T init=0) {
-    typename std::vector<T> v(size);
-    std::iota(std::begin(v), std::end(v), init);
-    return v;
-}
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
+// for std::valarray
 
 // Generage valarray with equally spaced values
 inline std::valarray<double>
@@ -56,8 +51,61 @@ lin_spaced(const size_t size, const double low=0.0, const double high=1.0) {
 
 // Imperfect but convenient rounding
 inline std::valarray<double>
-round(const std::valarray<double> x, const double precision=1) {
+round(const std::valarray<double>& x, const double precision=1) {
     return (x * precision).apply(std::round) / precision;
+}
+
+template <class T> inline std::valarray<T>
+row_sums(const std::vector<std::valarray<T>>& matrix) {
+    const size_t nrow = matrix.size();
+    std::valarray<T> sums(nrow);
+    for (size_t i=0; i<nrow; ++i) {
+        sums[i] = matrix[i].sum();
+    }
+    return sums;
+}
+
+template <class T> inline std::valarray<T>
+col_sums(const std::vector<std::valarray<T>>& matrix) {
+    const size_t ncol = matrix.at(0).size();
+    std::valarray<T> sums(ncol);
+    for (const auto& row: matrix) {
+        sums += row;
+    }
+    return sums;
+}
+
+template <class T> inline std::vector<std::valarray<T>>
+filter(const std::vector<std::valarray<T>>& matrix, const std::valarray<bool>& binary) {
+    std::vector<std::valarray<T>> filtered;
+    filtered.reserve(binary.sum());
+    const size_t nrow = matrix.size();
+    for (size_t i=0; i<nrow; ++i) {
+        if (binary[i]) filtered.push_back(matrix[i]);
+    }
+    return filtered;
+}
+
+template <class T, class U> inline
+std::valarray<T>
+cast(const std::valarray<U>& x) {
+    const size_t n = x.size();
+    std::valarray<T> y(n);
+    for (size_t i=0; i<n; ++i) {
+        y[i] = static_cast<T>(x[i]);
+    }
+    return y;
+}
+
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
+// for std::vector
+
+// Generate integer vector with increasing values
+template <class T=size_t> inline
+typename std::vector<T> seq_len(const size_t size, const T init=0) {
+    typename std::vector<T> v(size);
+    std::iota(std::begin(v), std::end(v), init);
+    return v;
 }
 
 // sum

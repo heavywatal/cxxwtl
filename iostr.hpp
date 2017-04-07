@@ -415,6 +415,19 @@ read_header(std::istream& fin, const char* sep="\t") {
     return split(buffer, sep);
 }
 
+template <class T> inline std::vector<std::valarray<T>>
+read_valarrays(std::istream& ist) {
+    std::vector<std::valarray<T>> matrix;
+    std::string buffer;
+    std::istream_iterator<T> end;
+    while (std::getline(ist, buffer)) {
+        std::istringstream iss(buffer);
+        std::vector<T> vec(std::istream_iterator<T>(iss), end);
+        matrix.emplace_back(vec.data(), vec.size());
+    }
+    return matrix;
+}
+
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 } // namespace wtl
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
