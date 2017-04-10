@@ -14,6 +14,11 @@ class ExitSuccess: public std::runtime_error {
     ExitSuccess(const char* msg="EXIT_SUCCESS"): std::runtime_error(msg) {}
 };
 
+class KeyboardInterrupt: public std::runtime_error {
+  public:
+    KeyboardInterrupt(const char* msg="KeyboardInterrupt"): std::runtime_error(msg) {}
+};
+
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 } // namespace wtl
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
