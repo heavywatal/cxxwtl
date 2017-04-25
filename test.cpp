@@ -1,7 +1,4 @@
 // -*- mode: c++; coding: utf-8 -*-
-#include <thread>
-#include <future>
-
 #include "numeric.hpp"
 #include "debug.hpp"
 #include "iostr.hpp"
@@ -9,7 +6,7 @@
 #include "os.hpp"
 #include "demangle.hpp"
 #include "prandom.hpp"
-#include "multiprocessing.hpp"
+#include "concurrent.hpp"
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
@@ -93,54 +90,52 @@ inline void test_speed() {HERE;
     std::cerr << x << std::endl;
 }
 
+std::mutex MUTEX;
+
 inline void cxx11_thread() {HERE;
     const size_t concurrency = std::thread::hardware_concurrency();
     std::cerr << "std::thread::hardware_concurrency(): "
               << concurrency << std::endl;
-    std::mutex display_mutex;
-    constexpr size_t n = 4;
-    wtl::Pool pool(concurrency);
-    for (size_t i=0; i<n; ++i) {
-        pool.async_thread([&]()->void {
-            display_mutex.lock();
-            std::cerr << std::this_thread::get_id() << std::endl;
-            display_mutex.unlock();
-            std::this_thread::sleep_for(std::chrono::milliseconds(500));
-        });
-    }
-    pool.join();
+    const size_t n = concurrency * 2;
 
-    std::vector<std::thread> threads;
-    wtl::Semaphore sem(concurrency);
-    for (size_t i=0; i<n; ++i) {
-        sem.lock();
-        threads.emplace_back([&]()->void {
-            display_mutex.lock();
-            std::cerr << std::this_thread::get_id() << std::endl;
-            display_mutex.unlock();
-            std::this_thread::sleep_for(std::chrono::milliseconds(500));
-            sem.unlock();
-        });
-    }
-    for (auto& x: threads) {x.join();}
+    std::vector<std::future<size_t>> futures;
+    wtl::Semaphore semaphore(concurrency);
 
-    auto dist = std::uniform_real_distribution<>();
-    auto gen = std::bind(dist, wtl::mt());
-    std::vector<std::future<double> > results;
     for (size_t i=0; i<n; ++i) {
-        results.push_back(pool.async_future(gen));
-    }
-    for (size_t i=0; i<n; ++i) {
-        sem.lock();
-        results.push_back(std::async(std::launch::async, [&] {
-            auto x = gen();
-            sem.unlock();
-            return x;
+        // manual lock before thread creation: reused from pool
+        semaphore.lock();
+        futures.push_back(std::async(std::launch::async, [&semaphore, i] {
+            std::ostringstream oss;
+            oss << std::this_thread::get_id() << ": " << i << "\n";
+            std::cerr << oss.str() << std::flush;
+            std::this_thread::sleep_for(std::chrono::milliseconds(250));
+            semaphore.unlock();
+            return i;
         }));
     }
-    for (auto& x: results) {
-        std::cerr << x.get() << std::endl;
+    for (auto& x: futures) x.wait();
+    for (auto& x: futures) {
+        std::cerr << x.get() << " ";
     }
+    std::cerr << std::endl;
+
+    futures.clear();
+    for (size_t i=0; i<n; ++i) {
+        // RAII lock after thread creation: many new threads are created
+        futures.push_back(std::async(std::launch::async, [&semaphore, i] {
+            std::lock_guard<wtl::Semaphore> _(semaphore);
+            std::ostringstream oss;
+            oss << std::this_thread::get_id() << ": " << i << "\n";
+            std::cerr << oss.str() << std::flush;
+            std::this_thread::sleep_for(std::chrono::milliseconds(250));
+            return i;
+        }));
+    }
+    for (auto& x: futures) x.wait();
+    for (auto& x: futures) {
+        std::cerr << x.get() << " ";
+    }
+    std::cerr << std::endl;
 }
 
 inline void test_temporal() {HERE;
@@ -163,8 +158,8 @@ int main(int argc, char* argv[]) {
         // test_integral();
         // test_validity();
         // test_speed();
-        // cxx11_thread();
-        test_temporal();
+        cxx11_thread();
+        // test_temporal();
         std::cerr << "EXIT_SUCCESS" << std::endl;
         return EXIT_SUCCESS;
     }
