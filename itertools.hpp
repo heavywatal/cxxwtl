@@ -3,11 +3,11 @@
 #ifndef WTL_ITERTOOLS_HPP_
 #define WTL_ITERTOOLS_HPP_
 
+#include <cstdint>
 #include <vector>
 #include <type_traits>
 
 #include <boost/coroutine2/coroutine.hpp>
-#include <boost/multiprecision/cpp_int.hpp>
 
 #include "numeric.hpp"
 
@@ -19,7 +19,7 @@ template <class value_type>
 class Generator {
   public:
     typedef boost::coroutines2::coroutine<value_type> coro_t;
-    typedef boost::multiprecision::cpp_int size_type;
+    typedef uintmax_t size_type;
     typedef typename std::remove_const<decltype(value_type().size())>::type value_size_t;
 
     Generator() = default;
