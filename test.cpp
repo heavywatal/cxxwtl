@@ -90,8 +90,6 @@ inline void test_speed() {HERE;
     std::cerr << x << std::endl;
 }
 
-std::mutex MUTEX;
-
 inline void cxx11_thread() {HERE;
     const size_t concurrency = std::thread::hardware_concurrency();
     std::cerr << "std::thread::hardware_concurrency(): "

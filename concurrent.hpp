@@ -3,6 +3,7 @@
 #ifndef WTL_CONCURRENT_HPP_
 #define WTL_CONCURRENT_HPP_
 
+#include <thread>
 #include <mutex>
 #include <condition_variable>
 #include <future>
