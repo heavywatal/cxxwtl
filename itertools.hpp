@@ -26,12 +26,14 @@ class Generator {
     virtual ~Generator() = default;
 
     size_type count() const {return cnt_;}
-    virtual size_type max_count() const = 0;
+    size_type max_count() const {return max_cnt_;}
+    double percent() const {return 100.0 * cnt_ / max_cnt_;}
     typename coro_t::pull_type operator()(const size_type skip=0) {
         return typename coro_t::pull_type([this,skip](typename coro_t::push_type& yield){source(yield, skip);});
     }
   protected:
     size_type cnt_ = 0;
+    size_type max_cnt_ = 0;
     virtual void source(typename coro_t::push_type& yield, const size_type skip) = 0;
 };
 
@@ -44,21 +46,19 @@ class Product final: public Generator<value_type> {
     using typename Generator<value_type>::size_type;
     using typename Generator<value_type>::value_size_t;
     Product() = delete;
-    explicit Product(const std::vector<value_type>& axes):
-        Generator<value_type>(),
-        axes_(axes),
-        value_(axes_.size()),
-        pos_(axes_.size()) {}
+    explicit Product(const std::vector<value_type>& axes)
+        : Generator<value_type>(),
+          axes_(axes),
+          value_(axes_.size()),
+          pos_(axes_.size()) {
+        this->max_cnt_ = 1;
+        for (const auto& c: axes_) {this->max_cnt_ *= c.size();}
+    }
     ~Product() = default;
 
     void reset() {
         pos_ = axes_.size();
         this->cnt_ = 0;
-    }
-    virtual size_type max_count() const override {
-        size_type n = 1;
-        for (const auto& c: axes_) {n *= c.size();}
-        return n;
     }
 
   private:
@@ -100,16 +100,14 @@ class UniAxis final: public Generator<value_type> {
     using typename Generator<value_type>::size_type;
     using typename Generator<value_type>::value_size_t;
     UniAxis() = delete;
-    UniAxis(const std::vector<value_type>& axes, const value_type& center):
-      Generator<value_type>(),
-      axes_(axes), center_(center) {}
-    ~UniAxis() = default;
-
-    virtual size_type max_count() const override {
-        size_type n = 0;
-        for (const auto& c: axes_) {n += c.size();}
-        return n;
+    UniAxis(const std::vector<value_type>& axes, const value_type& center)
+        : Generator<value_type>(),
+          axes_(axes),
+          center_(center) {
+        this->max_cnt_ = 0;
+        for (const auto& c: axes_) {this->max_cnt_ += c.size();}
     }
+    ~UniAxis() = default;
 
   private:
     virtual void source(typename coro_t::push_type& yield, const size_type skip) override {
@@ -143,16 +141,15 @@ class Prototype final: public Generator<value_type> {
     using typename Generator<value_type>::size_type;
     using typename Generator<value_type>::value_size_t;
     Prototype() = delete;
-    Prototype(const std::vector<value_type>& main_axes, const std::vector<value_type>& vicinity):
-      Generator<value_type>(),
-      main_axes_(main_axes), product_(vicinity) {}
-    ~Prototype() = default;
-
-    virtual size_type max_count() const override {
-        size_type n = 0;
-        for (const auto& v: main_axes_) {n += v.size();}
-        return n * product_.max_count();
+    Prototype(const std::vector<value_type>& main_axes, const std::vector<value_type>& vicinity)
+        : Generator<value_type>(),
+          main_axes_(main_axes),
+          product_(vicinity) {
+        this->max_cnt_ = 0;
+        for (const auto& v: main_axes_) {this->max_cnt_ += v.size();}
+        this->max_cnt_ *= product_.max_count();
     }
+    ~Prototype() = default;
 
   private:
     virtual void source(typename coro_t::push_type& yield, const size_type skip) override {
@@ -188,12 +185,14 @@ class Simplex  final: public Generator<value_type> {
     using typename Generator<value_type>::coro_t;
     using typename Generator<value_type>::size_type;
     Simplex() = delete;
-    explicit Simplex(const std::vector<value_type>& axes, const double sum=1.0):
-        product_(axes), sum_(sum) {}
+    explicit Simplex(const std::vector<value_type>& axes, const double sum=1.0)
+        : product_(axes),
+          sum_(sum) {
+        this->max_cnt_ = product_.max_count();
+    }
 
     void reset() {product_.reset();}
     size_type raw_count() const {return product_.count();}
-    virtual size_type max_count() const override {return product_.max_count();}
 
   private:
     virtual void source(typename coro_t::push_type& yield, const size_type skip) override {
