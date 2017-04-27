@@ -7,6 +7,7 @@
 #include <mutex>
 #include <condition_variable>
 #include <future>
+#include <chrono>
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 namespace wtl {
@@ -40,6 +41,18 @@ class Semaphore {
     std::condition_variable condition_;
     unsigned int count_;
 };
+
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
+
+template <typename T> inline
+std::future_status status(const std::future<T>& future) {
+    return future.wait_for(std::chrono::seconds(0));
+}
+
+template <typename T> inline
+bool is_ready(const std::future<T>& future) {
+    return status(future) == std::future_status::ready;
+}
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 } // namespace wtl
