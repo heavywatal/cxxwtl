@@ -94,20 +94,20 @@ Product<value_type> product(const std::vector<value_type>& axes) {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
 template <class value_type>
-class UniAxis final: public Generator<value_type> {
+class UniAxes final: public Generator<value_type> {
   public:
     using typename Generator<value_type>::coro_t;
     using typename Generator<value_type>::size_type;
     using typename Generator<value_type>::value_size_t;
-    UniAxis() = delete;
-    UniAxis(const std::vector<value_type>& axes, const value_type& center)
+    UniAxes() = delete;
+    UniAxes(const std::vector<value_type>& axes, const value_type& center)
         : Generator<value_type>(),
           axes_(axes),
           center_(center) {
         this->max_cnt_ = 0;
         for (const auto& c: axes_) {this->max_cnt_ += c.size();}
     }
-    ~UniAxis() = default;
+    ~UniAxes() = default;
 
   private:
     virtual void source(typename coro_t::push_type& yield, const size_type skip) override {
@@ -128,8 +128,44 @@ class UniAxis final: public Generator<value_type> {
 };
 
 template <class value_type>
-UniAxis<value_type> uniaxis(const std::vector<value_type>& axes, const value_type& center) {
-    return UniAxis<value_type>(axes, center);
+class UniAxis final: public Generator<value_type> {
+  public:
+    using typename Generator<value_type>::coro_t;
+    using typename Generator<value_type>::size_type;
+    using typename Generator<value_type>::value_size_t;
+    UniAxis() = delete;
+    UniAxis(const value_type& axis, const value_type& center, const value_size_t idx)
+        : Generator<value_type>(),
+          axis_(axis),
+          center_(center),
+          idx_(idx) {
+        this->max_cnt_ = axis_.size();
+    }
+    ~UniAxis() = default;
+
+  private:
+    virtual void source(typename coro_t::push_type& yield, const size_type skip) override {
+        auto value = center_;
+        for (value_size_t j=0; j<axis_.size(); ++j) {
+            value[idx_] = axis_[j];
+            if (++this->cnt_ > skip) {
+                yield(value_type(value));
+            }
+        }
+    }
+    const value_type& axis_;
+    const value_type center_;
+    const value_size_t idx_;
+};
+
+template <class value_type>
+UniAxes<value_type> uniaxis(const std::vector<value_type>& axes, const value_type& center) {
+    return UniAxes<value_type>(axes, center);
+}
+
+template <class value_type>
+UniAxis<value_type> uniaxis(const value_type& axis, const value_type& center, const size_t idx) {
+    return UniAxis<value_type>(axis, center, idx);
 }
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
