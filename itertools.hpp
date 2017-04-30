@@ -171,51 +171,6 @@ UniAxis<value_type> uniaxis(const value_type& axis, const value_type& center, co
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
 template <class value_type>
-class Prototype final: public Generator<value_type> {
-  public:
-    using typename Generator<value_type>::coro_t;
-    using typename Generator<value_type>::size_type;
-    using typename Generator<value_type>::value_size_t;
-    Prototype() = delete;
-    Prototype(const std::vector<value_type>& main_axes, const std::vector<value_type>& vicinity)
-        : Generator<value_type>(),
-          main_axes_(main_axes),
-          product_(vicinity) {
-        this->max_cnt_ = 0;
-        for (const auto& v: main_axes_) {this->max_cnt_ += v.size();}
-        this->max_cnt_ *= product_.max_count();
-    }
-    ~Prototype() = default;
-
-  private:
-    virtual void source(typename coro_t::push_type& yield, const size_type skip) override {
-        for (size_t i=0; i<main_axes_.size(); ++i) {
-            const auto& axis = main_axes_[i];
-            const auto l = axis.size();
-            for (const auto& center: product_()) {
-                auto value = center;
-                for (value_size_t j=0; j<l; ++j) {
-                    value[i] = axis[j];
-                    if (++this->cnt_ > skip) {
-                        yield(value_type(value));
-                    }
-                }
-            }
-            product_.reset();
-        }
-    }
-    const std::vector<value_type> main_axes_;
-    Product<value_type> product_;
-};
-
-template <class value_type>
-Prototype<value_type> prototype(const std::vector<value_type>& axes, const std::vector<value_type>& vicinity) {
-    return Prototype<value_type>(axes, vicinity);
-}
-
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
-
-template <class value_type>
 class Simplex  final: public Generator<value_type> {
   public:
     using typename Generator<value_type>::coro_t;
