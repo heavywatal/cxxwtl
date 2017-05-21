@@ -153,13 +153,13 @@ double mean(const V& v) {
 }
 
 
-// geographic (multiplicative) mean
+// geometric (multiplicative) mean
 template <class Iter> inline
-double gmean(const Iter begin_, const Iter end_) {
+double geomean(const Iter begin_, const Iter end_) {
     return std::pow(prod(begin_, end_), 1.0 / std::distance(begin_, end_));
 }
 template <class V> inline
-double gmean(const V& v) {
+double geomean(const V& v) {
     return std::pow(prod(v), 1.0 / v.size());
 }
 
@@ -179,27 +179,6 @@ double median(const RandIter begin_, const RandIter end_) {
 }
 template <class V> inline
 double median(V* v) {return median(v->begin(), v->end());}
-
-
-// mode: the value that appears most often
-// Sort the container before applying this
-template <class Iter> inline
-typename Iter::value_type mode(Iter begin_, const Iter end_) {
-    size_t score = 0;
-    Iter resiter;
-    while (begin_!=end_) {
-        Iter bound(std::upper_bound(begin_, end_, *begin_));
-        const size_t d(std::distance(begin_, bound));
-        if (d > score) {
-            score = d;
-            resiter = begin_;
-        }
-        begin_ = bound;
-    }
-    return *resiter;
-}
-template <class V> inline
-typename V::value_type mode(const V& v) {return mode(begin(v), end(v));}
 
 
 // deviation squares
