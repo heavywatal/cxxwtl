@@ -2,7 +2,6 @@
 #include "numeric.hpp"
 #include "debug.hpp"
 #include "iostr.hpp"
-#include "mixin.hpp"
 #include "os.hpp"
 #include "demangle.hpp"
 #include "prandom.hpp"
@@ -10,19 +9,11 @@
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
-class Cls: public Singleton<Cls> {
-    friend Singleton<Cls>;
-  public:
-    int get_x() const {return x_;}
-    void print_x() const {std::cout << x_ << std::endl;}
-  private:
-    Cls(const int x): x_(x) {HERE;};
-    int x_ = 42;
-};
-
 inline void test_integral() {HERE;
-    std::cerr << "y = 1: " << wtl::integrate([](const double x){return 1.0 + x*0;}, 0, 1) << std::endl;
-    std::cerr << "y = x: " << wtl::integrate([](const double x){return x;}, 0, 1) << std::endl;
+    std::cerr << "y = 1: "
+        << wtl::integrate([](const double x){return 1.0 + x*0;}, 0, 1) << std::endl;
+    std::cerr << "y = x: "
+        << wtl::integrate([](const double x){return x;}, 0, 1) << std::endl;
     std::cerr << "y = sin(x): "
         << wtl::integrate([](const double x){return std::sin(x);}, 0, M_PI) << std::endl;
     std::cerr << "y = cos(x): "
@@ -32,12 +23,6 @@ inline void test_integral() {HERE;
     std::cerr << "y = exp(-x^2) / sqrt(pi): "
         << wtl::integrate([](const double x)
             {return std::exp(- x * x);}, 0, 10, 100) * 2 / std::sqrt(M_PI) << std::endl;
-}
-
-inline void test_validity() {HERE;
-    auto& ref = Cls::instance(1);
-    ref.print_x();
-    Cls::instance(2).print_x();
 }
 
 inline void test_speed() {HERE;
@@ -154,7 +139,6 @@ int main(int argc, char* argv[]) {
     try {
         std::cerr << wtl::str_join(argv, argv + argc, " ") << std::endl;
         // test_integral();
-        // test_validity();
         // test_speed();
         cxx11_thread();
         // test_temporal();
