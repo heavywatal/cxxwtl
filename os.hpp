@@ -28,6 +28,7 @@ inline std::string basename(const std::string& path) {
 
 inline std::string dirname(const std::string& path) {
     size_t pos = path.find_last_of('/');
+    if (pos == std::string::npos) return ".";
     return path.substr(0, pos);
 }
 
@@ -123,7 +124,7 @@ class Pushd{
         while (!stack_.empty()) {popd();}
     }
     void operator()(const std::string& dst) {HERE;
-        if (dst.empty()) return;
+        if (dst.empty() || dst == ".") return;
         stack_.push_back(pwd());
         cd(dst); PWD;
     }
