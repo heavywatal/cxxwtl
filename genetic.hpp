@@ -3,31 +3,21 @@
 #ifndef WTL_GENETIC_HPP_
 #define WTL_GENETIC_HPP_
 
+#include "numeric.hpp"
+#include "algorithm.hpp"
+
 #include <vector>
-#include <algorithm>
-#include <numeric>
 #include <random>
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 namespace wtl {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
-template <class T> inline
-T partial_sum(const T& v) {
-    T result(v.size());
-    std::partial_sum(v.begin(), v.end(), result.begin());
-    return result;
-}
-
-inline size_t pocket_idx(const std::vector<double>& ubounds, const double ball) {
-    return std::upper_bound(ubounds.begin(), ubounds.end(), ball) - ubounds.begin();
-}
-
 template <class RNG> inline
 size_t roulette_select(const std::vector<double>& fitnesses, RNG& rng) {
     const std::vector<double> ubounds = partial_sum(fitnesses);
     std::uniform_real_distribution<double> uniform(0.0, ubounds.back());
-    return pocket_idx(ubounds, uniform(rng));
+    return bisect(ubounds, uniform(rng));
 }
 
 template <class RNG> inline
@@ -39,7 +29,7 @@ std::vector<size_t> roulette_select(
     std::vector<size_t> indices;
     indices.reserve(n);
     for (size_t i=0; i<n; ++i) {
-        indices.push_back(pocket_idx(ubounds, uniform(rng)));
+        indices.push_back(bisect(ubounds, uniform(rng)));
     }
     return indices;
 }
@@ -81,7 +71,7 @@ std::vector<size_t> roulette_select(
     else {
         std::uniform_real_distribution<double> uniform(0.0, ubounds.back());
         while (children.size() < pop_size) {
-            children.push_back(pocket_idx(ubounds, uniform(rng)));
+            children.push_back(bisect(ubounds, uniform(rng)));
         }
     }
     return children;

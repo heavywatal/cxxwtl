@@ -100,6 +100,13 @@ cast(const std::valarray<U>& x) {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 // for std::vector
 
+template <class T> inline
+T partial_sum(const T& v) {
+    T result(v.size());
+    std::partial_sum(std::begin(v), std::end(v), std::begin(result));
+    return result;
+}
+
 // Generate integer vector with increasing values
 template <class T=size_t> inline
 typename std::vector<T> seq_len(const size_t size, const T init=0) {

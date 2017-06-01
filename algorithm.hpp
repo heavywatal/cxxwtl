@@ -13,6 +13,23 @@
 namespace wtl {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
+template <class T> inline
+size_t bisect_left(const std::vector<T>& array, const T val) {
+    return std::lower_bound(array.begin(), array.end(), val) - array.begin();
+}
+
+template <class T> inline
+size_t bisect_right(const std::vector<T>& array, const T val) {
+    return std::upper_bound(array.begin(), array.end(), val) - array.begin();
+}
+
+template <class T> inline
+size_t bisect(const std::vector<T>& array, const T val) {
+    return bisect_right(array, val);
+}
+
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
+
 template<class T> inline
 void rstrip(std::vector<T>* seq, const T& value=T(0)) {
     auto rit = std::find_if(seq->rbegin(), seq->rend(),
