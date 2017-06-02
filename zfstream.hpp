@@ -21,18 +21,21 @@ namespace bios = boost::iostreams;
 class ozfstream: public bios::filtering_ostream {
   public:
     ozfstream(const std::string& path, std::ios::openmode mode=std::ios::out):
-      bios::filtering_ostream() {
+      bios::filtering_ostream(), path_(path) {
         if (std::regex_search(path, std::regex("\\.gz$"))) {
             push(bios::gzip_compressor());
         }
         push(bios::file_descriptor_sink(path, mode));
     }
+    const std::string& path() const {return path_;}
+  private:
+    const std::string path_;
 };
 
 class izfstream: public bios::filtering_istream {
   public:
     izfstream(const std::string& path, std::ios::openmode mode=std::ios::in):
-      bios::filtering_istream() {
+      bios::filtering_istream(), path_(path) {
         if (std::regex_search(path, std::regex("\\.gz$"))) {
             push(bios::gzip_decompressor());
         }
@@ -53,6 +56,9 @@ class izfstream: public bios::filtering_istream {
     }
     std::string read(const char delimiter='\0') {return readline(delimiter);}
     void close() {pop();}
+    const std::string& path() const {return path_;}
+  private:
+    const std::string path_;
 };
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
