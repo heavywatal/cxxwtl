@@ -12,6 +12,7 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <iterator>
 
 #include <string>
 #include <vector>
