@@ -63,8 +63,8 @@ template <class Fn>
 void benchmark(Fn&& fn, const std::string& label="", size_t times=3) {
     for (; times>0; --times) {
         const auto t = stopwatch(fn);
-        std::cerr << "#BENCHMARK " << label
-                  << t.count() << " [ms]" << std::endl;
+        std::cerr << "#BENCHMARK "
+                  << t.count() << " [ms] " << label << std::endl;
     }
 }
 

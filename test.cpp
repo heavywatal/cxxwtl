@@ -32,25 +32,18 @@ inline void test_speed() {HERE;
     double mu = 8.0;
     std::poisson_distribution<size_t> dist(mu);
 
-    wtl::benchmark([&](){
+    auto lambda_random = [&](auto& generator) mutable {
         for (size_t j=0; j<n; ++j) {
-            x[j] = dist(wtl::sfmt());
+            x[j] = dist(generator);
         }
-    });
+    };
+    wtl::benchmark(std::bind(lambda_random, wtl::mt()), "mt", 2);
     std::cerr << wtl::mean(x) << std::endl;
-
-    wtl::benchmark([&](){
-        for (size_t j=0; j<n; ++j) {
-            x[j] = dist(wtl::mt());
-        }
-    });
+    wtl::benchmark(std::bind(lambda_random, wtl::mt64()), "mt64", 2);
     std::cerr << wtl::mean(x) << std::endl;
-
-    wtl::benchmark([&](){
-        for (size_t j=0; j<n; ++j) {
-            x[j] = wtl::prandom().poisson(mu);
-        }
-    });
+    wtl::benchmark(std::bind(lambda_random, wtl::sfmt()), "sfmt", 2);
+    std::cerr << wtl::mean(x) << std::endl;
+    wtl::benchmark(std::bind(lambda_random, wtl::sfmt64()), "sfmt64", 2);
     std::cerr << wtl::mean(x) << std::endl;
 
     size_t k = n / 50;
@@ -88,11 +81,11 @@ inline void cxx11_thread() {HERE;
         // manual lock before thread creation: reused from pool
         semaphore.lock();
         futures.push_back(std::async(std::launch::async, [&semaphore, i] {
+            std::lock_guard<wtl::Semaphore> scope_unlock(semaphore, std::adopt_lock);
             std::ostringstream oss;
             oss << std::this_thread::get_id() << ": " << i << "\n";
             std::cerr << oss.str() << std::flush;
             std::this_thread::sleep_for(std::chrono::milliseconds(250));
-            semaphore.unlock();
             return i;
         }));
     }
@@ -139,7 +132,7 @@ int main(int argc, char* argv[]) {
     try {
         std::cerr << wtl::str_join(argv, argv + argc, " ") << std::endl;
         // test_integral();
-        // test_speed();
+        test_speed();
         cxx11_thread();
         // test_temporal();
         std::cerr << "EXIT_SUCCESS" << std::endl;
