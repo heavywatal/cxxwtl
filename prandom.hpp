@@ -86,89 +86,6 @@ Container sample_knuth(const Container& src, const size_t k, RNG& rng) {
 }
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
-// Generators
-
-class XorShift {
-  public:
-    typedef unsigned int result_type;
-    typedef unsigned int state_type[4];
-
-    static constexpr result_type min() {return 0U;}
-    static constexpr result_type max() {
-        return std::numeric_limits<result_type>::max();
-    }
-
-    // constructors
-    explicit XorShift(const result_type s) {seed(s);}
-    explicit XorShift(const state_type& state) {setstate(state);}
-    XorShift(const XorShift&) = delete;
-
-    // [0, 2^32-1]
-    result_type operator()() {
-        unsigned int t(state_[0] ^ (state_[0] << 11));
-        state_[0] = state_[1];
-        state_[1] = state_[2];
-        state_[2] = state_[3];
-        return state_[3] = (state_[3] ^ (state_[3] >> 19)) ^ (t ^ (t >> 8));
-    }
-
-    // [0.0, 1.0)
-    double canonical() {
-        return std::uniform_real_distribution<double>()(*this);
-    }
-
-    void seed(result_type s) {
-        for (unsigned int i=0; i<4U; ++i) {
-            state_[i] = s = 1812433253U * (s ^ (s >> 30)) + i;
-        }
-    }
-
-    void discard(unsigned long long n) {
-        for (; n != 0ULL; --n) {(*this)();}
-    }
-
-    template<class Fn>
-    std::function<typename Fn::result_type ()> bind(Fn&& function) {
-        return std::bind(function, *this);
-    }
-
-    const state_type& getstate() const {return state_;}
-    void setstate(const state_type& state) {
-        for (unsigned int i=0; i<4U; ++i) {
-            state_[i] = state[i];
-        }
-    }
-
-  private:
-    state_type state_;
-};
-
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
-// Global definition/declaration
-
-namespace detail {
-    template <class T> class Holder {
-      public:
-        T& operator()(void) {return instance_;}
-      private:
-        static T instance_;
-    };
-    template <class T> T Holder<T>::instance_(std::random_device{}());
-} // namespace detail
-
-inline std::mt19937& mt() {
-    return wtl::detail::Holder<std::mt19937>{}();
-}
-
-inline sfmt19937& sfmt() {
-    return wtl::detail::Holder<sfmt19937>{}();
-}
-
-inline XorShift& xorshift() {
-    return wtl::detail::Holder<XorShift>{}();
-}
-
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
 //! Pythonic RNG object
 template <class Generator>
@@ -293,8 +210,32 @@ class Prandom{
     Generator generator_;
 };
 
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
+// Global definition/declaration
+
+inline std::mt19937& mt() {
+    static std::mt19937 generator(std::random_device{}());
+    return generator;
+}
+
+inline std::mt19937_64& mt64() {
+    static std::mt19937_64 generator(std::random_device{}());
+    return generator;
+}
+
+inline sfmt19937& sfmt() {
+    static sfmt19937 generator(std::random_device{}());
+    return generator;
+}
+
+inline sfmt19937_64& sfmt64() {
+    static sfmt19937_64 generator(std::random_device{}());
+    return generator;
+}
+
 inline Prandom<sfmt19937>& prandom() {
-    return wtl::detail::Holder<Prandom<sfmt19937> >{}();
+    static Prandom<sfmt19937> generator;
+    return generator;
 }
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
