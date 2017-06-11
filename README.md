@@ -11,7 +11,6 @@ Personal C++ header library
 - `getopt.hpp` uses [boost::program_options](http://www.boost.org/doc/libs/release/libs/program_options/doc/)
 - `grn.hpp` uses [boost::graph](http://www.boost.org/doc/libs/release/libs/graph/doc/)
 - `eigen.hpp` uses [Eigen](https://eigen.tuxfamily.org/)
-- `prandom.hpp` uses [sfmt-class](https://github.com/heavywatal/sfmt-class)
 - `zfstream.hpp` uses [boost::iostreams](http://www.boost.org/doc/libs/release/libs/iostreams/doc/)
 
 

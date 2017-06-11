@@ -7,6 +7,8 @@
 #include "prandom.hpp"
 #include "concurrent.hpp"
 
+#include <sfmt.hpp> // https://github.com/heavywatal/sfmt-class
+
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
 inline void test_integral() {HERE;

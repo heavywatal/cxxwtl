@@ -9,8 +9,6 @@
 #include <functional> // bind
 #include <unordered_set>
 
-#include <sfmt.hpp>
-
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 namespace wtl {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
@@ -223,18 +221,8 @@ inline std::mt19937_64& mt64() {
     return generator;
 }
 
-inline sfmt19937& sfmt() {
-    static sfmt19937 generator(std::random_device{}());
-    return generator;
-}
-
-inline sfmt19937_64& sfmt64() {
-    static sfmt19937_64 generator(std::random_device{}());
-    return generator;
-}
-
-inline Prandom<sfmt19937>& prandom() {
-    static Prandom<sfmt19937> generator;
+inline Prandom<std::mt19937>& prandom() {
+    static Prandom<std::mt19937> generator;
     return generator;
 }
 
