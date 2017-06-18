@@ -342,15 +342,14 @@ inline std::string iso8601time(const std::string& sep=":") {
 inline std::string iso8601datetime() {return strftime("%FT%T%z");}
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
-// fstream wrapper for binary mode and exceptions
-// boost::serialization requires binary mode
+// Pythonic fstream wrapper with exceptions and binary mode
 
-class Fin: public std::ifstream {
+class ipfstream: public std::ifstream {
   public:
-    explicit Fin(const std::string& filepath,
-                 const std::ios::openmode mode=std::ios::in) {
-        exceptions(std::ios::failbit);
-        open(filepath.c_str(), mode | std::ios::binary);
+    explicit ipfstream(const std::string& filepath,
+                       const std::ios::openmode mode=std::ios::in)
+        : std::ifstream(filepath, mode | std::ios::binary) {
+        exceptions(std::ios::failbit | std::ios::badbit);
     }
 
     std::string readline(const char delimiter='\n') {
@@ -371,17 +370,17 @@ class Fin: public std::ifstream {
     std::string read(const char delimiter='\0') {return readline(delimiter);}
 };
 
-class Fout: public std::ofstream {
+class opfstream: public std::ofstream {
   public:
-    explicit Fout(const std::string& filepath,
-                  const std::ios::openmode mode=std::ios::out):
-                  std::ofstream(filepath.c_str(), mode | std::ios::binary) {
-        exceptions(std::ios::failbit);
+    explicit opfstream(const std::string& filepath,
+                       const std::ios::openmode mode=std::ios::out)
+        : std::ofstream(filepath, mode | std::ios::binary) {
+        exceptions(std::ios::failbit | std::ios::badbit);
         precision(std::cout.precision());
     }
 
     template <class Iter>
-    Fout& writelines(Iter begin_, const Iter end_, const char sep='\n') {
+    opfstream& writelines(Iter begin_, const Iter end_, const char sep='\n') {
         if (begin_ == end_) return *this;
         *this << *begin_;
         while (++begin_ != end_) {*this << sep << *begin_;}
@@ -389,14 +388,14 @@ class Fout: public std::ofstream {
     }
 
     template <class V>
-    Fout& writelines(const V& lines, const char sep='\n') {
+    opfstream& writelines(const V& lines, const char sep='\n') {
         return writelines(begin(lines), end(lines), sep);
     }
 };
 
 inline std::vector<std::pair<std::string, std::string> >
 read_ini(const std::string& filename) {
-    std::vector<std::string> lines = Fin(filename).readlines();
+    std::vector<std::string> lines = ipfstream(filename).readlines();
     std::vector<std::pair<std::string, std::string> > dst;
     dst.reserve(lines.size());
     for (auto line_: lines) {
