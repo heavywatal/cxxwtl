@@ -11,19 +11,20 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
 inline void test_integral() {HERE;
+    constexpr double pi = 3.14159265358979323846;
     std::cerr << "y = 1: "
         << wtl::integrate([](const double x){return 1.0 + x*0;}, 0, 1) << std::endl;
     std::cerr << "y = x: "
         << wtl::integrate([](const double x){return x;}, 0, 1) << std::endl;
     std::cerr << "y = sin(x): "
-        << wtl::integrate([](const double x){return std::sin(x);}, 0, M_PI) << std::endl;
+        << wtl::integrate([](const double x){return std::sin(x);}, 0, pi) << std::endl;
     std::cerr << "y = cos(x): "
-        << wtl::integrate([](const double x){return std::cos(x);}, 0, M_PI) << std::endl;
+        << wtl::integrate([](const double x){return std::cos(x);}, 0, pi) << std::endl;
     std::cerr << "x^2 + y^2 = 1: "
         << wtl::integrate([](const double x){return std::sqrt(1 - x * x);}, 0, 1) * 4 << std::endl;
     std::cerr << "y = exp(-x^2) / sqrt(pi): "
         << wtl::integrate([](const double x)
-            {return std::exp(- x * x);}, 0, 10, 100) * 2 / std::sqrt(M_PI) << std::endl;
+            {return std::exp(- x * x);}, 0, 10, 100) * 2 / std::sqrt(pi) << std::endl;
 }
 
 inline void test_speed() {HERE;
