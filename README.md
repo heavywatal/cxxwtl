@@ -17,7 +17,7 @@ Personal C++ header library
 ### Installation and Usage
 
 You can put the header files anywhere you want.
-For examle, I usualy clone them into `~/local/include/wtl`.
+For example, I usually clone them into `~/local/include/wtl`.
 It is consistent with the namespace `wtl` in which most of functions and classes are defined.
 
 ```sh
