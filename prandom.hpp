@@ -3,10 +3,7 @@
 #ifndef WTL_PRANDOM_HPP_
 #define WTL_PRANDOM_HPP_
 
-#include <cstddef> // ptrdiff_t
 #include <random>
-#include <limits> // numeric_limits
-#include <functional> // bind
 #include <unordered_set>
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
@@ -15,7 +12,8 @@ namespace wtl {
 
 template <class Iter, class RNG> inline
 Iter choice(Iter begin_, Iter end_, RNG& rng) {
-    std::uniform_int_distribution<ptrdiff_t> uniform(0, std::distance(begin_, end_) - 1);
+    using diff_t = decltype(std::distance(begin_, end_));
+    std::uniform_int_distribution<diff_t> uniform(0, std::distance(begin_, end_) - 1);
     std::advance(begin_, uniform(rng));
     return begin_;
 }
