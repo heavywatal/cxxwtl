@@ -3,6 +3,7 @@
 #ifndef WTL_PRANDOM_HPP_
 #define WTL_PRANDOM_HPP_
 
+#include <vector>
 #include <random>
 #include <unordered_set>
 
@@ -19,7 +20,8 @@ Iter choice(Iter begin_, Iter end_, RNG& rng) {
 }
 
 template <class Container, class RNG> inline
-Container sample(const Container& src, const size_t k, RNG& rng) {
+std::vector<typename Container::value_type>
+sample(const Container& src, const size_t k, RNG& rng) {
     const size_t n = src.size();
     if (100 * k < n) {return sample_set(src, k, rng);}
     else if (5 * k < n) {return sample_fisher(src, k, rng);}
@@ -28,11 +30,12 @@ Container sample(const Container& src, const size_t k, RNG& rng) {
 
 //! fast if k << n
 template <class Container, class RNG> inline
-Container sample_set(const Container& src, const size_t k, RNG& rng) {
+std::vector<typename Container::value_type>
+sample_set(const Container& src, const size_t k, RNG& rng) {
     const size_t n = src.size();
     if (n < k) throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + ": n < k");
     std::unordered_set<size_t> existing_indices;
-    Container dst;
+    std::vector<typename Container::value_type> dst;
     dst.reserve(k);
     std::uniform_int_distribution<size_t> uniform(0, n - 1);
     size_t idx = 0;
@@ -48,37 +51,40 @@ Container sample_set(const Container& src, const size_t k, RNG& rng) {
 //! Fisher-Yates algorithm; Durstenfeld; Knuth's P
 //! consistently fast; note that whole src is copied first
 template <class Container, class RNG> inline
-Container sample_fisher(Container src, const size_t k, RNG& rng) {
-    const size_t n = src.size();
+std::vector<typename Container::value_type>
+sample_fisher(const Container& src, const size_t k, RNG& rng) {
+    std::vector<typename Container::value_type> dst(std::begin(src), std::end(src));
+    const size_t n = dst.size();
     if (n < k) throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + ": n < k");
     const size_t last = n - 1;
     for (size_t i=0; i<k; ++i) {
-        std::swap(src[std::uniform_int_distribution<size_t>(i, last)(rng)], src[i]);
+        std::swap(dst[std::uniform_int_distribution<size_t>(i, last)(rng)], dst[i]);
     }
-    src.resize(k);
-    return src;
+    dst.resize(k);
+    return dst;
 }
 
 //! Knuth's algorithm S
 //! fast if k / n is large
 //! The order is not random
 template <class Container, class RNG> inline
-Container sample_knuth(const Container& src, const size_t k, RNG& rng) {
+std::vector<typename Container::value_type>
+sample_knuth(const Container& src, const size_t k, RNG& rng) {
     const size_t n = src.size();
     if (n < k) throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + ": n < k");
-    Container samples;
-    samples.reserve(k);
+    std::vector<typename Container::value_type> dst;
+    dst.reserve(k);
     size_t i = 0;
     for (; i<k; ++i) {
-        samples.push_back(src[i]);
+        dst.push_back(src[i]);
     }
     std::uniform_int_distribution<size_t> uniform(0, k - 1);
     while (i < n) {
         if (std::bernoulli_distribution((1.0 / ++i) * k)(rng)) {
-            samples[uniform(rng)] = src[i - 1];
+            dst[uniform(rng)] = src[i - 1];
         }
     }
-    return samples;
+    return dst;
 }
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
