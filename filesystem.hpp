@@ -1,4 +1,3 @@
-// -*- mode: c++; coding: utf-8 -*-
 #pragma once
 #ifndef WTL_FILESYSTEM_HPP_
 #define WTL_FILESYSTEM_HPP_

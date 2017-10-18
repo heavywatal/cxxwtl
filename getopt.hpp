@@ -1,4 +1,3 @@
-// -*- mode: c++; coding: utf-8 -*-
 #pragma once
 
 #include <ostream>

@@ -1,4 +1,3 @@
-// -*- mode: c++; coding: utf-8 -*-
 #pragma once
 #ifndef WTL_ALGORITHM_HPP_
 #define WTL_ALGORITHM_HPP_

@@ -1,4 +1,3 @@
-// -*- mode: c++; coding: utf-8 -*-
 #pragma once
 #ifndef WTL_SCOPE_HPP_
 #define WTL_SCOPE_HPP_
