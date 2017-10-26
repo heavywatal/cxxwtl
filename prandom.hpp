@@ -10,6 +10,11 @@
 namespace wtl {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
+template <class URBG> inline
+double generate_canonical(URBG& gen) {
+    return std::generate_canonical<double, std::numeric_limits<double>::digits>(gen);
+}
+
 template <class Iter, class RNG> inline
 Iter choice(Iter begin_, Iter end_, RNG& rng) {
     using diff_t = decltype(std::distance(begin_, end_));
