@@ -7,6 +7,8 @@
 #include <condition_variable>
 #include <future>
 #include <chrono>
+#include <vector>
+#include <queue>
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 namespace wtl {
@@ -52,6 +54,52 @@ template <typename T> inline
 bool is_ready(const std::future<T>& future) {
     return status(future) == std::future_status::ready;
 }
+
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
+
+class ThreadPool {
+  public:
+    ThreadPool(const size_t n) {
+        for (size_t i=0; i<n; ++i) {
+            threads_.emplace_back(&ThreadPool::run, this);
+        }
+    }
+
+    ~ThreadPool() {
+        this->wants_to_stop_ = true;
+        for (auto& th: threads_) {
+            th.join();
+        }
+    }
+
+    template <class Func>
+    void submit(Func&& func) {
+        tasks_.push(func);
+    }
+
+  private:
+    void run() {
+        while (true) {
+            std::function<void()> task;
+            {
+                std::unique_lock<std::mutex> lck(mutex_);
+                condition_.wait(lck, [this]{
+                    return this->wants_to_stop_ || !this->tasks_.empty();
+                });
+                if (wants_to_stop_ && tasks_.empty()) return;
+                task = std::move(tasks_.front());
+                tasks_.pop();
+            }
+            task();
+        }
+    }
+
+    std::vector<std::thread> threads_;
+    std::queue<std::function<void()>> tasks_;
+    std::mutex mutex_;
+    std::condition_variable condition_;
+    bool wants_to_stop_ = false;
+};
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 } // namespace wtl
