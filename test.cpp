@@ -115,6 +115,23 @@ inline void cxx11_thread() {HERE;
     std::cerr << std::endl;
 }
 
+inline void test_thread_pool() {HERE;
+    wtl::ThreadPool pool(2);
+    for (size_t j=0; j<2ul; ++j) {
+        for (size_t i=0; i<4ul; ++i) {
+            pool.submit([i]() {
+                std::this_thread::sleep_for(std::chrono::milliseconds(500));
+                std::ostringstream oss;
+                oss << std::this_thread::get_id() << ": " << i << "\n";
+                std::cerr << oss.str() << std::flush;
+            });
+        }
+        std::cerr << std::this_thread::get_id() << ": main\n" << std::flush;
+        pool.wait();
+        std::cerr << std::this_thread::get_id() << ": main\n" << std::flush;
+    }
+}
+
 inline void test_temporal() {HERE;
     std::cout << std::numeric_limits<size_t>::max() << std::endl;
     std::cout << std::log2(std::numeric_limits<size_t>::max()) << std::endl;
@@ -133,8 +150,9 @@ int main(int argc, char* argv[]) {
     try {
         std::cerr << wtl::str_join(argv, argv + argc, " ") << std::endl;
         // test_integral();
-        test_speed();
-        cxx11_thread();
+        // test_speed();
+        // cxx11_thread();
+        test_thread_pool();
         // test_temporal();
         std::cerr << "EXIT_SUCCESS" << std::endl;
         return EXIT_SUCCESS;
