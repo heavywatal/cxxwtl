@@ -66,7 +66,8 @@ class ThreadPool {
     }
 
     ~ThreadPool() {
-        this->wants_to_stop_ = true;
+        wants_to_stop_ = true;
+        condition_.notify_all();
         for (auto& th: threads_) {
             th.join();
         }
@@ -74,19 +75,21 @@ class ThreadPool {
 
     template <class Func>
     void submit(Func&& func) {
+        std::lock_guard<std::mutex> lck(mutex_);
         tasks_.push(func);
+        condition_.notify_one();
     }
 
   private:
     void run() {
+        std::function<void()> task;
         while (true) {
-            std::function<void()> task;
             {
                 std::unique_lock<std::mutex> lck(mutex_);
-                condition_.wait(lck, [this]{
-                    return this->wants_to_stop_ || !this->tasks_.empty();
+                condition_.wait(lck, [this] {
+                    return wants_to_stop_ || !tasks_.empty();
                 });
-                if (wants_to_stop_ && tasks_.empty()) return;
+                if (tasks_.empty()) return;
                 task = std::move(tasks_.front());
                 tasks_.pop();
             }
