@@ -66,8 +66,8 @@ class ThreadPool {
     }
 
     ~ThreadPool() {
-        wants_to_stop_ = true;
-        condition_.notify_all();
+        is_being_destroyed_ = true;
+        condition_run_.notify_all();
         for (auto& th: threads_) {
             th.join();
         }
@@ -77,7 +77,15 @@ class ThreadPool {
     void submit(Func&& func) {
         std::lock_guard<std::mutex> lck(mutex_);
         tasks_.push(func);
-        condition_.notify_one();
+        condition_run_.notify_one();
+    }
+
+    // wait for worker threads to finish all tasks without executing join()
+    void wait() {
+        std::unique_lock<std::mutex> lck(mutex_);
+        condition_wait_.wait(lck, [this]{
+            return tasks_.empty() && waiting_threads_ == threads_.size();
+        });
     }
 
   private:
@@ -86,9 +94,12 @@ class ThreadPool {
         while (true) {
             {
                 std::unique_lock<std::mutex> lck(mutex_);
-                condition_.wait(lck, [this] {
-                    return wants_to_stop_ || !tasks_.empty();
+                ++waiting_threads_;
+                condition_wait_.notify_one();
+                condition_run_.wait(lck, [this] {
+                    return !tasks_.empty() || is_being_destroyed_;
                 });
+                --waiting_threads_;
                 if (tasks_.empty()) return;
                 task = std::move(tasks_.front());
                 tasks_.pop();
@@ -100,8 +111,10 @@ class ThreadPool {
     std::vector<std::thread> threads_;
     std::queue<std::function<void()>> tasks_;
     std::mutex mutex_;
-    std::condition_variable condition_;
-    bool wants_to_stop_ = false;
+    std::condition_variable condition_run_;
+    std::condition_variable condition_wait_;
+    bool is_being_destroyed_ = false;
+    size_t waiting_threads_ = 0;
 };
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
