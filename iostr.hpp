@@ -160,7 +160,7 @@ join(const T& v, const Char* delim="\t", Func func=Func()) {
 }
 
 inline std::ostringstream
-make_oss(const unsigned int precision=std::cout.precision(),
+make_oss(const std::streamsize precision=std::cout.precision(),
          const std::ios_base::fmtflags fmtfl=std::cout.flags()) {
     std::ostringstream oss;
     oss.precision(precision);
@@ -308,9 +308,9 @@ inline std::string strprintf(const char* const format, ...) {
     const int length = std::vsnprintf(nullptr, 0, format, args) ;
     va_end(args);
     if (length < 0) throw std::runtime_error(format);
-    buffer.resize(length + 1);
+    buffer.resize(static_cast<size_t>(length) + 1u);
     va_start(args, format);
-    const int result = std::vsnprintf(&buffer[0], length + 1, format, args);
+    const int result = std::vsnprintf(&buffer[0], static_cast<size_t>(length) + 1u, format, args);
     va_end(args);
     if (result < 0) throw std::runtime_error(format);
     buffer.pop_back();

@@ -39,7 +39,7 @@ typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS,
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
-Graph make_graph(const std::vector<std::vector<double> >& adj_matrix) {
+inline Graph make_graph(const std::vector<std::vector<double> >& adj_matrix) {
     const size_t order = adj_matrix.size();
     std::vector<std::pair<size_t, size_t> > adj_list;
     std::vector<double> weights;
@@ -114,7 +114,7 @@ make_double_writer(const M1& m1, const std::string& key1,
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
-std::ostream& write_graphviz(std::ostream& ost,
+inline std::ostream& write_graphviz(std::ostream& ost,
                  const std::vector<std::vector<double> >& adj_matrix,
                  const size_t frequency=0,
                  const std::vector<std::string>& normal_input={},

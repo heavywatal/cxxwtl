@@ -268,7 +268,7 @@ double var_once(Iter begin_, const Iter end_, const bool unbiased=true) {
         wmean += d / (++n);
         sqsum += (n - 1) * d * d / n;
     }
-    n -= static_cast<int>(unbiased);
+    n -= static_cast<unsigned int>(unbiased);
     return sqsum /= n;
 }
 
@@ -305,14 +305,14 @@ template <class Iter1, class Iter2> inline
 double cov(const Iter1 begin1, const Iter1 end1, const Iter2 begin2, const Iter2 end2, const bool unbiased=true) {
     const double mean_x = mean(begin1, end1);
     const double mean_y = mean(begin2, end2);
-    double x = std::inner_product(begin1, end1, begin2, 0.0, std::plus<double>(),
+    double s = std::inner_product(begin1, end1, begin2, 0.0, std::plus<double>(),
         [&](typename Iter1::value_type x, typename Iter2::value_type y) {
             x -= mean_x;
             y -= mean_y;
             return x *= y;
         }
     );
-    return x /= (std::distance(begin1, end1) - static_cast<int>(unbiased));
+    return s /= (std::distance(begin1, end1) - static_cast<int>(unbiased));
 }
 
 template <class V, class U> inline
