@@ -45,12 +45,12 @@ std::vector<size_t> roulette_select(
     std::vector<size_t> candidates(pop_size);
     std::iota(begin(candidates), end(candidates), 0);
     std::vector<size_t> children;
-    children.reserve(pop_size * 1.1);
+    children.reserve(pop_size);
 
     // elite selection
     if (elites) {
         const auto fittest = std::max_element(fitnesses.begin(), fitnesses.end());
-        children.assign(elites, fittest - fitnesses.begin());
+        children.assign(elites, static_cast<size_t>(fittest - fitnesses.begin()));
     }
 
     // poisson selection
