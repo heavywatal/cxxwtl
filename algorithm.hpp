@@ -14,12 +14,12 @@ namespace wtl {
 
 template <class T> inline
 size_t bisect_left(const std::vector<T>& array, const T val) {
-    return std::lower_bound(array.begin(), array.end(), val) - array.begin();
+    return static_cast<size_t>(std::lower_bound(array.begin(), array.end(), val) - array.begin());
 }
 
 template <class T> inline
 size_t bisect_right(const std::vector<T>& array, const T val) {
-    return std::upper_bound(array.begin(), array.end(), val) - array.begin();
+    return static_cast<size_t>(std::upper_bound(array.begin(), array.end(), val) - array.begin());
 }
 
 template <class T> inline
