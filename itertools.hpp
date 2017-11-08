@@ -54,6 +54,7 @@ class Product final: public Generator<value_type> {
         for (const auto& c: axes_) {this->max_cnt_ *= c.size();}
     }
     ~Product() = default;
+    Product(const Product&) = default;
 
     void reset() {
         pos_ = axes_.size();
@@ -107,6 +108,7 @@ class UniAxes final: public Generator<value_type> {
         for (const auto& c: axes_) {this->max_cnt_ += c.size();}
     }
     ~UniAxes() = default;
+    UniAxes(const UniAxes&) = default;
 
   private:
     virtual void source(typename coro_t::push_type& yield, const size_type skip) override {
@@ -141,6 +143,7 @@ class UniAxis final: public Generator<value_type> {
         this->max_cnt_ = axis_.size();
     }
     ~UniAxis() = default;
+    UniAxis(const UniAxis&) = default;
 
   private:
     virtual void source(typename coro_t::push_type& yield, const size_type skip) override {
