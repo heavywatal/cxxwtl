@@ -22,10 +22,37 @@
 #include <unordered_set>
 #include <algorithm>
 
+namespace wtl {
+
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
+// stream factory
+
+inline std::ofstream
+make_ofs(const std::string& filepath, std::ios_base::openmode mode=std::ios_base::out) {
+    std::ofstream ofs(filepath, mode | std::ios::binary);
+    ofs.exceptions(std::ios::failbit | std::ios::badbit);
+    ofs.precision(std::cout.precision());
+    return ofs;
+}
+
+inline std::ifstream
+make_ifs(const std::string& filepath, std::ios_base::openmode mode=std::ios_base::in) {
+    std::ifstream ifs(filepath, mode | std::ios::binary);
+    ifs.exceptions(std::ios::failbit | std::ios::badbit);
+    return ifs;
+}
+
+inline std::ostringstream
+make_oss(const std::streamsize precision=std::cout.precision(),
+         const std::ios_base::fmtflags fmtfl=std::cout.flags()) {
+    std::ostringstream oss;
+    oss.precision(precision);
+    oss.setf(fmtfl);
+    return oss;
+}
+
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 // prior declaration
-
-namespace wtl {
 
 struct identity {
     template<class T>
@@ -66,7 +93,7 @@ detail::JoinHelper<Iter, Char, Func> join(Iter begin, const Iter end, const Char
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 // global operator<< for containers
 
-namespace std{
+namespace std {
 
 template <class T> inline
 std::ostream& operator<< (std::ostream& ost, const std::valarray<T>& v) {
@@ -157,15 +184,6 @@ detail::JoinHelper<typename T::const_iterator, Char, Func>
 join(const T& v, const Char* delim="\t", Func func=Func()) {
     return detail::JoinHelper<typename T::const_iterator, Char, Func>
         (std::begin(v), std::end(v), delim, func);
-}
-
-inline std::ostringstream
-make_oss(const std::streamsize precision=std::cout.precision(),
-         const std::ios_base::fmtflags fmtfl=std::cout.flags()) {
-    std::ostringstream oss;
-    oss.precision(precision);
-    oss.setf(fmtfl);
-    return oss;
 }
 
 template <class Iter, class Func=identity> inline
@@ -341,60 +359,20 @@ inline std::string iso8601time(const std::string& sep=":") {
 inline std::string iso8601datetime() {return strftime("%FT%T%z");}
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
-// Pythonic fstream wrapper with exceptions and binary mode
+// Reader
 
-class ipfstream: public std::ifstream {
-  public:
-    explicit ipfstream(const std::string& filepath,
-                       const std::ios::openmode mode=std::ios::in)
-        : std::ifstream(filepath, mode | std::ios::binary) {
-        exceptions(std::ios::failbit | std::ios::badbit);
+inline std::vector<std::string> readlines(std::istream& ist) {
+    std::vector<std::string> lines;
+    std::string buffer;
+    while (std::getline(ist, buffer)) {
+        lines.push_back(buffer);
     }
-
-    std::string readline(const char delimiter='\n') {
-        std::string buffer;
-        std::getline(*this, buffer, delimiter);
-        return buffer;
-    }
-
-    std::vector<std::string> readlines(const char delimiter='\n') {
-        std::vector<std::string> lines;
-        std::string buffer;
-        while (std::getline(*this, buffer, delimiter)) {
-            lines.push_back(buffer);
-        }
-        return lines;
-    }
-
-    std::string read(const char delimiter='\0') {return readline(delimiter);}
-};
-
-class opfstream: public std::ofstream {
-  public:
-    explicit opfstream(const std::string& filepath,
-                       const std::ios::openmode mode=std::ios::out)
-        : std::ofstream(filepath, mode | std::ios::binary) {
-        exceptions(std::ios::failbit | std::ios::badbit);
-        precision(std::cout.precision());
-    }
-
-    template <class Iter>
-    opfstream& writelines(Iter begin_, const Iter end_, const char sep='\n') {
-        if (begin_ == end_) return *this;
-        *this << *begin_;
-        while (++begin_ != end_) {*this << sep << *begin_;}
-        return *this;
-    }
-
-    template <class V>
-    opfstream& writelines(const V& lines, const char sep='\n') {
-        return writelines(begin(lines), end(lines), sep);
-    }
-};
+    return lines;
+}
 
 inline std::vector<std::pair<std::string, std::string> >
-read_ini(const std::string& filename) {
-    std::vector<std::string> lines = ipfstream(filename).readlines();
+read_ini(std::istream& ist) {
+    std::vector<std::string> lines = readlines(ist);
     std::vector<std::pair<std::string, std::string> > dst;
     dst.reserve(lines.size());
     for (auto line_: lines) {
@@ -408,9 +386,9 @@ read_ini(const std::string& filename) {
 }
 
 inline std::vector<std::string>
-read_header(std::istream& fin, const char* sep="\t") {
+read_header(std::istream& ist, const char* sep="\t") {
     std::string buffer;
-    std::getline(fin, buffer, '\n');
+    std::getline(ist, buffer, '\n');
     return split(buffer, sep);
 }
 
