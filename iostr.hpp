@@ -2,9 +2,6 @@
 #ifndef WTL_IOSTR_HPP_
 #define WTL_IOSTR_HPP_
 
-#include <cstring>
-#include <cerrno>
-#include <cstdarg>
 #include <ctime>
 
 #include <stdexcept>
@@ -318,24 +315,7 @@ inline std::string replace_all(const std::string& patt, const std::string& repl,
 }
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
-
-inline std::string strprintf(const char* const format, ...) {
-    va_list args;
-    std::string buffer;
-    va_start(args, format);
-    const int length = std::vsnprintf(nullptr, 0, format, args) ;
-    va_end(args);
-    if (length < 0) throw std::runtime_error(format);
-    buffer.resize(static_cast<size_t>(length) + 1u);
-    va_start(args, format);
-    const int result = std::vsnprintf(&buffer[0], static_cast<size_t>(length) + 1u, format, args);
-    va_end(args);
-    if (result < 0) throw std::runtime_error(format);
-    buffer.pop_back();
-    return buffer;
-}
-
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
+// datetime
 
 // default is the same as ctime(): Thu Aug 23 14:55:02 2001
 // which is equivalent to "%a %b %d %T %Y"
