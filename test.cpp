@@ -4,6 +4,7 @@
 #include "demangle.hpp"
 #include "prandom.hpp"
 #include "concurrent.hpp"
+#include "genetic.hpp"
 
 #include <sfmt.hpp> // https://github.com/heavywatal/sfmt-class
 
@@ -70,7 +71,7 @@ inline void test_speed() {HERE;
 }
 
 inline void cxx11_thread() {HERE;
-    const size_t concurrency = std::thread::hardware_concurrency();
+    const unsigned int concurrency = std::thread::hardware_concurrency();
     std::cerr << "std::thread::hardware_concurrency(): "
               << concurrency << std::endl;
     const size_t n = concurrency * 2;
@@ -142,6 +143,51 @@ inline void test_temporal() {HERE;
     std::cout << wtl::round(wtl::lin_spaced(51), 100) << std::endl;
 }
 
+inline void test_genetic() {HERE;
+    const size_t n = 200'000;
+    std::vector<double> fitnesses(n);
+    std::vector<double> children(n);
+
+    for (double& w: fitnesses) {w = wtl::sfmt64().canonical();}
+    wtl::benchmark([&](){
+        for (size_t i=0u; i<10u; ++i) {
+            auto indices = wtl::roulette_select_cxx11(fitnesses, n, wtl::sfmt());
+            children.clear();
+            for (const auto j: indices) {
+                children.push_back(fitnesses[j]);
+            }
+            fitnesses.swap(children);
+        }
+        std::cerr << wtl::mean(fitnesses) << std::endl;
+    });
+
+    for (double& w: fitnesses) {w = wtl::sfmt64().canonical();}
+    wtl::benchmark([&](){
+        for (size_t i=0u; i<10u; ++i) {
+            auto indices = wtl::roulette_select(fitnesses, n, wtl::sfmt());
+            children.clear();
+            for (const auto j: indices) {
+                children.push_back(fitnesses[j]);
+            }
+            fitnesses.swap(children);
+        }
+        std::cerr << wtl::mean(fitnesses) << std::endl;
+    });
+
+    for (double& w: fitnesses) {w = wtl::sfmt64().canonical();}
+    wtl::benchmark([&](){
+        for (size_t i=0u; i<10u; ++i) {
+            std::discrete_distribution<size_t> dist(fitnesses.begin(), fitnesses.end());
+            children.clear();
+            for (size_t j=0u; j<n; ++j) {
+                children.push_back(fitnesses[dist(wtl::sfmt())]);
+            }
+            fitnesses.swap(children);
+        }
+        std::cerr << wtl::mean(fitnesses) << std::endl;
+    });
+}
+
 int main(int argc, char* argv[]) {
     std::ios::sync_with_stdio(false);
     std::cin.tie(0);
@@ -152,7 +198,8 @@ int main(int argc, char* argv[]) {
         // test_integral();
         // test_speed();
         // cxx11_thread();
-        test_thread_pool();
+        // test_thread_pool();
+        test_genetic();
         // test_temporal();
         std::cerr << "EXIT_SUCCESS" << std::endl;
         return EXIT_SUCCESS;

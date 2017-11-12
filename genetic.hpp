@@ -34,6 +34,19 @@ std::vector<size_t> roulette_select(
 }
 
 template <class RNG> inline
+std::vector<size_t> roulette_select_cxx11(
+    const std::vector<double>& fitnesses, const size_t n, RNG& rng) {
+
+    std::discrete_distribution<size_t> dist(fitnesses.begin(), fitnesses.end());
+    std::vector<size_t> indices;
+    indices.reserve(n);
+    for (size_t i=0; i<n; ++i) {
+        indices.push_back(dist(rng));
+    }
+    return indices;
+}
+
+template <class RNG> inline
 std::vector<size_t> roulette_select(
     const std::vector<double>& fitnesses,
     RNG& rng,
