@@ -9,6 +9,7 @@
 #include <chrono>
 #include <vector>
 #include <queue>
+#include <memory>
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 namespace wtl {
@@ -57,6 +58,22 @@ bool is_ready(const std::future<T>& future) {
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
+class BasicTask {
+  public:
+    virtual ~BasicTask() {}
+    virtual void operator()() = 0;
+};
+
+template <typename result_t>
+class Task: public BasicTask {
+  public:
+    Task(std::function<result_t()>&& func): std_task_(func) {}
+    std::future<result_t> get_future() {return std_task_.get_future();}
+    void operator()() override {std_task_();}
+  private:
+    std::packaged_task<result_t()> std_task_;
+};
+
 class ThreadPool {
   public:
     ThreadPool(const size_t n) {
@@ -76,8 +93,18 @@ class ThreadPool {
     template <class Func>
     void submit(Func&& func) {
         std::lock_guard<std::mutex> lck(mutex_);
-        tasks_.push(func);
+        tasks_.push(std::make_unique<Task<void>>(func));
         condition_run_.notify_one();
+    }
+
+    template <class result_t, class Func, class... Args>
+    std::future<result_t> submit(Func&& func, Args&&... args) {
+        std::lock_guard<std::mutex> lck(mutex_);
+        auto task = std::make_unique<Task<result_t>>(std::bind(func, args...));
+        std::future<result_t> ftr = task->get_future();
+        tasks_.push(std::move(task));
+        condition_run_.notify_one();
+        return ftr;
     }
 
     // wait for worker threads to finish all tasks without executing join()
@@ -90,7 +117,7 @@ class ThreadPool {
 
   private:
     void run() {
-        std::function<void()> task;
+        std::unique_ptr<BasicTask> task = nullptr;
         while (true) {
             {
                 std::unique_lock<std::mutex> lck(mutex_);
@@ -104,12 +131,12 @@ class ThreadPool {
                 task = std::move(tasks_.front());
                 tasks_.pop();
             }
-            task();
+            (*task)();
         }
     }
 
     std::vector<std::thread> threads_;
-    std::queue<std::function<void()>> tasks_;
+    std::queue<std::unique_ptr<BasicTask>> tasks_;
     std::mutex mutex_;
     std::condition_variable condition_run_;
     std::condition_variable condition_wait_;

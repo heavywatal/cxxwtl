@@ -118,18 +118,23 @@ inline void cxx11_thread() {HERE;
 
 inline void test_thread_pool() {HERE;
     wtl::ThreadPool pool(2);
+    std::vector<std::future<size_t>> futures;
     for (size_t j=0; j<2ul; ++j) {
         for (size_t i=0; i<4ul; ++i) {
-            pool.submit([i]() {
-                std::this_thread::sleep_for(std::chrono::milliseconds(500));
+            futures.push_back(pool.submit<size_t>([](const size_t i) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(300));
                 std::ostringstream oss;
                 oss << std::this_thread::get_id() << ": " << i << "\n";
                 std::cerr << oss.str() << std::flush;
-            });
+                return i;
+            }, i));
         }
         std::cerr << std::this_thread::get_id() << ": main\n" << std::flush;
         pool.wait();
         std::cerr << std::this_thread::get_id() << ": main\n" << std::flush;
+    }
+    for (auto& f: futures) {
+        std::cout << f.get() << " ";
     }
 }
 
@@ -198,8 +203,8 @@ int main(int argc, char* argv[]) {
         // test_integral();
         // test_speed();
         // cxx11_thread();
-        // test_thread_pool();
-        test_genetic();
+        test_thread_pool();
+        // test_genetic();
         // test_temporal();
         std::cerr << "EXIT_SUCCESS" << std::endl;
         return EXIT_SUCCESS;
