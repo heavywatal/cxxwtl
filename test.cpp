@@ -198,6 +198,7 @@ int main(int argc, char* argv[]) {
     std::cin.tie(0);
     std::cout.precision(16);
     std::cerr.precision(6);
+    std::cout << "__cplusplus: " << __cplusplus << std::endl;
     try {
         std::cerr << wtl::str_join(argv, argv + argc, " ") << std::endl;
         // test_integral();

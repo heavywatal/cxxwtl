@@ -10,6 +10,7 @@
 #include <vector>
 #include <queue>
 #include <memory>
+#include <type_traits>
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 namespace wtl {
@@ -97,11 +98,13 @@ class ThreadPool {
         condition_run_.notify_one();
     }
 
-    // TODO: std::invoke_result since C++17
     template <class Func, class... Args>
-    std::future<std::result_of_t<Func(Args...)>>
-    submit(Func&& func, Args&&... args) {
+    auto submit(Func&& func, Args&&... args) {
+#if __cplusplus >= 201703L
+        using result_t = std::invoke_result_t<Func, Args...>;
+#else
         using result_t = std::result_of_t<Func(Args...)>;
+#endif
         std::lock_guard<std::mutex> lck(mutex_);
         auto task = std::make_unique<Task<result_t>>(std::bind(func, args...));
         std::future<result_t> ftr = task->get_future();
