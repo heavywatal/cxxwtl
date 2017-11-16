@@ -97,8 +97,11 @@ class ThreadPool {
         condition_run_.notify_one();
     }
 
-    template <class result_t, class Func, class... Args>
-    std::future<result_t> submit(Func&& func, Args&&... args) {
+    // TODO: std::invoke_result since C++17
+    template <class Func, class... Args>
+    std::future<typename std::result_of<Func(Args...)>::type>
+    submit(Func&& func, Args&&... args) {
+        using result_t = typename std::result_of<Func(Args...)>::type;
         std::lock_guard<std::mutex> lck(mutex_);
         auto task = std::make_unique<Task<result_t>>(std::bind(func, args...));
         std::future<result_t> ftr = task->get_future();

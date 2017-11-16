@@ -121,7 +121,7 @@ inline void test_thread_pool() {HERE;
     std::vector<std::future<size_t>> futures;
     for (size_t j=0; j<2ul; ++j) {
         for (size_t i=0; i<4ul; ++i) {
-            futures.push_back(pool.submit<size_t>([](const size_t i) {
+            futures.push_back(pool.submit([](const size_t i) {
                 std::this_thread::sleep_for(std::chrono::milliseconds(300));
                 std::ostringstream oss;
                 oss << std::this_thread::get_id() << ": " << i << "\n";
