@@ -30,14 +30,14 @@ size_t bisect(const std::vector<T>& array, const T val) {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
 template<class T> inline
-void rstrip(std::vector<T>* seq, const T& value=T(0)) {
+void rstrip(std::vector<T>* seq, const T& value=T{}) {
     auto rit = std::find_if(seq->rbegin(), seq->rend(),
                            [&](const T& x){return x != value;});
-    seq->resize(seq->rend() - rit);
+    seq->resize(static_cast<size_t>(seq->rend() - rit));
 }
 
 template<class T> inline
-std::vector<T> rstrip(std::vector<T> seq, const T& value=T(0)) {
+std::vector<T> rstrip(std::vector<T> seq, const T& value=T{}) {
     rstrip(&seq, value);
     return seq;
 }
@@ -217,7 +217,7 @@ OutputIter pairwise_transform(const InputIter begin_, const InputIter end_, Outp
 template <class Iter, class BinaryOperator> inline
 std::vector<typename BinaryOperator::result_type> pairwise_transform(const Iter begin_, const Iter end_, BinaryOperator op) {
     const size_t n = std::distance(begin_, end_);
-    const size_t combinations = n * (n - 1) / 2;
+    const size_t combinations = n * (n - 1u) / 2u;
     std::vector<typename BinaryOperator::result_type> result(combinations);
     pairwise_transform(begin_, end_, begin(result), op);
     return result;
