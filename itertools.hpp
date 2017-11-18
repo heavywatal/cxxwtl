@@ -23,6 +23,7 @@ class Generator {
 
     Generator() = default;
     virtual ~Generator() = default;
+    Generator(const Generator&) = default;
 
     size_type count() const {return cnt_;}
     size_type max_count() const {return max_cnt_;}
