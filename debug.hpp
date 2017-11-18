@@ -7,7 +7,6 @@
 #include <cerrno>
 #include <iostream>
 #include <string>
-#include <chrono>
 
 
 #define CERR(...) std::cerr << "\033[1;30m" << __VA_ARGS__ << "\033[0m"
@@ -45,26 +44,6 @@ inline const char* strerror(const std::string& msg="") {
 // overloaded to receive an additional message in std:string
 inline void perror(const std::string& msg="") {
     std::perror(msg.empty() ? nullptr : std::string("\nERROR:\n"+msg).c_str());
-}
-
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
-// speed test
-
-template <typename Time = std::chrono::milliseconds, typename Fn>
-inline Time stopwatch (Fn&& fn) {
-    typedef std::chrono::high_resolution_clock Clock;
-    const auto start = Clock::now();
-    fn();
-    return std::chrono::duration_cast<Time>(Clock::now() - start);
-}
-
-template <class Fn>
-void benchmark(Fn&& fn, const std::string& label="", size_t times=3) {
-    for (; times>0; --times) {
-        const auto t = stopwatch(fn);
-        std::cerr << "#BENCHMARK "
-                  << t.count() << " [ms] " << label << std::endl;
-    }
 }
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////

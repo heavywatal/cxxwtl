@@ -2,8 +2,6 @@
 #ifndef WTL_IOSTR_HPP_
 #define WTL_IOSTR_HPP_
 
-#include <ctime>
-
 #include <iostream>
 #include <sstream>
 #include <fstream>
@@ -124,30 +122,6 @@ inline std::string replace_all(const std::string& patt, const std::string& repl,
     result.append(src, pos_before, src.size()-pos_before);
     return result;
 }
-
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
-// datetime
-
-// default is the same as ctime(): Thu Aug 23 14:55:02 2001
-// which is equivalent to "%a %b %d %T %Y"
-inline std::string strftime(const std::string& format="%c") {
-    char cstr[80];
-    const time_t rawtime = time(nullptr);
-    const struct tm* t = localtime(&rawtime);
-    std::strftime(cstr, sizeof(cstr), format.c_str(), t);
-    return std::string(cstr);
-}
-inline std::string iso8601date(const std::string& sep="-") {
-    std::ostringstream oss;
-    oss << "%Y" << sep << "%m" << sep << "%d";
-    return strftime(oss.str());
-}
-inline std::string iso8601time(const std::string& sep=":") {
-    std::ostringstream oss;
-    oss << "%H" << sep << "%M" << sep << "%S";
-    return strftime(oss.str());
-}
-inline std::string iso8601datetime() {return strftime("%FT%T%z");}
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 // Reader
