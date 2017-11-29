@@ -2,17 +2,56 @@
 #ifndef WTL_RANDOM_HPP_
 #define WTL_RANDOM_HPP_
 
-#include <vector>
+#include <cstdint>
+#include <limits>
 #include <random>
+#include <vector>
 #include <unordered_set>
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 namespace wtl {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
+namespace {
+    union bits64_t {
+        uint64_t as_uint64_t;
+        uint32_t as_uint32_t[2];
+        double as_double;
+
+        bits64_t(uint64_t x): as_uint64_t{x} {}
+        bits64_t(uint32_t x, uint32_t y): as_uint32_t{x, y} {}
+
+        // Use 52 bits to make double [0.0, 1.0)
+        double as_canonical() const {
+            bits64_t exponent_zero = (as_uint64_t >> 2) | 0x3ff0'0000'0000'0000u;
+            return exponent_zero.as_double - 1.0;
+        }
+    };
+}
+
+class random_device_64 {
+  public:
+    typedef uint64_t result_type;
+    static constexpr result_type min() {return 0u;}
+    static constexpr result_type max() {return std::numeric_limits<result_type>::max();}
+
+    result_type operator()() {
+        return bits64_t(std_rd(), std_rd()).as_uint64_t;
+    }
+    double entropy() const noexcept {return std_rd.entropy();}
+  private:
+    std::random_device std_rd;
+};
+
 template <class URBG> inline
 double generate_canonical(URBG& gen) {
-    return std::generate_canonical<double, std::numeric_limits<double>::digits>(gen);
+    if (URBG::max() == std::numeric_limits<uint64_t>::max()) {
+        return bits64_t(gen()).as_canonical();
+    } else if (URBG::max() == std::numeric_limits<uint32_t>::max()) {
+        return bits64_t(gen(), gen()).as_canonical();
+    } else {
+        return std::generate_canonical<double, std::numeric_limits<double>::digits>(gen);
+    }
 }
 
 template <class Iter, class RNG> inline
@@ -225,7 +264,7 @@ inline std::mt19937& mt() {
 }
 
 inline std::mt19937_64& mt64() {
-    static std::mt19937_64 generator(std::random_device{}());
+    static std::mt19937_64 generator(random_device_64{}());
     return generator;
 }
 

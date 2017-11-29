@@ -154,7 +154,7 @@ inline void test_genetic() {HERE;
     std::vector<double> fitnesses(n);
     std::vector<double> children(n);
 
-    for (double& w: fitnesses) {w = wtl::sfmt64().canonical();}
+    for (double& w: fitnesses) {w = wtl::generate_canonical(wtl::sfmt64());}
     wtl::benchmark([&](){
         for (size_t i=0u; i<10u; ++i) {
             auto indices = wtl::roulette_select_cxx11(fitnesses, n, wtl::sfmt());
@@ -167,7 +167,7 @@ inline void test_genetic() {HERE;
         std::cerr << wtl::mean(fitnesses) << std::endl;
     });
 
-    for (double& w: fitnesses) {w = wtl::sfmt64().canonical();}
+    for (double& w: fitnesses) {w = wtl::generate_canonical(wtl::sfmt64());}
     wtl::benchmark([&](){
         for (size_t i=0u; i<10u; ++i) {
             auto indices = wtl::roulette_select(fitnesses, n, wtl::sfmt());
@@ -180,7 +180,7 @@ inline void test_genetic() {HERE;
         std::cerr << wtl::mean(fitnesses) << std::endl;
     });
 
-    for (double& w: fitnesses) {w = wtl::sfmt64().canonical();}
+    for (double& w: fitnesses) {w = wtl::generate_canonical(wtl::sfmt64());}
     wtl::benchmark([&](){
         for (size_t i=0u; i<10u; ++i) {
             std::discrete_distribution<size_t> dist(fitnesses.begin(), fitnesses.end());
