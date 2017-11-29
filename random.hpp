@@ -1,6 +1,6 @@
 #pragma once
-#ifndef WTL_PRANDOM_HPP_
-#define WTL_PRANDOM_HPP_
+#ifndef WTL_RANDOM_HPP_
+#define WTL_RANDOM_HPP_
 
 #include <vector>
 #include <random>
@@ -238,4 +238,4 @@ inline Prandom<std::mt19937>& prandom() {
 } // namespace wtl
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
-#endif /* WTL_PRANDOM_HPP_ */
+#endif /* WTL_RANDOM_HPP_ */
