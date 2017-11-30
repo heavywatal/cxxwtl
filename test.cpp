@@ -53,19 +53,19 @@ inline void test_speed() {HERE;
     size_t trash = 0;
     wtl::benchmark([&](){
         trash += wtl::sample(x, k, wtl::sfmt())[0];
-    });
+    }, "sample");
     std::cerr << trash << std::endl;
     wtl::benchmark([&](){
-        trash += wtl::sample_set(x, k, wtl::sfmt())[0];
-    });
+        trash += wtl::sample_floyd(x, k, wtl::sfmt())[0];
+    }, "sample_floyd");
     std::cerr << trash << std::endl;
     wtl::benchmark([&](){
         trash += wtl::sample_fisher(x, k, wtl::sfmt())[0];
-    });
+    }, "sample_fisher");
     std::cerr << trash << std::endl;
     wtl::benchmark([&](){
         trash += wtl::sample_knuth(x, k, wtl::sfmt())[0];
-    });
+    }, "sample_knuth");
     std::cerr << trash << std::endl;
     x.resize(6);
     std::cerr << x << std::endl;

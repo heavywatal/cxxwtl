@@ -66,27 +66,29 @@ template <class Container, class URBG> inline
 std::vector<typename Container::value_type>
 sample(const Container& src, const size_t k, URBG& engine) {
     const size_t n = src.size();
-    if (100 * k < n) {return sample_set(src, k, engine);}
+    if (100 * k < n) {return sample_floyd(src, k, engine);}
     else if (5 * k < n) {return sample_fisher(src, k, engine);}
     else {return sample_knuth(src, k, engine);}
 }
 
+//! Floyd's algorithm
 //! fast if k << n
 template <class Container, class URBG> inline
 std::vector<typename Container::value_type>
-sample_set(const Container& src, const size_t k, URBG& engine) {
+sample_floyd(const Container& src, const size_t k, URBG& engine) {
     const size_t n = src.size();
     if (n < k) throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + ": n < k");
     std::unordered_set<size_t> existing_indices;
     std::vector<typename Container::value_type> dst;
     dst.reserve(k);
     std::uniform_int_distribution<size_t> uniform(0, n - 1);
-    size_t idx = 0;
-    for (size_t i=0; i<k; ++i) {
-        do {
-            idx = uniform(engine);
-        } while (!std::get<1>(existing_indices.insert(idx)));
-        dst.push_back(src[idx]);
+    for (size_t upper = n - k; upper < n; ++upper) {
+        size_t idx = std::uniform_int_distribution<size_t>(0, upper)(engine);
+        if (existing_indices.insert(idx).second) {
+            dst.push_back(src[idx]);
+        } else {
+            dst.push_back(src[upper]);
+        }
     }
     return dst;
 }
