@@ -54,27 +54,27 @@ double generate_canonical(URBG& gen) {
     }
 }
 
-template <class Iter, class RNG> inline
-Iter choice(Iter begin_, Iter end_, RNG& rng) {
+template <class Iter, class URBG> inline
+Iter choice(Iter begin_, Iter end_, URBG& engine) {
     using diff_t = decltype(std::distance(begin_, end_));
     std::uniform_int_distribution<diff_t> uniform(0, std::distance(begin_, end_) - 1);
-    std::advance(begin_, uniform(rng));
+    std::advance(begin_, uniform(engine));
     return begin_;
 }
 
-template <class Container, class RNG> inline
+template <class Container, class URBG> inline
 std::vector<typename Container::value_type>
-sample(const Container& src, const size_t k, RNG& rng) {
+sample(const Container& src, const size_t k, URBG& engine) {
     const size_t n = src.size();
-    if (100 * k < n) {return sample_set(src, k, rng);}
-    else if (5 * k < n) {return sample_fisher(src, k, rng);}
-    else {return sample_knuth(src, k, rng);}
+    if (100 * k < n) {return sample_set(src, k, engine);}
+    else if (5 * k < n) {return sample_fisher(src, k, engine);}
+    else {return sample_knuth(src, k, engine);}
 }
 
 //! fast if k << n
-template <class Container, class RNG> inline
+template <class Container, class URBG> inline
 std::vector<typename Container::value_type>
-sample_set(const Container& src, const size_t k, RNG& rng) {
+sample_set(const Container& src, const size_t k, URBG& engine) {
     const size_t n = src.size();
     if (n < k) throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + ": n < k");
     std::unordered_set<size_t> existing_indices;
@@ -84,7 +84,7 @@ sample_set(const Container& src, const size_t k, RNG& rng) {
     size_t idx = 0;
     for (size_t i=0; i<k; ++i) {
         do {
-            idx = uniform(rng);
+            idx = uniform(engine);
         } while (!std::get<1>(existing_indices.insert(idx)));
         dst.push_back(src[idx]);
     }
@@ -93,15 +93,15 @@ sample_set(const Container& src, const size_t k, RNG& rng) {
 
 //! Fisher-Yates algorithm; Durstenfeld; Knuth's P
 //! consistently fast; note that whole src is copied first
-template <class Container, class RNG> inline
+template <class Container, class URBG> inline
 std::vector<typename Container::value_type>
-sample_fisher(const Container& src, const size_t k, RNG& rng) {
+sample_fisher(const Container& src, const size_t k, URBG& engine) {
     std::vector<typename Container::value_type> dst(std::begin(src), std::end(src));
     const size_t n = dst.size();
     if (n < k) throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + ": n < k");
     const size_t last = n - 1;
     for (size_t i=0; i<k; ++i) {
-        std::swap(dst[std::uniform_int_distribution<size_t>(i, last)(rng)], dst[i]);
+        std::swap(dst[std::uniform_int_distribution<size_t>(i, last)(engine)], dst[i]);
     }
     dst.resize(k);
     return dst;
@@ -110,9 +110,9 @@ sample_fisher(const Container& src, const size_t k, RNG& rng) {
 //! Knuth's algorithm S
 //! fast if k / n is large
 //! The order is not random
-template <class Container, class RNG> inline
+template <class Container, class URBG> inline
 std::vector<typename Container::value_type>
-sample_knuth(const Container& src, const size_t k, RNG& rng) {
+sample_knuth(const Container& src, const size_t k, URBG& engine) {
     const size_t n = src.size();
     if (n < k) throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + ": n < k");
     std::vector<typename Container::value_type> dst;
@@ -123,8 +123,8 @@ sample_knuth(const Container& src, const size_t k, RNG& rng) {
     }
     std::uniform_int_distribution<size_t> uniform(0, k - 1);
     while (i < n) {
-        if (std::bernoulli_distribution((1.0 / ++i) * k)(rng)) {
-            dst[uniform(rng)] = src[i - 1];
+        if (std::bernoulli_distribution((1.0 / ++i) * k)(engine)) {
+            dst[uniform(engine)] = src[i - 1];
         }
     }
     return dst;
@@ -132,7 +132,7 @@ sample_knuth(const Container& src, const size_t k, RNG& rng) {
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
-//! Pythonic RNG object
+//! Pythonic engine object
 template <class Generator>
 class Prandom{
   public:
