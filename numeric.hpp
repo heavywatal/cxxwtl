@@ -96,6 +96,10 @@ cast(const std::valarray<U>& x) {
     return y;
 }
 
+inline ptrdiff_t count(const std::valarray<bool>& x) {
+    return std::count_if(std::begin(x), std::end(x), [](bool b){return b;});
+}
+
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 // for std::vector
 
