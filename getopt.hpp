@@ -16,6 +16,9 @@ ost_any(std::ostream& ost, const boost::any& value) {
     else if (value.type() == typeid(unsigned int)) {
         ost << boost::any_cast<unsigned int>(value);
     }
+    else if (value.type() == typeid(ptrdiff_t)) {
+        ost << boost::any_cast<ptrdiff_t>(value);
+    }
     else if (value.type() == typeid(size_t)) {
         ost << boost::any_cast<size_t>(value);
     }
