@@ -15,16 +15,23 @@ Personal C++ header library
 - `eigen.hpp` uses [Eigen](https://eigen.tuxfamily.org/)
 
 
-### Installation and Usage
+### Installation
 
-You can put the header files anywhere you want.
-For example, I usually clone them into `~/local/include/wtl`.
-It is consistent with the namespace `wtl` in which most of functions and classes are defined.
+I recommend using [CMake](https://cmake.org).
 
 ```sh
-% cd ~/local/include/
-% git clone https://github.com/heavywatal/cxxwtl.git wtl
+% # brew install cmake
+% git clone https://github.com/heavywatal/cxxwtl.git
+% cd cxxwtl/
+% mkdir build && cd build/
+% YOUR_PREFIX=${HOME}/local  # or /usr/local
+% cmake -DCMAKE_INSTALL_PREFIX=$YOUR_PREFIX ..
+% cmake --build . --target install
 ```
+
+Alternatively, you can just copy the header files, or clone the repository into `${YOUR_PREFIX}/include/wtl`.
+
+### Usage
 
 ```c++
 // example.cpp
