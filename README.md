@@ -17,19 +17,23 @@ Personal C++ header library
 
 ### Installation
 
-I recommend using [CMake](https://cmake.org).
-
+The easiest way is to use [Homebrew](https://brew.sh/)/[Linuxbrew](http://linuxbrew.sh/):
 ```sh
-% # brew install cmake
+% brew tap heavywatal/tap
+% brew install cxxwtl --HEAD
+```
+
+Alternatively, you can get the source code from GitHub manually:
+```sh
 % git clone https://github.com/heavywatal/cxxwtl.git
 % cd cxxwtl/
 % mkdir build && cd build/
 % YOUR_PREFIX=${HOME}/local  # or /usr/local
 % cmake -DCMAKE_INSTALL_PREFIX=$YOUR_PREFIX ..
-% cmake --build . --target install
+% make install
 ```
 
-Alternatively, you can just copy the header files, or clone the repository into `${YOUR_PREFIX}/include/wtl`.
+You can also just copy the header files, or clone the repository directly into `${YOUR_PREFIX}/include/wtl`.
 
 ### Usage
 
