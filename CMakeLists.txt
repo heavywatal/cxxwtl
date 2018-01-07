@@ -20,7 +20,7 @@ install(DIRECTORY "./"
 )
 
 add_library(${PROJECT_NAME} INTERFACE)
-target_include_directories(${PROJECT_NAME} INTERFACE
+include_directories(${PROJECT_NAME}
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
   $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
 )
@@ -29,3 +29,6 @@ install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}-config)
 install(EXPORT ${PROJECT_NAME}-config
   DESTINATION share/${PROJECT_NAME}
 )
+
+enable_testing()
+add_subdirectory(test)
