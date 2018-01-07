@@ -19,8 +19,7 @@ Personal C++ header library
 
 The easiest way is to use [Homebrew](https://brew.sh/)/[Linuxbrew](http://linuxbrew.sh/):
 ```sh
-% brew tap heavywatal/tap
-% brew install cxxwtl --HEAD
+% brew install --HEAD heavywatal/tap/cxxwtl
 ```
 
 Alternatively, you can get the source code from GitHub manually:
