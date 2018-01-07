@@ -62,29 +62,6 @@ Iter choice(Iter begin_, Iter end_, URBG& engine) {
     return begin_;
 }
 
-//! sample integers from [0, n) without replacement
-template <class T, class URBG> inline
-std::unordered_set<T> sample(const T n, const T k, URBG& engine) {
-    if (n < k) throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + ": n < k");
-    std::unordered_set<T> existing_indices;
-    for (T upper = n - k; upper < n; ++upper) {
-        T x = std::uniform_int_distribution<T>(0, upper)(engine);
-        if (!existing_indices.insert(x).second) {
-            existing_indices.insert(upper);
-        }
-    }
-    return existing_indices;
-}
-
-template <class Container, class URBG> inline
-std::vector<typename Container::value_type>
-sample(const Container& src, const size_t k, URBG& engine) {
-    const size_t n = src.size();
-    if (100 * k < n) {return sample_floyd(src, k, engine);}
-    else if (5 * k < n) {return sample_fisher(src, k, engine);}
-    else {return sample_knuth(src, k, engine);}
-}
-
 //! Floyd's algorithm
 //! fast if k << n
 template <class Container, class URBG> inline
@@ -144,6 +121,29 @@ sample_knuth(const Container& src, const size_t k, URBG& engine) {
         }
     }
     return dst;
+}
+
+//! sample integers from [0, n) without replacement
+template <class T, class URBG> inline
+std::unordered_set<T> sample(const T n, const T k, URBG& engine) {
+    if (n < k) throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + ": n < k");
+    std::unordered_set<T> existing_indices;
+    for (T upper = n - k; upper < n; ++upper) {
+        T x = std::uniform_int_distribution<T>(0, upper)(engine);
+        if (!existing_indices.insert(x).second) {
+            existing_indices.insert(upper);
+        }
+    }
+    return existing_indices;
+}
+
+template <class Container, class URBG> inline
+std::vector<typename Container::value_type>
+sample(const Container& src, const size_t k, URBG& engine) {
+    const size_t n = src.size();
+    if (100 * k < n) {return sample_floyd(src, k, engine);}
+    else if (5 * k < n) {return sample_fisher(src, k, engine);}
+    else {return sample_knuth(src, k, engine);}
 }
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
