@@ -40,8 +40,18 @@ inline void set_SIGINT_handler() {
     });
 }
 
+class AssertionError: public std::runtime_error {
+  public:
+    AssertionError(const std::string& message):
+      std::runtime_error("\nAssertionError:\n" + message) {}
+};
+
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 } // namespace wtl
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
+
+#define ASSERT_THAT(EXPR) if (!(EXPR)) {\
+    throw AssertionError(std::string(__FILE__) + ":" + std::to_string(__LINE__) + ": " + #EXPR);\
+}
 
 #endif // WTL_EXCEPTION_HPP_
