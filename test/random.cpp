@@ -3,6 +3,8 @@
 #include "chrono.hpp"
 #include "iostr.hpp"
 
+#include <functional>
+
 int main() {
     constexpr size_t n = 2 * 1000 * 1000;
     std::vector<size_t> x(n);

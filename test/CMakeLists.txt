@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.1)
 
 set(CMAKE_CXX_FLAGS "-DNDEBUG -O3 -march=native -Wall -Wextra -Wpedantic")
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+endif()
 include_directories(/usr/local/include)
 link_directories(/usr/local/lib)
 
