@@ -1,49 +1,28 @@
 #include "genetic.hpp"
 #include "random.hpp"
-#include "chrono.hpp"
-#include "iostr.hpp"
+#include "exception.hpp"
+
+#include <iostream>
 
 int main() {
-    const size_t n = 200'000;
-    std::vector<double> fitnesses(n);
-    std::vector<double> children(n);
-
-    for (double& w: fitnesses) {w = wtl::generate_canonical(wtl::mt64());}
-    wtl::benchmark([&](){
-        for (size_t i=0u; i<10u; ++i) {
-            auto indices = wtl::roulette_select_cxx11(fitnesses, n, wtl::mt64());
-            children.clear();
-            for (const auto j: indices) {
-                children.push_back(fitnesses[j]);
-            }
-            fitnesses.swap(children);
+    constexpr size_t num_generations = 8u;
+    constexpr size_t popsize = 10'000u;
+    std::vector<double> fitnesses(popsize);
+    std::vector<double> children(popsize);
+    for (double& w: fitnesses) {
+        w = wtl::generate_canonical(wtl::mt64());
+    }
+    const double mean_fitness_start = wtl::mean(fitnesses);
+    std::cout << mean_fitness_start << std::endl;
+    for (size_t i=0u; i<num_generations; ++i) {
+        auto indices = wtl::roulette_select(fitnesses, popsize, wtl::mt64());
+        children.clear();
+        for (const auto j: indices) {
+            children.push_back(fitnesses[j]);
         }
-        std::cerr << wtl::mean(fitnesses) << std::endl;
-    });
-
-    for (double& w: fitnesses) {w = wtl::generate_canonical(wtl::mt64());}
-    wtl::benchmark([&](){
-        for (size_t i=0u; i<10u; ++i) {
-            auto indices = wtl::roulette_select(fitnesses, n, wtl::mt64());
-            children.clear();
-            for (const auto j: indices) {
-                children.push_back(fitnesses[j]);
-            }
-            fitnesses.swap(children);
-        }
-        std::cerr << wtl::mean(fitnesses) << std::endl;
-    });
-
-    for (double& w: fitnesses) {w = wtl::generate_canonical(wtl::mt64());}
-    wtl::benchmark([&](){
-        for (size_t i=0u; i<10u; ++i) {
-            std::discrete_distribution<size_t> dist(fitnesses.begin(), fitnesses.end());
-            children.clear();
-            for (size_t j=0u; j<n; ++j) {
-                children.push_back(fitnesses[dist(wtl::mt64())]);
-            }
-            fitnesses.swap(children);
-        }
-        std::cerr << wtl::mean(fitnesses) << std::endl;
-    });
+        fitnesses.swap(children);
+        std::cout << wtl::mean(fitnesses) << std::endl;
+    }
+    ASSERT_THAT(wtl::mean(fitnesses) > mean_fitness_start);
+    return 0;
 }
