@@ -51,7 +51,7 @@ class AssertionError: public std::runtime_error {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
 #define ASSERT_THAT(EXPR) if (!(EXPR)) {\
-    throw AssertionError(std::string(__FILE__) + ":" + std::to_string(__LINE__) + ": " + #EXPR);\
+    throw wtl::AssertionError(std::string(__FILE__) + ":" + std::to_string(__LINE__) + ": " + #EXPR);\
 }
 
 #endif // WTL_EXCEPTION_HPP_
