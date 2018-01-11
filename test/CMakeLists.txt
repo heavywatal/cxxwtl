@@ -1,23 +1,18 @@
-cmake_minimum_required(VERSION 3.1)
+include_directories($<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}>)
 
-set(CMAKE_CXX_FLAGS "-DNDEBUG -O3 -march=native -Wall -Wextra -Wpedantic")
+add_compile_options(-DNDEBUG -O3 -march=native -Wall -Wextra -Wpedantic)
+
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+  link_libraries(pthread)
 endif()
-include_directories(/usr/local/include)
-link_directories(/usr/local/lib)
 
-add_executable(test-concurrent concurrent.cpp)
-add_test(NAME concurrent COMMAND $<TARGET_FILE:test-concurrent>)
+macro(add_test_named name)
+  add_executable(test-${name} ${name}.cpp)
+  add_test(NAME ${name} COMMAND $<TARGET_FILE:test-${name}>)
+endmacro()
 
-add_executable(test-genetic genetic.cpp)
-add_test(NAME genetic COMMAND $<TARGET_FILE:test-genetic>)
-
-add_executable(test-iostr iostr.cpp)
-add_test(NAME iostr COMMAND $<TARGET_FILE:test-iostr>)
-
-add_executable(test-numeric numeric.cpp)
-add_test(NAME numeric COMMAND $<TARGET_FILE:test-numeric>)
-
-add_executable(test-random random.cpp)
-add_test(NAME random COMMAND $<TARGET_FILE:test-random>)
+add_test_named(concurrent)
+add_test_named(genetic)
+add_test_named(iostr)
+add_test_named(numeric)
+add_test_named(random)
