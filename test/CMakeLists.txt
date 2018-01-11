@@ -1,4 +1,7 @@
-include_directories($<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}>)
+include_directories(
+  $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}>
+  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+)
 
 add_compile_options(-DNDEBUG -O3 -march=native -Wall -Wextra -Wpedantic)
 
