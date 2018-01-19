@@ -40,7 +40,7 @@ Approx<T> approx(const T value) {return Approx<T>(value);}
 // Generage valarray with equally spaced values
 inline std::valarray<double>
 lin_spaced(const size_t size, const double low=0.0, const double high=1.0) {
-    const double step = (high - low) / (size - 1);
+    const double step = (high - low) / (size - 1u);
     std::valarray<double> x(step, size);
     for (size_t i=0; i<size; ++i) {
         x[i] *= i;
@@ -50,7 +50,7 @@ lin_spaced(const size_t size, const double low=0.0, const double high=1.0) {
 
 // Imperfect but convenient rounding
 inline std::valarray<double>
-round(const std::valarray<double>& x, const double precision=1) {
+round(const std::valarray<double>& x, const double precision=1.0) {
     return (x * precision).apply(std::round) / precision;
 }
 
@@ -66,7 +66,7 @@ row_sums(const std::vector<std::valarray<T>>& matrix) {
 
 template <class T> inline std::valarray<T>
 col_sums(const std::vector<std::valarray<T>>& matrix) {
-    const size_t ncol = matrix.at(0).size();
+    const size_t ncol = matrix.at(0u).size();
     std::valarray<T> sums(ncol);
     for (const auto& row: matrix) {
         sums += row;
@@ -97,9 +97,9 @@ cast(const std::valarray<U>& x) {
 }
 
 inline size_t count(const std::valarray<bool>& x) {
-    return std::accumulate(std::begin(x), std::end(x), 0u,
+    return std::accumulate(std::begin(x), std::end(x), 0ul,
       [](size_t x, bool b) {
-          if (b) {return x + 1;} else {return x;}
+          if (b) {return ++x;} else {return x;}
       });
 }
 
@@ -181,9 +181,9 @@ double geomean(const V& v) {
 template <class RandIter> inline
 double median(const RandIter begin_, const RandIter end_) {
     const size_t n = std::distance(begin_, end_);
-    const RandIter mid = begin_ + (n >> 1); // larger one if n is even
+    const RandIter mid = begin_ + (n / 2u); // larger one if n is even
     std::nth_element(begin_, mid, end_);
-    if (n&1) { // n is odd if the first bit is 1
+    if (n & 1) { // n is odd if the first bit is 1
         return *mid;
     } else {
         std::nth_element(begin_, mid - 1, end_);
@@ -273,7 +273,7 @@ double var_once(Iter begin_, const Iter end_, const bool unbiased=true) {
         double d = *begin_;
         d -= wmean;
         wmean += d / (++n);
-        sqsum += (n - 1) * d * d / n;
+        sqsum += (n - 1u) * d * d / n;
     }
     n -= static_cast<unsigned int>(unbiased);
     return sqsum /= n;
@@ -297,9 +297,9 @@ template <class Iter> inline
 double sem(const Iter begin_, const Iter end_, const size_t& N=0) {
     const size_t n(std::distance(begin_, end_));
     double fpc(1.0);
-    if (N) {
+    if (N > 0u) {
         if (N < n) {throw std::range_error("N<n in sem()");}
-        fpc = (N - n) * (1.0 / (N - 1));
+        fpc = (N - n) * (1.0 / (N - 1u));
     }
     return std::sqrt(fpc * var(begin_, end_) / n);
 }
@@ -442,7 +442,7 @@ typename V::value_type squared_euclidean(const V& v, const U& u) {
 // Simpson Diversity D
 template <class V> inline
 double simpson_diversity(const V& v) {
-    const double square1_N = pow(1.0 / sum(v), 2);
+    const double square1_N = std::pow(1.0 / sum(v), 2);
     double d = 0.0;
     for (const auto& x: v) {
         auto tmp = square1_N;
@@ -456,7 +456,7 @@ double simpson_diversity(const V& v) {
 // Shannon's diversity H'
 template <class V> inline
 double shannon_diversity(const V& v) {
-    if (v.size() < 2) {return 0.0;}
+    if (v.size() < 2u) {return 0.0;}
     typename V::value_type n = 0;
     double nlogn = 0.0;
     for (const auto& n_i: v) {
@@ -473,8 +473,8 @@ double shannon_diversity(const V& v) {
 template <class Matrix> inline
 Matrix transpose(const Matrix& A) {
     const size_t nrow = A.size();
-    if (nrow == 0) return A;
-    const size_t ncol = A[0].size();
+    if (nrow == 0u) return A;
+    const size_t ncol = A[0u].size();
     Matrix out(ncol, typename Matrix::value_type(nrow));
     for (size_t row=0; row<nrow; ++row) {
         for (size_t col=0; col<ncol; ++col) {

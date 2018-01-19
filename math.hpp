@@ -16,11 +16,11 @@ constexpr T pow(T base, unsigned int exponent) noexcept {
 
 // factorial at compile time
 constexpr unsigned int factorial(unsigned int n) {
-    return n ? (n * factorial(n - 1)) : 1;
+    return n ? (n * factorial(n - 1u)) : 1u;
 }
 
 constexpr unsigned int permut(unsigned int n, unsigned int r) {
-    return r ? (n * permut(n - 1, --r)) : 1;
+    return r ? (n * permut(n - 1u, --r)) : 1u;
 }
 
 constexpr unsigned int choose(unsigned int n, unsigned int r) {
@@ -100,11 +100,6 @@ class Tanh {
   private:
     const double a_;
 };
-
-// 2^n?
-inline constexpr bool is_power_of_two(const int& num) {
-    return num && !(num & (num - 1));
-}
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 } // namespace wtl
