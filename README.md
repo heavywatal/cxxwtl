@@ -6,7 +6,6 @@ Personal C++ header library
 ### Dependency
 
 - C++14 compiler
-- `bmath.hpp` uses [boost::math](http://www.boost.org/doc/libs/release/libs/math/doc/)
 - `filesystem.hpp` uses [boost::filesystems](http://www.boost.org/doc/libs/release/libs/filesystem/doc/)
 - `zfstream.hpp` uses [boost::iostreams](http://www.boost.org/doc/libs/release/libs/iostreams/doc/)
 - `itertools.hpp` uses [boost::coroutine2](http://www.boost.org/doc/libs/release/libs/coroutine2/doc/html/)

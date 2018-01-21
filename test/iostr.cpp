@@ -1,15 +1,16 @@
 #include "iostr.hpp"
-#include "demangle.hpp"
 
 int main(int argc, char* argv[]) {
     std::cout << "__cplusplus: " << __cplusplus << std::endl;
-    try {
-        std::cerr << wtl::str_join(argv, argv + argc, " ") << std::endl;
-        std::cerr << "EXIT_SUCCESS" << std::endl;
-        return EXIT_SUCCESS;
+    std::cout << wtl::str_join(argv, argv + argc, " ") << std::endl;
+    std::vector<int> v;
+    std::map<int, double> m;
+    v.reserve(6);
+    for (int i=0; i<6; ++i) {
+        v.push_back(i);
+        m[i] = 0.5 * i;
     }
-    catch (const std::exception& e) {
-        std::cerr << "\n" << wtl::typestr(e) << ": " << e.what() << std::endl;
-    }
-    return EXIT_FAILURE;
+    std::cout << v << std::endl;
+    std::cout << m << std::endl;
+    return 0;
 }
