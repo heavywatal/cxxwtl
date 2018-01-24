@@ -6,7 +6,8 @@ Personal C++ header library
 ### Dependency
 
 - C++14 compiler
-- `filesystem.hpp` uses [boost::filesystems](http://www.boost.org/doc/libs/release/libs/filesystem/doc/)
+- CMake
+- `filesystem.hpp` uses [boost::filesystem](http://www.boost.org/doc/libs/release/libs/filesystem/doc/)
 - `zfstream.hpp` uses [boost::iostreams](http://www.boost.org/doc/libs/release/libs/iostreams/doc/)
 - `itertools.hpp` uses [boost::coroutine2](http://www.boost.org/doc/libs/release/libs/coroutine2/doc/html/)
 - `getopt.hpp` uses [boost::program_options](http://www.boost.org/doc/libs/release/libs/program_options/doc/)
@@ -21,17 +22,18 @@ The easiest way is to use [Homebrew](https://brew.sh/)/[Linuxbrew](http://linuxb
 % brew install heavywatal/tap/cxxwtl
 ```
 
-Alternatively, you can get the source code from GitHub manually:
+Alternatively, you can get the source code from GitHub, and install it with CMake:
 ```sh
 % git clone https://github.com/heavywatal/cxxwtl.git
 % cd cxxwtl/
-% mkdir build && cd build/
-% YOUR_PREFIX=${HOME}/local  # or /usr/local
-% cmake -DCMAKE_INSTALL_PREFIX=$YOUR_PREFIX ..
+% mkdir build
+% cd build/
+% cmake -DCMAKE_INSTALL_PREFIX=${HOME}/local ..
 % make install
 ```
+Header files are installed to `${CMAKE_INSTALL_PREFIX}/include/wtl/`.
+This library can be used with `find_package()` from other CMake projects.
 
-You can also just copy the header files, or clone the repository directly into `${YOUR_PREFIX}/include/wtl`.
 
 ### Usage
 
@@ -42,13 +44,14 @@ You can also just copy the header files, or clone the repository directly into `
 
 int main() {
     std::cout << wtl::factorial(5) << std::endl;
+    return 0;
 }
 ```
 
 Additional include path can be specified with `-I` option or `CPATH` environment variable.
 
 ```sh
-% clang++ -O2 -Wall -Wextra -std=c++14 -I${HOME}/local/include example.cpp
+% clang++ -std=c++14 -O2 -Wall -Wextra -Wpedantic -I${HOME}/local/include example.cpp
 % ./a.out
 120
 ```
