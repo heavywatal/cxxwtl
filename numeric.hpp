@@ -14,25 +14,23 @@
 namespace wtl {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
-template <class T> inline
-bool approx(const T x, const T y) {
-    return std::abs(x - y) <
-           std::numeric_limits<T>::epsilon() * (std::abs(x) + std::abs(y));
+inline bool approx(double x, double y, double epsilon) {
+    return std::abs(x - y) < epsilon;
 }
 
-template <class T>
+inline bool approx(double x, double y) {
+    return approx(x, y, std::numeric_limits<double>::epsilon() * (std::abs(x) + std::abs(y)));
+}
+
 class Approx {
   public:
-    Approx(const T value): value_(value) {}
-    bool operator()(const T x) const {
-        return approx<T>(x, value_);
+    Approx(double value): value_(value) {}
+    bool operator()(double x) const {
+        return approx(x, value_);
     }
   private:
-    const T value_;
+    const double value_;
 };
-
-template <class T> inline
-Approx<T> approx(const T value) {return Approx<T>(value);}
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 // for std::valarray
