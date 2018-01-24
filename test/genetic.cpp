@@ -23,6 +23,6 @@ int main() {
         fitnesses.swap(children);
         std::cout << wtl::mean(fitnesses) << std::endl;
     }
-    ASSERT_THAT(wtl::mean(fitnesses) > mean_fitness_start);
+    WTL_ASSERT(wtl::mean(fitnesses) > mean_fitness_start);
     return 0;
 }
