@@ -12,5 +12,6 @@ int main(int argc, char* argv[]) {
     }
     std::cout << v << std::endl;
     std::cout << m << std::endl;
+    std::cout << wtl::setfill0w(3) << 7u << std::endl;
     return 0;
 }

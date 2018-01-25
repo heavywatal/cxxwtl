@@ -46,6 +46,34 @@ make_oss(const std::streamsize precision=std::cout.precision(),
 }
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
+// stream manipulator
+
+namespace detail {
+  template <typename CharT>
+  class SetFillW {
+    public:
+      SetFillW(CharT ch, std::streamsize width): ch_(ch), width_(width) {}
+      friend std::ostream& operator<<(std::ostream& ost, const SetFillW<CharT>& x) {
+          ost.fill(x.ch_);
+          ost.width(x.width_);
+          return ost;
+      }
+    private:
+      const CharT ch_;
+      const std::streamsize width_;
+  };
+} // namespace detail
+
+template <typename CharT>
+inline detail::SetFillW<CharT> setfillw(CharT fill, std::streamsize width) {
+    return detail::SetFillW<CharT>(fill, width);
+}
+
+inline detail::SetFillW<char> setfill0w(std::streamsize width) {
+    return detail::SetFillW<char>('0', width);
+}
+
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 // std::string manipulation
 
 inline std::vector<std::string> split_algorithm(const std::string& src, const std::string& delimiter=" \t\n") {
