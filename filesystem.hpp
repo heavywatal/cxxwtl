@@ -14,17 +14,17 @@ namespace fs = boost::filesystem;
 
 class ChDir {
   public:
-    ChDir(const fs::path& dst, const bool mkdir=false) {HERE;
+    ChDir(const fs::path& dst, const bool mkdir=false) {
         if (dst.empty() || dst == ".") return;
         if (mkdir) {
             fs::create_directory(dst);
         }
         fs::current_path(dst);
-        DCERR("pwd: " << fs::current_path() << std::endl);
+        DCERR("cd " << fs::current_path().string() << "\n");
     }
-    ~ChDir() {HERE;
+    ~ChDir() {
         fs::current_path(origin_);
-        DCERR("pwd: " << fs::current_path() << std::endl);
+        DCERR("cd " << fs::current_path().string() << "\n");
     }
   private:
     const fs::path origin_ = fs::current_path();
