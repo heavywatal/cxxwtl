@@ -3,11 +3,7 @@
 #define WTL_DEBUG_HPP_
 
 #include <cstdio>
-#include <cstring>
-#include <cerrno>
 #include <iostream>
-#include <string>
-
 
 #define CERR(...) std::cerr << "\033[1;30m" << __VA_ARGS__ << "\033[0m"
 
@@ -22,33 +18,5 @@
 #define FILE_LINE_PRETTY __FILE__<<':'<<__LINE__<<':'<<__PRETTY_FUNCTION__
 #define FLPF CERR(FILE_LINE_PRETTY << std::endl)
 #define HERE DCERR(FILE_LINE_PRETTY << std::endl)
-
-#define DQUOTE(s) # s
-#define CONCATENATE(x, y) x ## y
-
-
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
-namespace wtl {
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
-
-inline const char* strerror(const std::string& msg="") {
-    if (msg.empty()) {
-        return std::strerror(errno);
-    } else {
-        static const std::string s(msg + ": " + std::strerror(errno));
-        return s.c_str();
-    }
-}
-
-// std::cerr << std::strerror(errno);
-// overloaded to receive an additional message in std:string
-inline void perror(const std::string& msg="") {
-    std::perror(msg.empty() ? nullptr : std::string("\nERROR:\n"+msg).c_str());
-}
-
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
-} // namespace wtl
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
-
 
 #endif // WTL_DEBUG_HPP_
