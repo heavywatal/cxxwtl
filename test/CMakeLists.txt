@@ -1,8 +1,3 @@
-include_directories(
-  $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}>
-  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
-)
-
 if(CMAKE_BUILD_TYPE MATCHES Debug)
   add_compile_options(-g)
 else()
@@ -10,6 +5,7 @@ else()
 endif()
 add_compile_options(-O3 -march=native -Wall -Wextra -Wpedantic)
 
+link_libraries(wtl)
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
   link_libraries(pthread)
 endif()
