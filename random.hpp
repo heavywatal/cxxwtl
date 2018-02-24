@@ -22,9 +22,10 @@ namespace {
         bits64_t(uint32_t x, uint32_t y): as_uint32_t{x, y} {}
 
         // Use 52 bits to make double [0.0, 1.0)
-        double as_canonical() const {
-            bits64_t exponent_zero = (as_uint64_t >> 2) | 0x3ff0'0000'0000'0000u;
-            return exponent_zero.as_double - 1.0;
+        double as_canonical() {
+            as_uint64_t >>= 2;
+            as_uint64_t |= 0x3ff0'0000'0000'0000u;
+            return as_double -= 1.0;
         }
     };
 }
