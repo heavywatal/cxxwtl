@@ -1,9 +1,10 @@
-if(CMAKE_BUILD_TYPE MATCHES Debug)
-  add_compile_options(-g)
-else()
-  add_definitions(-DNDEBUG)
+add_compile_options(-march=native -Wall -Wextra -Wpedantic)
+
+if (NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release)
 endif()
-add_compile_options(-O3 -march=native -Wall -Wextra -Wpedantic)
+message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
+set(CMAKE_CXX_FLAGS_DEV "-O2 -g")
 
 link_libraries(wtl)
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
