@@ -37,7 +37,7 @@ class Approx {
 
 // Generage valarray with equally spaced values
 inline std::valarray<double>
-lin_spaced(const size_t size, const double low=0.0, const double high=1.0) {
+lin_spaced(size_t size, double low=0.0, double high=1.0) {
     const double step = (high - low) / (size - 1u);
     std::valarray<double> x(step, size);
     for (size_t i=0; i<size; ++i) {
@@ -48,7 +48,7 @@ lin_spaced(const size_t size, const double low=0.0, const double high=1.0) {
 
 // Imperfect but convenient rounding
 inline std::valarray<double>
-round(const std::valarray<double>& x, const double precision=1.0) {
+round(const std::valarray<double>& x, double precision=1.0) {
     return (x * precision).apply(std::round) / precision;
 }
 
@@ -113,7 +113,7 @@ T partial_sum(const T& v) {
 
 // Generate integer vector with increasing values
 template <class T=size_t> inline
-typename std::vector<T> seq_len(const size_t size, const T init=0) {
+typename std::vector<T> seq_len(size_t size, T init=0) {
     typename std::vector<T> v(size);
     std::iota(std::begin(v), std::end(v), init);
     return v;
@@ -194,7 +194,7 @@ double median(V* v) {return median(v->begin(), v->end());}
 
 // deviation squares
 template <class Iter> inline
-typename Iter::value_type devsq(Iter begin_, const Iter end_, const typename Iter::value_type& theta=0) {
+typename Iter::value_type devsq(Iter begin_, const Iter end_, typename Iter::value_type theta=0) {
     typename Iter::value_type result = 0;
     for (; begin_!=end_; ++begin_) {
         auto tmp = *begin_;
@@ -205,19 +205,19 @@ typename Iter::value_type devsq(Iter begin_, const Iter end_, const typename Ite
     return result;
 }
 template <class V> inline
-typename V::value_type devsq(const V& v, const typename V::value_type& theta=0) {
+typename V::value_type devsq(const V& v, typename V::value_type theta=0) {
     return devsq(begin(v), end(v), theta);
 }
 
 
 // mean square deviation
 template <class Iter> inline
-double qmean(const Iter begin_, const Iter end_, const typename Iter::value_type& theta=0) {
+double qmean(const Iter begin_, const Iter end_, typename Iter::value_type theta=0) {
     double x = devsq(begin_, end_, theta);
     return x /= std::distance(begin_, end_);
 }
 template <class V> inline
-double qmean(const V& v, const typename V::value_type& theta=0) {
+double qmean(const V& v, typename V::value_type theta=0) {
     double x = devsq(v, theta);
     return x /= v.size();
 }
@@ -225,31 +225,31 @@ double qmean(const V& v, const typename V::value_type& theta=0) {
 
 // root mean square deviation (RMSD)
 template <class Iter> inline
-double rmsd(const Iter begin_, const Iter end_, const typename Iter::value_type& theta=0) {
+double rmsd(const Iter begin_, const Iter end_, typename Iter::value_type theta=0) {
     return std::sqrt(qmean(begin_, end_, theta));
 }
 template <class V> inline
-double rmsd(const V& v, const typename V::value_type& theta=0) {
+double rmsd(const V& v, typename V::value_type theta=0) {
     return rmsd(begin(v), end(v), theta);
 }
 
 
 // variance
 template <class Iter> inline
-double var(const Iter begin_, const Iter end_, const bool unbiased=true) {
+double var(const Iter begin_, const Iter end_, bool unbiased=true) {
     size_t denom = std::distance(begin_, end_);
     denom -= static_cast<size_t>(unbiased);
     return devsq(begin_, end_, mean(begin_, end_)) / denom;
 }
 template <class V> inline
-double var(const V& v, const bool unbiased=true) {
+double var(const V& v, bool unbiased=true) {
     size_t denom = v.size();
     denom -= static_cast<size_t>(unbiased);
     return devsq(v, mean(v)) / denom;
 }
 
 template <class Iter> inline
-double var_fast(Iter begin_, const Iter end_, const bool unbiased=true) {
+double var_fast(Iter begin_, const Iter end_, bool unbiased=true) {
     size_t n = std::distance(begin_, end_);
     n -= static_cast<size_t>(unbiased);
     typename Iter::value_type sq(0), s(0);
@@ -262,7 +262,7 @@ double var_fast(Iter begin_, const Iter end_, const bool unbiased=true) {
 }
 
 template <class Iter> inline
-double var_once(Iter begin_, const Iter end_, const bool unbiased=true) {
+double var_once(Iter begin_, const Iter end_, bool unbiased=true) {
     size_t n = 0;
     double wmean = 0.0;
     double sqsum = 0.0;
@@ -280,19 +280,19 @@ double var_once(Iter begin_, const Iter end_, const bool unbiased=true) {
 
 // standard deviation
 template <class Iter> inline
-double sd(const Iter begin_, const Iter end_, const bool unbiased=true) {
+double sd(const Iter begin_, const Iter end_, bool unbiased=true) {
     return std::sqrt(var(begin_, end_, unbiased));
 }
 
 template <class V> inline
-double sd(const V& v, const bool unbiased=true) {
+double sd(const V& v, bool unbiased=true) {
     return std::sqrt(var(v, unbiased));
 }
 
 
 // standard error of the mean (fpc: finite population correction)
 template <class Iter> inline
-double sem(const Iter begin_, const Iter end_, const size_t& N=0) {
+double sem(const Iter begin_, const Iter end_, size_t N=0) {
     const size_t n(std::distance(begin_, end_));
     double fpc(1.0);
     if (N > 0u) {
@@ -302,12 +302,12 @@ double sem(const Iter begin_, const Iter end_, const size_t& N=0) {
     return std::sqrt(fpc * var(begin_, end_) / n);
 }
 template <class V> inline
-double sem(const V& v, const size_t& N=0) {return sem(begin(v), end(v), N);}
+double sem(const V& v, size_t N=0) {return sem(begin(v), end(v), N);}
 
 
 // coveriance
 template <class Iter1, class Iter2> inline
-double cov(const Iter1 begin1, const Iter1 end1, const Iter2 begin2, const Iter2 end2, const bool unbiased=true) {
+double cov(const Iter1 begin1, const Iter1 end1, const Iter2 begin2, const Iter2 end2, bool unbiased=true) {
     const double mean_x = mean(begin1, end1);
     const double mean_y = mean(begin2, end2);
     double s = std::inner_product(begin1, end1, begin2, 0.0, std::plus<double>(),
@@ -321,7 +321,7 @@ double cov(const Iter1 begin1, const Iter1 end1, const Iter2 begin2, const Iter2
 }
 
 template <class V, class U> inline
-double cov(const V& v, const U& u, const bool unbiased=true) {
+double cov(const V& v, const U& u, bool unbiased=true) {
     return cov(v.cbegin(), v.cend(), u.cbegin(), u.cend(), unbiased);
 }
 
@@ -486,7 +486,7 @@ Matrix transpose(const Matrix& A) {
 // numerical integration
 
 template <class Func> inline
-double integrate_trapezoid(Func func, const double lower, const double upper, const size_t precision=100) {
+double integrate_trapezoid(Func func, double lower, double upper, size_t precision=100) {
     const double step = (upper - lower) / precision;
     double result = func(lower);
     result += func(upper);
@@ -498,7 +498,7 @@ double integrate_trapezoid(Func func, const double lower, const double upper, co
 }
 
 template <class Func> inline
-double integrate_midpoint(Func func, const double lower, const double upper, const size_t precision=100) {
+double integrate_midpoint(Func func, double lower, double upper, size_t precision=100) {
     const double step = (upper - lower) / precision;
     double result = 0.0;
     for (double x=lower + 0.5 * step; x<upper; x+=step) {
@@ -508,7 +508,7 @@ double integrate_midpoint(Func func, const double lower, const double upper, con
 }
 
 template <class Func> inline
-double integrate_simpson(Func func, const double lower, const double upper, const size_t precision=100) {
+double integrate_simpson(Func func, double lower, double upper, size_t precision=100) {
     const double step = (upper - lower) / precision;
     const double double_step = step * 2.0;
     double result_odd = 0.0;
@@ -530,7 +530,7 @@ double integrate_simpson(Func func, const double lower, const double upper, cons
 }
 
 template <class Func> inline
-double integrate(Func func, const double lower, const double upper, const size_t precision=100) {
+double integrate(Func func, double lower, double upper, size_t precision=100) {
     return integrate_simpson(func, lower, upper, precision);
 }
 

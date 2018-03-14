@@ -56,20 +56,20 @@ inline unsigned int choose_runtime(unsigned int n, unsigned int r) {
 
 // step function: sign, heaviside
 template <class T> inline
-constexpr int sign(const T& x) {return (x < 0) ? -1 : (x == 0) ? 0 : 1;}
+constexpr int sign(T x) {return (x < 0) ? -1 : (x == 0) ? 0 : 1;}
 
 template <class T> inline
-constexpr int heaviside0(const T& x) {return (x <= 0) ? 0 : 1;}
+constexpr int heaviside0(T x) {return (x <= 0) ? 0 : 1;}
 template <class T> inline
-constexpr int heaviside1(const T& x) {return (x < 0) ? 0 : 1;}
+constexpr int heaviside1(T x) {return (x < 0) ? 0 : 1;}
 template <class T> inline
-constexpr double heaviside1_2(const T& x) {return (x < 0) ? 0 : (x == 0) ? 0.5 : 1;}
+constexpr double heaviside1_2(T x) {return (x < 0) ? 0 : (x == 0) ? 0.5 : 1;}
 
 template <class Ret, class Arg>
 class Heaviside {
   public:
-    explicit Heaviside(const Ret& a=0): a_(a) {}
-    constexpr Ret operator()(const Arg& x) const {
+    explicit Heaviside(Ret a=0): a_(a) {}
+    constexpr Ret operator()(Arg x) const {
         return (x < 0) ? 0 : (x == 0) ? a_ : 1;
     }
   private:
@@ -78,14 +78,14 @@ class Heaviside {
 
 
 // x(-∞,∞) -> y(0,1)
-inline double sigmoid(const double& x, const double& gain=1.0) {
+inline double sigmoid(double x, double gain=1.0) {
     return 1.0 / (1.0 + std::exp(-gain * x));
 }
 // (0, 1)
 class Sigmoid {
   public:
-    Sigmoid(const double& gain): gain_(gain) {}
-    double operator()(const double& x) const {
+    Sigmoid(double gain): gain_(gain) {}
+    double operator()(double x) const {
         return 1.0 / (1.0 + std::exp(-gain_ * x));
     }
   private:
@@ -95,8 +95,8 @@ class Sigmoid {
 // (-1, 1)
 class Tanh {
   public:
-    Tanh(const double& a): a_(a) {}
-    double operator()(const double& x) const {return std::tanh(a_ * x);}
+    Tanh(double a): a_(a) {}
+    double operator()(double x) const {return std::tanh(a_ * x);}
   private:
     const double a_;
 };

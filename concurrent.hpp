@@ -20,7 +20,7 @@ namespace wtl {
 class Semaphore {
   public:
     explicit
-    Semaphore(const unsigned int n=std::thread::hardware_concurrency()):
+    Semaphore(unsigned int n=std::thread::hardware_concurrency()):
         count_(n) {}
 
     void lock() {
@@ -77,7 +77,7 @@ class Task: public BasicTask {
 
 class ThreadPool {
   public:
-    ThreadPool(const size_t n) {
+    ThreadPool(size_t n) {
         for (size_t i=0; i<n; ++i) {
             threads_.emplace_back(&ThreadPool::run, this);
         }

@@ -67,7 +67,7 @@ Iter choice(Iter begin_, Iter end_, URBG& engine) {
 //! fast if k << n
 template <class Container, class URBG> inline
 std::vector<typename Container::value_type>
-sample_floyd(const Container& src, const size_t k, URBG& engine) {
+sample_floyd(const Container& src, size_t k, URBG& engine) {
     const size_t n = src.size();
     if (n < k) throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + ": n < k");
     std::unordered_set<size_t> existing_indices;
@@ -89,7 +89,7 @@ sample_floyd(const Container& src, const size_t k, URBG& engine) {
 //! consistently fast; note that whole src is copied first
 template <class Container, class URBG> inline
 std::vector<typename Container::value_type>
-sample_fisher(const Container& src, const size_t k, URBG& engine) {
+sample_fisher(const Container& src, size_t k, URBG& engine) {
     std::vector<typename Container::value_type> dst(std::begin(src), std::end(src));
     const size_t n = dst.size();
     if (n < k) throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + ": n < k");
@@ -106,7 +106,7 @@ sample_fisher(const Container& src, const size_t k, URBG& engine) {
 //! The order is not random
 template <class Container, class URBG> inline
 std::vector<typename Container::value_type>
-sample_knuth(const Container& src, const size_t k, URBG& engine) {
+sample_knuth(const Container& src, size_t k, URBG& engine) {
     const size_t n = src.size();
     if (n < k) throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + ": n < k");
     std::vector<typename Container::value_type> dst;
@@ -126,7 +126,7 @@ sample_knuth(const Container& src, const size_t k, URBG& engine) {
 
 //! sample integers from [0, n) without replacement
 template <class T, class URBG> inline
-std::unordered_set<T> sample(const T n, const T k, URBG& engine) {
+std::unordered_set<T> sample(T n, T k, URBG& engine) {
     if (n < k) throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + ": n < k");
     std::unordered_set<T> existing_indices;
     for (T upper = n - k; upper < n; ++upper) {
@@ -140,7 +140,7 @@ std::unordered_set<T> sample(const T n, const T k, URBG& engine) {
 
 template <class Container, class URBG> inline
 std::vector<typename Container::value_type>
-sample(const Container& src, const size_t k, URBG& engine) {
+sample(const Container& src, size_t k, URBG& engine) {
     const size_t n = src.size();
     if (100 * k < n) {return sample_floyd(src, k, engine);}
     else if (5 * k < n) {return sample_fisher(src, k, engine);}
@@ -161,7 +161,7 @@ class Prandom{
     static constexpr result_type max() {return Generator::max();}
 
     // constructors
-    explicit Prandom(const result_type s=std::random_device{}())
+    explicit Prandom(result_type s=std::random_device{}())
     : seed_(s), generator_(s) {seed(s);}
 
     Prandom(const Prandom&) = delete;
@@ -169,7 +169,7 @@ class Prandom{
     ////////////////////////////////////////
     // methods
 
-    void seed(const result_type s) {seed_ = s; generator_.seed(seed_);}
+    void seed(result_type s) {seed_ = s; generator_.seed(seed_);}
     void discard(unsigned long long n) {generator_.discard(n);}
 
     ////////////////////
@@ -182,11 +182,11 @@ class Prandom{
         return std::uniform_int_distribution<unsigned int>(0, --n)(generator_);
     }
     // [a, b-1]
-    int randrange(const int a, int b) {
+    int randrange(int a, int b) {
         return randint(a, --b);
     }
     // [a, b]
-    int randint(const int a, const int b) {
+    int randint(int a, int b) {
         return std::uniform_int_distribution<int>(a, b)(generator_);
     }
 
@@ -212,45 +212,45 @@ class Prandom{
     // continuous
 
     // E = 1/lambda, V = 1/lambda^2
-    double exponential(const double lambda=1.0) {
+    double exponential(double lambda=1.0) {
         return std::exponential_distribution<double>(lambda)(generator_);
     }
 
     // Scale-free: E = ?, V = ?
-    double power(const double k=1.0, const double min=1.0) {
+    double power(double k=1.0, double min=1.0) {
         return min * std::pow(random_oc(), -1.0 / k);
     }
 
     // E = mu, V = sigma^2
-    double gauss(const double mu=0.0, const double sigma=1.0) {
+    double gauss(double mu=0.0, double sigma=1.0) {
         return std::normal_distribution<double>(mu, sigma)(generator_);
     }
-    double normal(const double mu=0.0, const double sigma=1.0) {return gauss(mu, sigma);}
+    double normal(double mu=0.0, double sigma=1.0) {return gauss(mu, sigma);}
 
     ////////////////////
     // discrete
 
     // return true with probability p
     // E = p, V = p(1-p)
-    bool bernoulli(const double p=0.5) {
+    bool bernoulli(double p=0.5) {
         return std::bernoulli_distribution(p)(generator_);
     }
 
     // The number of true in n trials with probability p
     // E = np, V = np(1-p)
-    unsigned int binomial(const unsigned int n, const double p=0.5) {
+    unsigned int binomial(unsigned int n, double p=0.5) {
         return std::binomial_distribution<unsigned int>(n, p)(generator_);
     }
 
     // The expected number of occurrences in an unit of time/space
     // E = V = lambda
-    unsigned int poisson(const double lambda) {
+    unsigned int poisson(double lambda) {
         return std::poisson_distribution<unsigned int>(lambda)(generator_);
     }
 
     // The number of trials needed to get first true
     // E = (1-p)/p, V = (1-p)/p^2
-    unsigned int geometric(const double p) {
+    unsigned int geometric(double p) {
         return std::geometric_distribution<unsigned int>(p)(generator_);
     }
 
@@ -262,7 +262,7 @@ class Prandom{
     }
 
     template <class Container>
-    Container sample(Container src, const size_t k) {
+    Container sample(Container src, size_t k) {
         wtl::sample(&src, k, generator_);
         return src;
     }

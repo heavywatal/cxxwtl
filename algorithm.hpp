@@ -13,17 +13,17 @@ namespace wtl {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
 template <class T> inline
-size_t bisect_left(const std::vector<T>& array, const T val) {
+size_t bisect_left(const std::vector<T>& array, const T& val) {
     return static_cast<size_t>(std::lower_bound(array.begin(), array.end(), val) - array.begin());
 }
 
 template <class T> inline
-size_t bisect_right(const std::vector<T>& array, const T val) {
+size_t bisect_right(const std::vector<T>& array, const T& val) {
     return static_cast<size_t>(std::upper_bound(array.begin(), array.end(), val) - array.begin());
 }
 
 template <class T> inline
-size_t bisect(const std::vector<T>& array, const T val) {
+size_t bisect(const std::vector<T>& array, const T& val) {
     return bisect_right(array, val);
 }
 
@@ -46,7 +46,7 @@ template <class V, class U> inline
 V subscript(const V& seq, const U& indices) {
     V subset;
     subset.reserve(indices.size());
-    for (const auto i: indices) {
+    for (auto i: indices) {
         subset.push_back(seq[i]);
     }
     return subset;
@@ -78,14 +78,14 @@ typename V::iterator sort_unique_erase(V* v) {
 
 // ceiling of integer division
 template <class T> inline constexpr
-T ceil_int_div(T lhs, const T rhs) {
+T ceil_int_div(T lhs, T rhs) {
     --lhs /= rhs;
     return ++lhs;
 }
 
 // split a sequence into the equally sized pieces
 template <class V> inline
-std::vector<V> chunk(const V& src, const size_t unit) {
+std::vector<V> chunk(const V& src, size_t unit) {
     std::vector<V> dst(ceil_int_div(src.size(), unit));
     size_t i = 0;
     for (auto it=begin(src); it!=end(src); ++it) {
@@ -224,7 +224,7 @@ std::vector<typename BinaryOperator::result_type> pairwise_transform(const Iter 
 }
 
 template <class Iter> inline
-std::pair<Iter, Iter> nth_pair(const Iter begin_, const Iter end_, const size_t n) {
+std::pair<Iter, Iter> nth_pair(const Iter begin_, const Iter end_, size_t n) {
     size_t i = 0;
     for (auto it1=begin_; it1!=end_; ++it1) {
         for (auto it2=it1; ++it2!=end_; ++i) {

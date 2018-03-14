@@ -114,7 +114,7 @@ columns(const Eigen::DenseBase<T>& matrix) {
 
 template <class T> inline
 Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>
-read_matrix(std::istream& fin, const size_t ncol) {
+read_matrix(std::istream& fin, size_t ncol) {
     std::vector<T> vec{std::istream_iterator<T>(fin), std::istream_iterator<T>()};
     if (vec.size() % ncol > 0) {
         std::string msg = std::string(__PRETTY_FUNCTION__);
@@ -125,7 +125,7 @@ read_matrix(std::istream& fin, const size_t ncol) {
 
 template <class T> inline
 Eigen::Array<T, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>
-read_array(std::istream& fin, const size_t ncol) {
+read_array(std::istream& fin, size_t ncol) {
     std::vector<T> vec{std::istream_iterator<T>(fin), std::istream_iterator<T>()};
     if (vec.size() % ncol > 0) {
         std::string msg = std::string(__PRETTY_FUNCTION__);

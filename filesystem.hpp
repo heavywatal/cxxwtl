@@ -14,7 +14,7 @@ namespace fs = boost::filesystem;
 
 class ChDir {
   public:
-    ChDir(const fs::path& dst, const bool mkdir=false) {
+    ChDir(const fs::path& dst, bool mkdir=false) {
         if (dst.empty() || dst == ".") return;
         if (mkdir) {
             fs::create_directory(dst);

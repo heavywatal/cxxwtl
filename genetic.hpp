@@ -21,7 +21,7 @@ size_t roulette_select(const std::vector<double>& fitnesses, RNG& rng) {
 
 template <class RNG> inline
 std::vector<size_t> roulette_select(
-    const std::vector<double>& fitnesses, const size_t n, RNG& rng) {
+    const std::vector<double>& fitnesses, size_t n, RNG& rng) {
 
     const std::vector<double> ubounds = partial_sum(fitnesses);
     std::uniform_real_distribution<double> uniform(0.0, ubounds.back());
@@ -35,7 +35,7 @@ std::vector<size_t> roulette_select(
 
 template <class RNG> inline
 std::vector<size_t> roulette_select_cxx11(
-    const std::vector<double>& fitnesses, const size_t n, RNG& rng) {
+    const std::vector<double>& fitnesses, size_t n, RNG& rng) {
 
     std::discrete_distribution<size_t> dist(fitnesses.begin(), fitnesses.end());
     std::vector<size_t> indices;
@@ -50,8 +50,8 @@ template <class RNG> inline
 std::vector<size_t> roulette_select(
     const std::vector<double>& fitnesses,
     RNG& rng,
-    const size_t pop_size,
-    const size_t elites=0) {
+    size_t pop_size,
+    size_t elites=0) {
 
     const std::vector<double> ubounds = partial_sum(fitnesses);
 

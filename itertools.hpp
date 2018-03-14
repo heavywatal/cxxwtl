@@ -28,7 +28,7 @@ class Generator {
     size_type count() const {return cnt_;}
     size_type max_count() const {return max_cnt_;}
     double percent() const {return 100.0 * cnt_ / max_cnt_;}
-    typename coro_t::pull_type operator()(const size_type skip=0) {
+    typename coro_t::pull_type operator()(size_type skip=0) {
         return typename coro_t::pull_type([this,skip](typename coro_t::push_type& yield){source(yield, skip);});
     }
   protected:
@@ -63,7 +63,7 @@ class Product final: public Generator<value_type> {
     }
 
   private:
-    virtual void source(typename coro_t::push_type& yield, const size_type skip) override {
+    virtual void source(typename coro_t::push_type& yield, size_type skip) override {
         if (--pos_ > 0) {
             const value_size_t n = axes_[pos_].size();
             for (value_size_t i=0; i<n; ++i) {
@@ -112,7 +112,7 @@ class UniAxes final: public Generator<value_type> {
     UniAxes(const UniAxes&) = default;
 
   private:
-    virtual void source(typename coro_t::push_type& yield, const size_type skip) override {
+    virtual void source(typename coro_t::push_type& yield, size_type skip) override {
         for (size_t i=0; i<axes_.size(); ++i) {
             auto value = center_;
             const auto& axis = axes_[i];
@@ -136,7 +136,7 @@ class UniAxis final: public Generator<value_type> {
     using typename Generator<value_type>::size_type;
     using typename Generator<value_type>::value_size_t;
     UniAxis() = delete;
-    UniAxis(const value_type& axis, const value_type& center, const value_size_t idx)
+    UniAxis(const value_type& axis, const value_type& center, value_size_t idx)
         : Generator<value_type>(),
           axis_(axis),
           center_(center),
@@ -147,7 +147,7 @@ class UniAxis final: public Generator<value_type> {
     UniAxis(const UniAxis&) = default;
 
   private:
-    virtual void source(typename coro_t::push_type& yield, const size_type skip) override {
+    virtual void source(typename coro_t::push_type& yield, size_type skip) override {
         auto value = center_;
         for (value_size_t j=0; j<axis_.size(); ++j) {
             value[idx_] = axis_[j];
@@ -167,7 +167,7 @@ UniAxes<value_type> uniaxis(const std::vector<value_type>& axes, const value_typ
 }
 
 template <class value_type>
-UniAxis<value_type> uniaxis(const value_type& axis, const value_type& center, const size_t idx) {
+UniAxis<value_type> uniaxis(const value_type& axis, const value_type& center, size_t idx) {
     return UniAxis<value_type>(axis, center, idx);
 }
 
@@ -179,7 +179,7 @@ class Simplex  final: public Generator<value_type> {
     using typename Generator<value_type>::coro_t;
     using typename Generator<value_type>::size_type;
     Simplex() = delete;
-    explicit Simplex(const std::vector<value_type>& axes, const double sum=1.0)
+    explicit Simplex(const std::vector<value_type>& axes, double sum=1.0)
         : product_(axes),
           sum_(sum) {
         this->max_cnt_ = product_.max_count();
@@ -201,7 +201,7 @@ class Simplex  final: public Generator<value_type> {
 };
 
 template <class value_type>
-Simplex<value_type> simplex(const std::vector<value_type>& axes, const double sum=1.0) {
+Simplex<value_type> simplex(const std::vector<value_type>& axes, double sum=1.0) {
     return Simplex<value_type>(axes, sum);
 }
 
