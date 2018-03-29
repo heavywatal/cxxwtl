@@ -216,10 +216,10 @@ class ostream_joiner : public std::iterator<std::output_iterator_tag,void,void,v
     typedef traits traits_type;
     typedef std::basic_ostream<charT,traits> ostream_type;
 
-    ostream_joiner(ostream_type& s, DelimT&& d, Func&& f=Func{})
-    : ost_(&s), delim_(std::move(d)), func_(f) {}
-    ostream_joiner(ostream_type& s, const DelimT& d, Func&& f=Func{})
-    : ost_(&s), delim_(d), func_(f) {}
+    ostream_joiner(ostream_type& s, DelimT&& d, Func&& f)
+    : ost_(&s), delim_(std::move(d)), func_(std::move(f)) {}
+    ostream_joiner(ostream_type& s, const DelimT& d, Func&& f)
+    : ost_(&s), delim_(d), func_(std::move(f)) {}
 
     template <class T>
     ostream_joiner& operator=(T const &item) {
@@ -261,24 +261,24 @@ join(const T& v, std::basic_ostream<charT, traits>& ost, DelimT&& delim, Func&& 
     return ost;
 }
 
-template <class Iter, class Func=Forward> inline
-std::string str_join(Iter begin_, Iter end_, const char* sep=",",
+template <class Iter, class DelimT, class Func=Forward> inline
+std::string str_join(Iter begin_, Iter end_, DelimT&& delim=",",
                      std::ostringstream&& oss=make_oss(), Func&& func=Func{}) {
-    join(begin_, end_, oss, sep, std::forward<Func>(func));
+    join(begin_, end_, oss, std::forward<DelimT>(delim), std::forward<Func>(func));
     return oss.str();
 }
 
-template <class T, class Func=Forward> inline
-std::string str_join(const T& v, const char* sep=",",
+template <class T, class DelimT, class Func=Forward> inline
+std::string str_join(const T& v, DelimT&& delim=",",
                      std::ostringstream&& oss=make_oss(), Func&& func=Func{}) {
-    return str_join(begin(v), end(v), sep, std::move(oss), std::forward<Func>(func));
+    return str_join(begin(v), end(v), std::forward<DelimT>(delim), std::move(oss), std::forward<Func>(func));
 }
 
-template <class T, class Func=Forward> inline
-std::string str_matrix(const T& m, const char* sep=",",
+template <class T, class DelimT, class Func=Forward> inline
+std::string str_matrix(const T& m, DelimT&& delim=",",
                        std::ostringstream&& oss=make_oss(), Func&& func=Func{}) {
     for (const auto& row: m) {
-        join(row, oss, sep, std::forward<Func>(func)) << '\n';
+        join(row, oss, std::forward<DelimT>(delim), std::forward<Func>(func)) << '\n';
     }
     return oss.str();
 }
