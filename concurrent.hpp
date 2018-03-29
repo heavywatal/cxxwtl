@@ -20,8 +20,8 @@ namespace wtl {
 class Semaphore {
   public:
     explicit
-    Semaphore(unsigned int n=std::thread::hardware_concurrency()):
-        count_(n) {}
+    Semaphore(unsigned int n=std::thread::hardware_concurrency()) noexcept:
+      count_(n) {}
 
     void lock() {
         std::unique_lock<std::mutex> lck(mutex_);
@@ -61,19 +61,26 @@ bool is_ready(const std::future<T>& future) {
 
 class BasicTask {
   public:
-    virtual ~BasicTask() {}
+    BasicTask() noexcept = default;
+    BasicTask(BasicTask&&) noexcept = default;
+    BasicTask(const BasicTask&) = delete;
+    virtual ~BasicTask() = default;
     virtual void operator()() = 0;
 };
 
 template <typename result_t>
 class Task: public BasicTask {
   public:
-    Task(std::function<result_t()>&& func): std_task_(func) {}
+    Task(std::function<result_t()>&& func) noexcept: std_task_(func) {}
     std::future<result_t> get_future() {return std_task_.get_future();}
     void operator()() override {std_task_();}
   private:
     std::packaged_task<result_t()> std_task_;
 };
+
+static_assert(!std::is_default_constructible<Task<void>>{}, "");
+static_assert(!std::is_copy_constructible<Task<void>>{}, "");
+static_assert(std::is_nothrow_move_constructible<Task<void>>{}, "");
 
 class ThreadPool {
   public:

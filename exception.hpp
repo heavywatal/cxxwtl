@@ -12,7 +12,8 @@ namespace wtl {
 
 class ExitSuccess: public std::runtime_error {
   public:
-    ExitSuccess(const char* msg="EXIT_SUCCESS"): std::runtime_error(msg) {}
+    ExitSuccess(const char* msg="EXIT_SUCCESS") noexcept:
+      std::runtime_error(msg) {}
 };
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
@@ -25,7 +26,8 @@ class ExitSuccess: public std::runtime_error {
 
 class KeyboardInterrupt: public std::runtime_error {
   public:
-    KeyboardInterrupt(const char* msg="KeyboardInterrupt"): std::runtime_error(msg) {}
+    KeyboardInterrupt(const char* msg="KeyboardInterrupt") noexcept:
+      std::runtime_error(msg) {}
 };
 
 inline std::atomic_bool& SIGINT_RAISED() {
@@ -42,7 +44,7 @@ inline void set_SIGINT_handler() {
 
 class AssertionError: public std::runtime_error {
   public:
-    AssertionError(const char* message):
+    AssertionError(const char* message) noexcept:
       std::runtime_error(message) {}
 };
 

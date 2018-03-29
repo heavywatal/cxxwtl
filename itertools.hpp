@@ -21,20 +21,20 @@ class Generator {
     typedef uintmax_t size_type;
     typedef typename std::remove_const<decltype(value_type().size())>::type value_size_t;
 
-    Generator() = default;
-    virtual ~Generator() = default;
-    Generator(const Generator&) = default;
+    Generator() noexcept = default;
+    virtual ~Generator() noexcept = default;
+    Generator(const Generator&) noexcept = default;
 
-    size_type count() const {return cnt_;}
-    size_type max_count() const {return max_cnt_;}
-    double percent() const {return 100.0 * cnt_ / max_cnt_;}
+    size_type count() const noexcept {return cnt_;}
+    size_type max_count() const noexcept {return max_cnt_;}
+    double percent() const noexcept {return 100.0 * cnt_ / max_cnt_;}
     typename coro_t::pull_type operator()(size_type skip=0) {
         return typename coro_t::pull_type([this,skip](typename coro_t::push_type& yield){source(yield, skip);});
     }
   protected:
+    virtual void source(typename coro_t::push_type& yield, const size_type skip) = 0;
     size_type cnt_ = 0;
     size_type max_cnt_ = 0;
-    virtual void source(typename coro_t::push_type& yield, const size_type skip) = 0;
 };
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////

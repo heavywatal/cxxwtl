@@ -111,16 +111,16 @@ bool equal_matrix(const V& v, const V& u, Fn&& fn) {
 }
 
 // true if signs are the same or both 0
-template <class T> struct alike_sign {public:
-    constexpr bool operator()(const T& x, const T& y) const {
-        return (x * y > T()) || (x == y);
+template <class T> struct alike_sign {
+    constexpr bool operator()(const T& x, const T& y) const noexcept {
+        return (x * y > T{}) || (x == y);
     }
 };
 
 // true if std::less(x, y) and signs are different
-template <class T> struct less_sign {public:
-    constexpr bool operator()(const T& x, const T& y) const {
-        return (x < y) && (x * y <= T());
+template <class T> struct less_sign {
+    constexpr bool operator()(const T& x, const T& y) const noexcept {
+        return (x < y) && (x * y <= T{});
     }
 };
 

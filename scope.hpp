@@ -11,12 +11,12 @@ namespace wtl {
 template <class Function>
 class ScopeExit {
   public:
-    ScopeExit(Function&& f): func_(std::forward<Function>(f)) {}
-    ~ScopeExit() {func_();}
+    ScopeExit(Function&& f) noexcept: func_(std::move(f)) {}
+    ~ScopeExit() noexcept(noexcept(func_())) {func_();}
     ScopeExit(const ScopeExit&) = delete;
     ScopeExit& operator=(const ScopeExit&) = delete;
-    ScopeExit(ScopeExit&&) = default;
-    ScopeExit& operator=(ScopeExit&&) = default;
+    ScopeExit(ScopeExit&&) noexcept = default;
+    ScopeExit& operator=(ScopeExit&&) noexcept = default;
   private:
     Function func_;
 };

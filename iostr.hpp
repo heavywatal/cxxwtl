@@ -52,8 +52,9 @@ namespace detail {
   template <typename CharT>
   class SetFillW {
     public:
-      SetFillW(CharT ch, std::streamsize width): ch_(ch), width_(width) {}
-      friend std::ostream& operator<<(std::ostream& ost, const SetFillW<CharT>& x) {
+      SetFillW(CharT ch, std::streamsize width) noexcept:
+        ch_(ch), width_(width) {}
+      friend std::ostream& operator<<(std::ostream& ost, const SetFillW<CharT>& x) noexcept {
           ost.fill(x.ch_);
           ost.width(x.width_);
           return ost;
