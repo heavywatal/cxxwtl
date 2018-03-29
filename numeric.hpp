@@ -238,20 +238,22 @@ double rmsd(const V& v, typename V::value_type theta=0) {
 template <class Iter> inline
 double var(const Iter begin_, const Iter end_, bool unbiased=true) {
     size_t denom = std::distance(begin_, end_);
-    denom -= static_cast<size_t>(unbiased);
-    return devsq(begin_, end_, mean(begin_, end_)) / denom;
+    if (unbiased) {--denom;}
+    double s = devsq(begin_, end_, mean(begin_, end_));
+    return s /= denom;
 }
 template <class V> inline
 double var(const V& v, bool unbiased=true) {
     size_t denom = v.size();
-    denom -= static_cast<size_t>(unbiased);
-    return devsq(v, mean(v)) / denom;
+    if (unbiased) {--denom;}
+    double s = devsq(v, mean(v));
+    return s /= denom;
 }
 
 template <class Iter> inline
 double var_fast(Iter begin_, const Iter end_, bool unbiased=true) {
     size_t n = std::distance(begin_, end_);
-    n -= static_cast<size_t>(unbiased);
+    if (unbiased) {--n;}
     typename Iter::value_type sq(0), s(0);
     // Be careful not to overflow if value_type is int
     for (; begin_!=end_; ++begin_) {
@@ -317,7 +319,9 @@ double cov(const Iter1 begin1, const Iter1 end1, const Iter2 begin2, const Iter2
             return x *= y;
         }
     );
-    return s /= (std::distance(begin1, end1) - static_cast<int>(unbiased));
+    auto d = std::distance(begin1, end1);
+    if (unbiased) {--d;}
+    return s /= d;
 }
 
 template <class V, class U> inline
