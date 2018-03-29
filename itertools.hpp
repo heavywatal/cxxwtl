@@ -17,9 +17,9 @@ namespace wtl { namespace itertools {
 template <class value_type>
 class Generator {
   public:
-    typedef boost::coroutines2::coroutine<value_type> coro_t;
-    typedef uintmax_t size_type;
-    typedef typename std::remove_const<decltype(value_type().size())>::type value_size_t;
+    using coro_t = boost::coroutines2::coroutine<value_type>;
+    using size_type = uintmax_t;
+    using value_size_t = typename std::remove_const<decltype(value_type().size())>::type;
 
     Generator() noexcept = default;
     virtual ~Generator() noexcept = default;

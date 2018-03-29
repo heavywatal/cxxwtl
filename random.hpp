@@ -32,7 +32,7 @@ namespace {
 
 class random_device_64 {
   public:
-    typedef uint64_t result_type;
+    using result_type = uint64_t;
     static constexpr result_type min() {return 0u;}
     static constexpr result_type max() {return std::numeric_limits<result_type>::max();}
 
@@ -153,9 +153,9 @@ sample(const Container& src, size_t k, URBG& engine) {
 template <class Generator>
 class Prandom{
   public:
-    // typedefs
-    typedef unsigned int result_type;
-    typedef result_type argument_type;
+    // alias
+    using result_type = unsigned int;
+    using argument_type = result_type;
 
     static constexpr result_type min() {return Generator::min();}
     static constexpr result_type max() {return Generator::max();}

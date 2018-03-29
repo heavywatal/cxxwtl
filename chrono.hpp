@@ -16,7 +16,7 @@ namespace wtl {
 
 template <typename Time = std::chrono::milliseconds, typename Fn>
 inline Time stopwatch (Fn&& fn) {
-    typedef std::chrono::high_resolution_clock Clock;
+    using Clock = std::chrono::high_resolution_clock;
     const auto start = Clock::now();
     fn();
     return std::chrono::duration_cast<Time>(Clock::now() - start);

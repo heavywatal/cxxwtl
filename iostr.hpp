@@ -209,12 +209,12 @@ struct Forward {
     }
 };
 
-template <class DelimT, class Func=Forward, class charT=char, class traits=std::char_traits<charT>>
+template <class DelimT, class Func=Forward, class charT=char, class traitsT=std::char_traits<charT>>
 class ostream_joiner : public std::iterator<std::output_iterator_tag,void,void,void,void> {
   public:
-    typedef charT char_type;
-    typedef traits traits_type;
-    typedef std::basic_ostream<charT,traits> ostream_type;
+    using char_type = charT;
+    using traits_type = traitsT;
+    using ostream_type = std::basic_ostream<char_type, traits_type>;
 
     ostream_joiner(ostream_type& s, DelimT&& d, Func&& f)
     : ost_(&s), delim_(std::move(d)), func_(std::move(f)) {}

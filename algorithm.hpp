@@ -102,7 +102,7 @@ bool equal(const V& v, const V& u, Fn&& fn) {
 
 template <class V, class Fn> inline
 bool equal_matrix(const V& v, const V& u, Fn&& fn) {
-    typedef typename V::value_type T;
+    using T = typename V::value_type;
     return wtl::equal(v, u,
                 [&fn](const T& x, const T& y) {
                     return wtl::equal(x, y, fn);

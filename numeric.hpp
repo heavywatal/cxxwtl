@@ -129,7 +129,7 @@ typename V::value_type sum(const V& v) {return sum(begin(v), end(v));}
 
 template <class Iter> inline
 typename Iter::value_type kahan_sum(Iter begin_, const Iter end_) {
-    typedef typename Iter::value_type T;
+    using T = typename Iter::value_type;
     T result = *begin_;
     T left_behind = 0;
     while (++begin_ != end_) {
@@ -144,7 +144,7 @@ typename Iter::value_type kahan_sum(Iter begin_, const Iter end_) {
 // product
 template <class Iter> inline
 typename Iter::value_type prod(const Iter begin_, const Iter end_) {
-    typedef typename Iter::value_type T;
+    using T = typename Iter::value_type;
     return std::accumulate(begin_, end_, T{1}, std::multiplies<T>{});
 }
 template <class V> inline
@@ -330,28 +330,10 @@ double cov(const V& v, const U& u, bool unbiased=true) {
 }
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
-// for pairs
-
-template <int N, class Iter> inline
-typename std::tuple_element<N, typename Iter::value_type>::type
-sum(const Iter begin_, const Iter end_) {
-    typedef typename Iter::value_type pair_t;
-    typedef typename std::tuple_element<N, pair_t>::trait_t T;
-    return std::accumulate(begin_, end_, T(0),
-        [](const T& x, const pair_t& p){return x + std::get<N>(p);});
-}
-
-template <int N, class Iter> inline
-double mean(const Iter begin_, const Iter end_) {
-    double x(sum<N>(begin_, end_));
-    return x /= std::distance(begin_, end_);
-}
-
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 // rank
 template <class Iter> inline
 std::vector<double> rank(const Iter begin_, const Iter end_) {
-    typedef typename Iter::value_type T;
+    using T = typename Iter::value_type;
     std::map<T, unsigned int> mtu;
     for (auto it=begin_; it!=end_; ++it) {
         ++mtu[*it];
@@ -425,9 +407,9 @@ double cor_spearman(const V1& v1, const V2& v2) {
 // squared euclid distance between 2 vectors
 template <class Iter1, class Iter2> inline
 typename Iter1::value_type squared_euclidean(const Iter1 begin1, const Iter1 end1, const Iter2 begin2) {
-    typedef typename Iter1::value_type T;
+    using T = typename Iter1::value_type;
     return std::inner_product(begin1, end1, begin2, 0.0, std::plus<T>(),
-        [](T x, const T y) {
+        [](T x, T y) {
             x -= y;
             return x *= x;
         }
