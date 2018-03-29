@@ -261,20 +261,20 @@ join(const T& v, std::basic_ostream<charT, traits>& ost, DelimT&& delim, Func&& 
     return ost;
 }
 
-template <class Iter, class DelimT, class Func=Forward> inline
+template <class Iter, class DelimT=const char*, class Func=Forward> inline
 std::string str_join(Iter begin_, Iter end_, DelimT&& delim=",",
                      std::ostringstream&& oss=make_oss(), Func&& func=Func{}) {
     join(begin_, end_, oss, std::forward<DelimT>(delim), std::forward<Func>(func));
     return oss.str();
 }
 
-template <class T, class DelimT, class Func=Forward> inline
+template <class T, class DelimT=const char*, class Func=Forward> inline
 std::string str_join(const T& v, DelimT&& delim=",",
                      std::ostringstream&& oss=make_oss(), Func&& func=Func{}) {
     return str_join(begin(v), end(v), std::forward<DelimT>(delim), std::move(oss), std::forward<Func>(func));
 }
 
-template <class T, class DelimT, class Func=Forward> inline
+template <class T, class DelimT=const char*, class Func=Forward> inline
 std::string str_matrix(const T& m, DelimT&& delim=",",
                        std::ostringstream&& oss=make_oss(), Func&& func=Func{}) {
     for (const auto& row: m) {
