@@ -147,14 +147,93 @@ sample(const Container& src, size_t k, URBG& engine) {
     else {return sample_knuth(src, k, engine);}
 }
 
-// std::geometric_distribution if (k == 1)
-// std::poisson_distribution   if (k == \infty)
-template <class IntType> inline
-std::negative_binomial_distribution<IntType>
-make_negative_binomial_distribution(IntType k, double mu) {
-    double prob = k / (mu + k);
-    return std::negative_binomial_distribution<IntType>(k, prob);
-}
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
+// a variant that accepts double k parameter
+
+template<class IntType = int>
+class negative_binomial_distribution {
+  public:
+    using result_type = IntType;
+
+    class param_type {
+      public:
+        using distribution_type = negative_binomial_distribution;
+        explicit param_type(double k = 1.0, double p = 0.5) noexcept:
+          _k(k), _p(p) {}
+        double k() const noexcept {return _k;}
+        double p() const noexcept {return _p;}
+        friend bool operator==(const param_type& lhs, const param_type& rhs) noexcept {
+            return (lhs._k == rhs._k) && (lhs._p == rhs._p);
+        }
+        friend bool operator!=(const param_type& lhs, const param_type& rhs) noexcept {
+            return !(lhs == rhs);
+        }
+      private:
+        double _k;
+        double _p;
+    };
+
+    explicit negative_binomial_distribution(double k = 1.0, double p = 0.5) noexcept:
+      _param(k, p) {}
+    explicit negative_binomial_distribution(const param_type& parameter) noexcept:
+      _param(parameter) {}
+    ~negative_binomial_distribution() noexcept = default;
+
+    void reset() noexcept {}
+
+    template<class URBG>
+    result_type operator()(URBG& engine) const {
+        return operator()(engine, _param);
+    }
+    template<class URBG>
+    result_type operator()(URBG& engine, const param_type& parameter) const {
+        auto p = parameter.p();
+        double lambda = std::gamma_distribution<double>(parameter.k(), (1.0 - p) / p)(engine);
+        return std::poisson_distribution<result_type>(lambda)(engine);
+    }
+
+    double k() const noexcept {return _param.k();}
+    double p() const noexcept {return _param.p();}
+
+    param_type param() const noexcept {return _param;}
+    void param(const param_type& parameter) noexcept {_param = parameter;}
+
+    result_type constexpr min() const noexcept {return 0;}
+    result_type constexpr max() const noexcept {return std::numeric_limits<result_type>::max();}
+
+    friend bool operator==(const negative_binomial_distribution& lhs,
+                           const negative_binomial_distribution& rhs) noexcept {
+        return lhs._param == rhs._param;
+    }
+    friend bool operator!=(const negative_binomial_distribution& lhs,
+                           const negative_binomial_distribution& rhs) noexcept {
+        return !(lhs == rhs);
+    }
+
+    template<class CharT, class Traits>
+    friend std::basic_ostream<CharT, Traits>&
+    operator<<(std::basic_ostream<CharT, Traits>& ost,
+               const negative_binomial_distribution& dist) {
+        ost << dist.param().p() << " " << dist.param().k();
+        return ost;
+    }
+    template<class CharT, class Traits>
+    friend std::basic_istream<CharT, Traits>&
+    operator>>(std::basic_istream<CharT, Traits>& ist,
+               negative_binomial_distribution& dist) {
+        ist.flags(std::ios_base::skipws);
+        double k;
+        double p;
+        ist >> k >> p;
+        if (!ist.fail()) {
+            dist.param(param_type(k, p));
+        }
+        return ist;
+    }
+
+  private:
+    param_type _param;
+};
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
