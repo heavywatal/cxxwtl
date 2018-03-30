@@ -147,6 +147,15 @@ sample(const Container& src, size_t k, URBG& engine) {
     else {return sample_knuth(src, k, engine);}
 }
 
+// std::geometric_distribution if (k == 1)
+// std::poisson_distribution   if (k == \infty)
+template <class IntType> inline
+std::negative_binomial_distribution<IntType>
+make_negative_binomial_distribution(IntType k, double mu) {
+    double prob = k / (mu + k);
+    return std::negative_binomial_distribution<IntType>(k, prob);
+}
+
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
 //! Pythonic engine object
