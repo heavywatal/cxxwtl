@@ -71,7 +71,8 @@ class BasicTask {
 template <typename result_t>
 class Task: public BasicTask {
   public:
-    Task(std::function<result_t()>&& func) noexcept: std_task_(func) {}
+    template <class Func>
+    Task(Func&& func) noexcept: std_task_(std::forward<Func>(func)) {}
     std::future<result_t> get_future() {return std_task_.get_future();}
     void operator()() override {std_task_();}
   private:
@@ -101,7 +102,7 @@ class ThreadPool {
     template <class Func>
     void submit(Func&& func) {
         std::lock_guard<std::mutex> lck(mutex_);
-        tasks_.push(std::make_unique<Task<void>>(func));
+        tasks_.push(std::make_unique<Task<void>>(std::forward<Func>(func)));
         condition_run_.notify_one();
     }
 
