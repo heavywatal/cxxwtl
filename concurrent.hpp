@@ -114,7 +114,9 @@ class ThreadPool {
         using result_t = std::result_of_t<Func(Args...)>;
 #endif
         std::lock_guard<std::mutex> lck(mutex_);
-        auto task = std::make_unique<Task<result_t>>(std::bind(func, args...));
+        auto task = std::make_unique<Task<result_t>>(
+            [&func, args...]{return func(args...);}
+        );
         std::future<result_t> ftr = task->get_future();
         tasks_.push(std::move(task));
         condition_run_.notify_one();
