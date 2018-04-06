@@ -84,8 +84,8 @@ static_assert(std::is_nothrow_move_constructible<Task<void>>{}, "");
 
 class ThreadPool {
   public:
-    ThreadPool(size_t n) {
-        for (size_t i=0; i<n; ++i) {
+    ThreadPool(unsigned int n) {
+        for (unsigned int i=0; i<n; ++i) {
             threads_.emplace_back(&ThreadPool::run, this);
         }
     }
@@ -124,7 +124,8 @@ class ThreadPool {
     void wait() {
         std::unique_lock<std::mutex> lck(mutex_);
         condition_wait_.wait(lck, [this]{
-            return tasks_.empty() && waiting_threads_ == threads_.size();
+            return tasks_.empty() &&
+                (waiting_threads_ == static_cast<unsigned int>(threads_.size()));
         });
     }
 
@@ -154,7 +155,7 @@ class ThreadPool {
     std::condition_variable condition_run_;
     std::condition_variable condition_wait_;
     bool is_being_destroyed_ = false;
-    size_t waiting_threads_ = 0;
+    unsigned int waiting_threads_ = 0;
 };
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
