@@ -10,6 +10,8 @@ namespace wtl {
 
 template <class Function>
 class ScopeExit {
+  private:
+    Function func_;
   public:
     ScopeExit(Function&& f) noexcept: func_(std::move(f)) {}
     ~ScopeExit() noexcept(noexcept(func_())) {func_();}
@@ -17,8 +19,6 @@ class ScopeExit {
     ScopeExit& operator=(const ScopeExit&) = delete;
     ScopeExit(ScopeExit&&) noexcept = default;
     ScopeExit& operator=(ScopeExit&&) noexcept = default;
-  private:
-    Function func_;
 };
 
 template <class Function>
