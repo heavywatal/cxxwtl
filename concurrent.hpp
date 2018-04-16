@@ -73,6 +73,8 @@ class Task: public BasicTask {
   public:
     template <class Func>
     Task(Func&& func) noexcept: std_task_(std::forward<Func>(func)) {}
+    Task(Task&&) noexcept = default;
+    Task(const Task&) = delete;
     std::future<result_t> get_future() {return std_task_.get_future();}
     void operator()() override {std_task_();}
   private:
