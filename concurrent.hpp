@@ -78,6 +78,7 @@ class Task: public BasicTask {
     void operator()() override {std_task_();}
   private:
     Task(const Task&) = delete;
+    Task& operator=(const Task&) = delete;
     std::packaged_task<result_t()> std_task_;
 };
 
