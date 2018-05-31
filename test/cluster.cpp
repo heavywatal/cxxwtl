@@ -21,8 +21,8 @@ int main(int argc, char* argv[]) {
     for (size_t i=0; i<n; ++i) {
         points.emplace_back(std::initializer_list<double>{unif(wtl::mt64()), unif(wtl::mt64())});
     }
-    const auto labels = wtl::k_medoids_pam(points, k, wtl::mt64());
-    write(std::cout, points, labels);
+    auto cl = wtl::cluster::pam(std::move(points), k);
+    write(std::cout, cl.points(), cl.labels());
     return 0;
 }
 /* R
