@@ -17,13 +17,13 @@ double euclidean_distance(ValArray&& v) {
     return std::sqrt((v * v).sum());
 }
 
-template <class T>
+template <class T, class URBG>
 class PAM {
   public:
-    PAM(const std::vector<std::valarray<T>>& points, size_t k, size_t max_iteration)
+    PAM(const std::vector<std::valarray<T>>& points, size_t k, URBG&& engine, size_t max_iteration)
     : points_(points), labels_(points.size()) {
         const auto n = points_.size();
-        const auto indices = wtl::sample(points.size(), k, wtl::mt64());
+        const auto indices = wtl::sample(points.size(), k, engine);
         medoids_.assign(indices.begin(), indices.end());
         for (size_t step=0; step<max_iteration; ++step) {
             for (size_t i=0; i<n; ++i) {
@@ -80,9 +80,9 @@ class PAM {
     std::vector<size_t> medoids_;
 };
 
-template <class T> inline
-auto pam(const T& points, size_t k, size_t max_iteration=10ul) {
-    return PAM<typename T::value_type::value_type>(points, k, max_iteration);
+template <class T, class URBG> inline
+auto pam(const T& points, size_t k, URBG&& engine, size_t max_iteration=10ul) {
+    return PAM<typename T::value_type::value_type, URBG>(points, k, std::forward<URBG>(engine), max_iteration);
 }
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////

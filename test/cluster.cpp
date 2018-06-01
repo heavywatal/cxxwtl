@@ -21,7 +21,7 @@ int main(int argc, char* argv[]) {
     for (size_t i=0; i<n; ++i) {
         points.emplace_back(std::initializer_list<double>{unif(wtl::mt64()), unif(wtl::mt64())});
     }
-    auto cl = wtl::cluster::pam(std::move(points), k);
+    auto cl = wtl::cluster::pam(std::move(points), k, wtl::mt64());
     write(std::cout, cl.points(), cl.labels());
     return 0;
 }
