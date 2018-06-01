@@ -10,18 +10,23 @@ void write(std::ostream& ost, const std::vector<std::valarray<T>>& points, const
     }
 }
 
-int main(int argc, char* argv[]) {
-    std::cout.precision(4);
-    std::vector<std::string> arguments(argv + 1, argv + argc);
-    const size_t n = (arguments.size() > 0u) ? std::stoul(arguments[0u]) : 20;
-    const size_t k = (arguments.size() > 1u) ? std::stoul(arguments[1u]) : 3;
+inline std::vector<std::valarray<double>> make_points(size_t n) {
     std::uniform_real_distribution<double> unif(-1.0, 1.0);
     std::vector<std::valarray<double>> points;
     points.reserve(n);
     for (size_t i=0; i<n; ++i) {
         points.emplace_back(std::initializer_list<double>{unif(wtl::mt64()), unif(wtl::mt64())});
     }
-    auto cl = wtl::cluster::pam(std::move(points), k, wtl::mt64());
+    return points;
+}
+
+int main(int argc, char* argv[]) {
+    std::cout.precision(4);
+    std::vector<std::string> arguments(argv + 1, argv + argc);
+    const size_t n = (arguments.size() > 0u) ? std::stoul(arguments[0u]) : 20;
+    const size_t k = (arguments.size() > 1u) ? std::stoul(arguments[1u]) : 3;
+    const auto points = make_points(n);
+    auto cl = wtl::cluster::pam(points, k, wtl::mt64());
     write(std::cout, cl.points(), cl.labels());
     return 0;
 }
