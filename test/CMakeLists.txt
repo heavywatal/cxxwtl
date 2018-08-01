@@ -11,6 +11,7 @@ endif()
 add_compile_options(-march=native -Wall -Wextra -Wpedantic)
 
 find_package(Threads)
+find_package(zlib)
 link_libraries(wtl ${CMAKE_THREAD_LIBS_INIT})
 
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR} source_files)
@@ -19,3 +20,4 @@ foreach(src IN LISTS source_files)
   add_executable(test-${name_we} ${src})
   add_test(NAME ${name_we} COMMAND $<TARGET_FILE:test-${name_we}>)
 endforeach()
+target_link_libraries(test-zlib ZLIB::ZLIB)
