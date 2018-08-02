@@ -1,7 +1,6 @@
 #pragma once
 
-#include <ostream>
-#include <sstream>
+#include "iostr.hpp"
 #include <boost/program_options.hpp>
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
@@ -37,6 +36,12 @@ ost_any(std::ostream& ost, const boost::any& value) {
     return ost;
 }
 
+inline std::string str_any(const boost::any& value) {
+    std::ostringstream oss;
+    ost_any(oss, value);
+    return oss.str();
+}
+
 inline std::ostream&
 flags_into_stream(std::ostream& ost,
                   const boost::program_options::variables_map& vm) {
@@ -57,6 +62,17 @@ flags_into_string(const boost::program_options::variables_map& vm) {
     oss.precision(std::numeric_limits<double>::max_digits10);
     flags_into_stream(oss, vm);
     return oss.str();
+}
+
+template <class DelimT=const char*>
+inline std::ostream&
+write_table(const boost::program_options::variables_map& vm,
+            std::ostream& ost, DelimT&& delim="\t") {
+    wtl::join(vm, ost, delim,
+      [](const auto& p){return p.first;}) << "\n";
+    wtl::join(vm, ost, delim,
+      [](const auto& p){return str_any(p.second.value());}) << "\n";
+    return ost;
 }
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
