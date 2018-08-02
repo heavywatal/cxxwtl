@@ -11,7 +11,7 @@ endif()
 add_compile_options(-march=native -Wall -Wextra -Wpedantic)
 
 find_package(Threads)
-find_package(zlib)
+find_package(ZLIB)
 link_libraries(wtl ${CMAKE_THREAD_LIBS_INIT})
 
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR} source_files)
