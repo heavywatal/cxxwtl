@@ -42,7 +42,7 @@ class Zstream : public z_stream {
         this->zalloc = Z_NULL;
         this->zfree = Z_NULL;
         this->opaque = Z_NULL;
-        auto ret = deflateInit2(this, Z_DEFAULT_COMPRESSION, Z_DEFLATED, 31, 8, Z_DEFAULT_STRATEGY);
+        auto ret = deflateInit2(this, Z_DEFAULT_COMPRESSION, Z_DEFLATED, MAX_WBITS + 16, 8, Z_DEFAULT_STRATEGY);
         if (ret != Z_OK) throw Exception(*this, ret);
     }
     ~Zstream() {
@@ -74,13 +74,13 @@ class ostreambuf : public std::streambuf {
     }
 
     std::streambuf::int_type overflow(std::streambuf::int_type c = traits_type::eof()) override {
-        zstrm_.avail_in = pptr() - pbase();
+        zstrm_.avail_in = static_cast<decltype(zstrm_.avail_in)>(pptr() - pbase());
         zstrm_.next_in = reinterpret_cast<decltype(zstrm_.next_in)>(pbase());
         while (zstrm_.avail_in > 0) {
             deflate_write(Z_NO_FLUSH);
         }
         setp(in_buf_, in_buf_ + SIZE);
-        return traits_type::eq_int_type(c, traits_type::eof()) ? traits_type::eof() : sputc(c);
+        return traits_type::eq_int_type(c, traits_type::eof()) ? traits_type::eof() : sputc(static_cast<char>(c));
     }
 
     int deflate_write(int flush) {
