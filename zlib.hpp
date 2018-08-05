@@ -36,6 +36,86 @@ class Exception : public std::runtime_error {
     std::string what_;
 };
 
+namespace detail {
+
+template <class Fstream, class StreamBuf>
+class Initializer {
+  public:
+    Initializer(const std::string& filename, std::ios_base::openmode mode)
+    : fst_(filename, mode), strbuf_(fst_.rdbuf()) {
+        fst_.exceptions(std::ios_base::failbit | std::ios_base::badbit);
+    }
+  private:
+    Fstream fst_;
+  protected:
+    StreamBuf strbuf_;
+};
+
+} // namespace detail
+
+class iz_stream : public z_stream {
+  public:
+    iz_stream() {
+        this->zalloc = Z_NULL;
+        this->zfree = Z_NULL;
+        this->opaque = Z_NULL;
+        this->next_in = Z_NULL;
+        this->avail_in = 0;
+        auto ret = inflateInit2(this, MAX_WBITS + 32);
+        if (ret != Z_OK) throw Exception(*this, ret);
+    }
+    ~iz_stream() {inflateEnd(this);}
+};
+
+class istreambuf : public std::streambuf {
+    static constexpr std::streamsize SIZE = 4096;
+  public:
+    istreambuf(std::streambuf* reader)
+    : reader_(reader) {
+        setg(out_buf_, out_buf_, out_buf_);
+    }
+    istreambuf(const istreambuf&) = delete;
+    istreambuf(istreambuf&&) = default;
+    istreambuf& operator=(const istreambuf&) = delete;
+    istreambuf& operator=(istreambuf&&) = default;
+
+    std::streambuf::int_type underflow() override {
+        if (zstrm_.avail_in == 0) {
+            std::streamsize sz = reader_->sgetn(in_buf_, SIZE);
+            zstrm_.next_in = reinterpret_cast<decltype(zstrm_.next_in)>(in_buf_);
+            zstrm_.avail_in = sz;
+        }
+        zstrm_.next_out = reinterpret_cast<decltype(zstrm_.next_out)>(out_buf_);
+        zstrm_.avail_out = SIZE;
+        int ret = inflate(&zstrm_, Z_NO_FLUSH);
+        if (ret != Z_OK && ret != Z_STREAM_END) throw Exception(zstrm_, ret);
+        this->setg(out_buf_, out_buf_, reinterpret_cast<char*>(zstrm_.next_out));
+        return this->gptr() == this->egptr()
+            ? traits_type::eof()
+            : traits_type::to_int_type(*this->gptr());
+    }
+  private:
+    char in_buf_[SIZE];
+    char out_buf_[SIZE];
+    iz_stream zstrm_;
+    std::streambuf* reader_;
+};
+
+using init_ifs_istbuf = detail::Initializer<std::ifstream, istreambuf>;
+
+class ifstream : private init_ifs_istbuf, public std::istream {
+  public:
+    explicit ifstream(const std::string& filename,
+                      std::ios_base::openmode mode = std::ios_base::in)
+    : init_ifs_istbuf(filename, mode),
+      std::istream(&strbuf_) {
+        exceptions(std::ios_base::failbit | std::ios_base::badbit);
+    }
+    const std::string& path() const noexcept {return path_;}
+  private:
+    const std::string path_;
+};
+
 class Zstream : public z_stream {
   public:
     Zstream() {
