@@ -158,50 +158,54 @@ class ostreambuf : public std::streambuf {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 namespace detail {
 
-template <class Fstream, class StreamBuf>
-class Initializer {
+template <class Fstream>
+class FstInitializer {
   public:
-    Initializer(const std::string& filename, std::ios_base::openmode mode)
-    : fst_(filename, mode), strbuf_(fst_.rdbuf()) {
+    FstInitializer(const std::string& filename, std::ios_base::openmode mode)
+    : fst_(filename, mode) {
         fst_.exceptions(std::ios_base::failbit | std::ios_base::badbit);
     }
-  private:
+  protected:
     Fstream fst_;
+};
+
+template <class StreamBuf>
+class StrBufInitializer {
+  public:
+    StrBufInitializer(std::streambuf* x): strbuf_(x) {}
   protected:
     StreamBuf strbuf_;
 };
 
-using ifs_istbuf = detail::Initializer<std::ifstream, istreambuf>;
-using ofs_ostbuf = detail::Initializer<std::ofstream, ostreambuf>;
+template<class Fstream, class StreamBuf, class Stream, std::ios_base::openmode Mode>
+class basic_fstream : private FstInitializer<Fstream>,
+                      private StrBufInitializer<StreamBuf>,
+                      public Stream {
+  public:
+    explicit basic_fstream(const std::string& filename,
+                           std::ios_base::openmode mode=Mode)
+    : FstInitializer<Fstream>(filename, mode | std::ios_base::binary),
+      StrBufInitializer<StreamBuf>(this->fst_.rdbuf()),
+      Stream(&this->strbuf_) {
+        this->exceptions(std::ios_base::badbit);
+    }
+    const std::string& path() const noexcept {return path_;}
+  private:
+    const std::string path_;
+};
 
 } // namespace detail
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
-class ifstream : private detail::ifs_istbuf, public std::istream {
-  public:
-    explicit ifstream(const std::string& filename,
-                      std::ios_base::openmode mode = std::ios_base::in)
-    : detail::ifs_istbuf(filename, mode),
-      std::istream(&strbuf_) {
-        exceptions(std::ios_base::failbit | std::ios_base::badbit);
-    }
-    const std::string& path() const noexcept {return path_;}
-  private:
-    const std::string path_;
-};
+using ifstream = detail::basic_fstream<std::ifstream,
+                                       istreambuf,
+                                       std::istream,
+                                       std::ios_base::in>;
 
-class ofstream : private detail::ofs_ostbuf, public std::ostream {
-  public:
-    explicit ofstream(const std::string& filename,
-                      std::ios_base::openmode mode = std::ios_base::out)
-    : detail::ofs_ostbuf(filename, mode | std::ios_base::binary),
-      std::ostream(&strbuf_) {
-        exceptions(std::ios_base::failbit | std::ios_base::badbit);
-    }
-    const std::string& path() const noexcept {return path_;}
-  private:
-    const std::string path_;
-};
+using ofstream = detail::basic_fstream<std::ofstream,
+                                       ostreambuf,
+                                       std::ostream,
+                                       std::ios_base::out>;
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 }} // namespace wtl::zlib
