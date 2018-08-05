@@ -2,7 +2,6 @@
 #ifndef WTL_ZLIB_HPP_
 #define WTL_ZLIB_HPP_
 
-#include <cassert>
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -36,22 +35,8 @@ class Exception : public std::runtime_error {
     std::string what_;
 };
 
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 namespace detail {
-
-template <class Fstream, class StreamBuf>
-class Initializer {
-  public:
-    Initializer(const std::string& filename, std::ios_base::openmode mode)
-    : fst_(filename, mode), strbuf_(fst_.rdbuf()) {
-        fst_.exceptions(std::ios_base::failbit | std::ios_base::badbit);
-    }
-  private:
-    Fstream fst_;
-  protected:
-    StreamBuf strbuf_;
-};
-
-} // namespace detail
 
 class iz_stream : public z_stream {
   public:
@@ -66,6 +51,21 @@ class iz_stream : public z_stream {
     }
     ~iz_stream() {inflateEnd(this);}
 };
+
+class oz_stream : public z_stream {
+  public:
+    oz_stream() {
+        this->zalloc = Z_NULL;
+        this->zfree = Z_NULL;
+        this->opaque = Z_NULL;
+        auto ret = deflateInit2(this, Z_DEFAULT_COMPRESSION, Z_DEFLATED, MAX_WBITS + 16, 8, Z_DEFAULT_STRATEGY);
+        if (ret != Z_OK) throw Exception(*this, ret);
+    }
+    ~oz_stream() {deflateEnd(this);}
+};
+
+} // namespace detail
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
 class istreambuf : public std::streambuf {
     static constexpr std::streamsize SIZE = 4096;
@@ -97,37 +97,8 @@ class istreambuf : public std::streambuf {
   private:
     char in_buf_[SIZE];
     char out_buf_[SIZE];
-    iz_stream zstrm_;
+    detail::iz_stream zstrm_;
     std::streambuf* reader_;
-};
-
-using init_ifs_istbuf = detail::Initializer<std::ifstream, istreambuf>;
-
-class ifstream : private init_ifs_istbuf, public std::istream {
-  public:
-    explicit ifstream(const std::string& filename,
-                      std::ios_base::openmode mode = std::ios_base::in)
-    : init_ifs_istbuf(filename, mode),
-      std::istream(&strbuf_) {
-        exceptions(std::ios_base::failbit | std::ios_base::badbit);
-    }
-    const std::string& path() const noexcept {return path_;}
-  private:
-    const std::string path_;
-};
-
-class Zstream : public z_stream {
-  public:
-    Zstream() {
-        this->zalloc = Z_NULL;
-        this->zfree = Z_NULL;
-        this->opaque = Z_NULL;
-        auto ret = deflateInit2(this, Z_DEFAULT_COMPRESSION, Z_DEFLATED, MAX_WBITS + 16, 8, Z_DEFAULT_STRATEGY);
-        if (ret != Z_OK) throw Exception(*this, ret);
-    }
-    ~Zstream() {
-        deflateEnd(this);
-    }
 };
 
 class ostreambuf : public std::streambuf {
@@ -135,7 +106,6 @@ class ostreambuf : public std::streambuf {
   public:
     ostreambuf(std::streambuf* writer)
     : writer_(writer) {
-        assert(writer_);
         setp(in_buf_, in_buf_ + SIZE);
     }
     ostreambuf(const ostreambuf&) = delete;
@@ -147,20 +117,21 @@ class ostreambuf : public std::streambuf {
     int sync() override {
         overflow();
         zstrm_.next_in = nullptr;
-        assert(zstrm_.avail_in == 0);
         while (deflate_write(Z_FINISH) != Z_STREAM_END) {;}
         deflateReset(&zstrm_);
         return 0;
     }
 
     std::streambuf::int_type overflow(std::streambuf::int_type c = traits_type::eof()) override {
-        zstrm_.avail_in = static_cast<decltype(zstrm_.avail_in)>(pptr() - pbase());
         zstrm_.next_in = reinterpret_cast<decltype(zstrm_.next_in)>(pbase());
+        zstrm_.avail_in = static_cast<decltype(zstrm_.avail_in)>(pptr() - pbase());
         while (zstrm_.avail_in > 0) {
             deflate_write(Z_NO_FLUSH);
         }
         setp(in_buf_, in_buf_ + SIZE);
-        return traits_type::eq_int_type(c, traits_type::eof()) ? traits_type::eof() : sputc(static_cast<char>(c));
+        return traits_type::eq_int_type(c, traits_type::eof())
+            ? traits_type::eof()
+            : sputc(static_cast<char>(c));
     }
 
     int deflate_write(int flush) {
@@ -177,32 +148,54 @@ class ostreambuf : public std::streambuf {
         }
         return ret;
     }
-
   private:
     char in_buf_[SIZE];
     char out_buf_[SIZE];
-    Zstream zstrm_;
+    detail::oz_stream zstrm_;
     std::streambuf* writer_;
 };
 
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
+namespace detail {
+
+template <class Fstream, class StreamBuf>
 class Initializer {
   public:
     Initializer(const std::string& filename, std::ios_base::openmode mode)
-    : ofs_(filename, mode), ostbuf_(ofs_.rdbuf()) {
-        ofs_.exceptions(std::ios_base::failbit | std::ios_base::badbit);
+    : fst_(filename, mode), strbuf_(fst_.rdbuf()) {
+        fst_.exceptions(std::ios_base::failbit | std::ios_base::badbit);
     }
   private:
-    std::ofstream ofs_;
+    Fstream fst_;
   protected:
-    ostreambuf ostbuf_;
+    StreamBuf strbuf_;
 };
 
-class ofstream : private Initializer, public std::ostream {
+using ifs_istbuf = detail::Initializer<std::ifstream, istreambuf>;
+using ofs_ostbuf = detail::Initializer<std::ofstream, ostreambuf>;
+
+} // namespace detail
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
+
+class ifstream : private detail::ifs_istbuf, public std::istream {
+  public:
+    explicit ifstream(const std::string& filename,
+                      std::ios_base::openmode mode = std::ios_base::in)
+    : detail::ifs_istbuf(filename, mode),
+      std::istream(&strbuf_) {
+        exceptions(std::ios_base::failbit | std::ios_base::badbit);
+    }
+    const std::string& path() const noexcept {return path_;}
+  private:
+    const std::string path_;
+};
+
+class ofstream : private detail::ofs_ostbuf, public std::ostream {
   public:
     explicit ofstream(const std::string& filename,
                       std::ios_base::openmode mode = std::ios_base::out)
-    : Initializer(filename, mode | std::ios_base::binary),
-      std::ostream(&ostbuf_) {
+    : detail::ofs_ostbuf(filename, mode | std::ios_base::binary),
+      std::ostream(&strbuf_) {
         exceptions(std::ios_base::failbit | std::ios_base::badbit);
     }
     const std::string& path() const noexcept {return path_;}
