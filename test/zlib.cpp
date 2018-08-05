@@ -16,7 +16,7 @@ int main() {
     }
     try {
       wtl::zlib::ifstream ifs("noexist.gz");
-    } catch (std::runtime_error& e) {
+    } catch (std::ios_base::failure& e) {
       std::cout << "expected error: " << e.what() << std::endl;
     }
     return 0;
