@@ -46,7 +46,7 @@ class iz_stream : public z_stream {
         this->opaque = Z_NULL;
         this->next_in = Z_NULL;
         this->avail_in = 0;
-        auto ret = inflateInit2(this, MAX_WBITS + 32);
+        int ret = inflateInit2(this, MAX_WBITS + 32);
         if (ret != Z_OK) throw Exception(*this, ret);
     }
     ~iz_stream() {inflateEnd(this);}
@@ -58,7 +58,7 @@ class oz_stream : public z_stream {
         this->zalloc = Z_NULL;
         this->zfree = Z_NULL;
         this->opaque = Z_NULL;
-        auto ret = deflateInit2(this, Z_DEFAULT_COMPRESSION, Z_DEFLATED, MAX_WBITS + 16, 8, Z_DEFAULT_STRATEGY);
+        int ret = deflateInit2(this, Z_DEFAULT_COMPRESSION, Z_DEFLATED, MAX_WBITS + 16, 8, Z_DEFAULT_STRATEGY);
         if (ret != Z_OK) throw Exception(*this, ret);
     }
     ~oz_stream() {deflateEnd(this);}
@@ -81,9 +81,9 @@ class istreambuf : public std::streambuf {
 
     std::streambuf::int_type underflow() override {
         if (zstrm_.avail_in == 0) {
-            std::streamsize sz = reader_->sgetn(in_buf_, SIZE);
+            std::streamsize num_copied = reader_->sgetn(in_buf_, SIZE);
             zstrm_.next_in = reinterpret_cast<decltype(zstrm_.next_in)>(in_buf_);
-            zstrm_.avail_in = sz;
+            zstrm_.avail_in = static_cast<decltype(zstrm_.avail_in)>(num_copied);
         }
         zstrm_.next_out = reinterpret_cast<decltype(zstrm_.next_out)>(out_buf_);
         zstrm_.avail_out = SIZE;
