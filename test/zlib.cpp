@@ -1,5 +1,7 @@
 #include "zlib.hpp"
+#include "exception.hpp"
 
+#include <cerrno>
 #include <iostream>
 
 int main() {
@@ -17,7 +19,7 @@ int main() {
     try {
       wtl::zlib::ifstream ifs("noexist.gz");
     } catch (std::ios_base::failure& e) {
-      std::cout << "expected error: " << e.what() << std::endl;
+      WTL_ASSERT(errno == ENOENT);
     }
     return 0;
 }
