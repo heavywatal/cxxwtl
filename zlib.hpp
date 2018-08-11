@@ -159,38 +159,34 @@ class ostreambuf : public std::streambuf {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 namespace detail {
 
-template <class Fstream>
-class FstInitializer {
+template <class Fstream, class StreamBuf>
+class Initializer {
   public:
-    FstInitializer(const std::string& filename, std::ios_base::openmode mode)
-    : fst_(filename, mode) {
-        fst_.exceptions(std::ios_base::failbit | std::ios_base::badbit);
-    }
+    Initializer(const std::string& filename, std::ios_base::openmode mode)
+    : fst_(filename, mode),
+      strbuf_(fst_.rdbuf()) {}
   protected:
     Fstream fst_;
-};
-
-template <class StreamBuf>
-class StrBufInitializer {
-  public:
-    StrBufInitializer(std::streambuf* x): strbuf_(x) {}
-  protected:
     StreamBuf strbuf_;
 };
 
 template<class Stream>
-class basic_fstream : private FstInitializer<typename std::conditional<std::is_same<std::istream, Stream>::value, std::ifstream, std::ofstream>::type>,
-                      private StrBufInitializer<typename std::conditional<std::is_same<std::istream, Stream>::value, istreambuf, ostreambuf>::type>,
-                      public Stream {
+class basic_fstream
+: private Initializer<
+    typename std::conditional<std::is_same<std::istream, Stream>::value, std::ifstream, std::ofstream>::type,
+    typename std::conditional<std::is_same<std::istream, Stream>::value, istreambuf, ostreambuf>::type
+  >,
+  public Stream {
     static constexpr bool is_ist = std::is_same<std::istream, Stream>::value;
     using Fstream = typename std::conditional<is_ist, std::ifstream, std::ofstream>::type;
     using StreamBuf = typename std::conditional<is_ist, istreambuf, ostreambuf>::type;
   public:
     explicit basic_fstream(const std::string& filename,
                            std::ios_base::openmode mode=is_ist ? std::ios_base::in : std::ios_base::out)
-    : FstInitializer<Fstream>(filename, mode | std::ios_base::binary),
-      StrBufInitializer<StreamBuf>(this->fst_.rdbuf()),
-      Stream(&this->strbuf_) {
+    : Initializer<Fstream, StreamBuf>(filename, mode | std::ios_base::binary),
+      Stream(&this->strbuf_),
+      path_(filename) {
+        this->fst_.exceptions(std::ios_base::badbit | std::ios_base::failbit);
         this->exceptions(std::ios_base::badbit);
     }
     const std::string& path() const noexcept {return path_;}
