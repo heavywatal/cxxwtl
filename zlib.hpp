@@ -5,6 +5,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <type_traits>
 #include <zlib.h>
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
@@ -177,13 +178,16 @@ class StrBufInitializer {
     StreamBuf strbuf_;
 };
 
-template<class Fstream, class StreamBuf, class Stream, std::ios_base::openmode Mode>
-class basic_fstream : private FstInitializer<Fstream>,
-                      private StrBufInitializer<StreamBuf>,
+template<class Stream>
+class basic_fstream : private FstInitializer<typename std::conditional<std::is_same<std::istream, Stream>::value, std::ifstream, std::ofstream>::type>,
+                      private StrBufInitializer<typename std::conditional<std::is_same<std::istream, Stream>::value, istreambuf, ostreambuf>::type>,
                       public Stream {
+    static constexpr bool is_ist = std::is_same<std::istream, Stream>::value;
+    using Fstream = typename std::conditional<is_ist, std::ifstream, std::ofstream>::type;
+    using StreamBuf = typename std::conditional<is_ist, istreambuf, ostreambuf>::type;
   public:
     explicit basic_fstream(const std::string& filename,
-                           std::ios_base::openmode mode=Mode)
+                           std::ios_base::openmode mode=is_ist ? std::ios_base::in : std::ios_base::out)
     : FstInitializer<Fstream>(filename, mode | std::ios_base::binary),
       StrBufInitializer<StreamBuf>(this->fst_.rdbuf()),
       Stream(&this->strbuf_) {
@@ -197,15 +201,8 @@ class basic_fstream : private FstInitializer<Fstream>,
 } // namespace detail
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
-using ifstream = detail::basic_fstream<std::ifstream,
-                                       istreambuf,
-                                       std::istream,
-                                       std::ios_base::in>;
-
-using ofstream = detail::basic_fstream<std::ofstream,
-                                       ostreambuf,
-                                       std::ostream,
-                                       std::ios_base::out>;
+using ifstream = detail::basic_fstream<std::istream>;
+using ofstream = detail::basic_fstream<std::ostream>;
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 }} // namespace wtl::zlib
