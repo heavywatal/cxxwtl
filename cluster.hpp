@@ -4,7 +4,6 @@
 
 #include "random.hpp"
 
-#include <valarray>
 #include <vector>
 #include <limits>
 
@@ -20,7 +19,7 @@ double euclidean_distance(ValArray&& v) {
 template <class T, class URBG>
 class PAM {
   public:
-    PAM(const std::vector<std::valarray<T>>& points, size_t k, URBG&& engine, size_t max_iteration)
+    PAM(const std::vector<T>& points, size_t k, URBG&& engine, size_t max_iteration)
     : points_(points), labels_(points.size()) {
         const auto n = points_.size();
         const auto indices = wtl::sample(points.size(), k, engine);
@@ -75,14 +74,14 @@ class PAM {
         return medoid_idx;
     }
 
-    const std::vector<std::valarray<T>>& points_;
+    const std::vector<T>& points_;
     std::vector<size_t> labels_;
     std::vector<size_t> medoids_;
 };
 
 template <class T, class URBG> inline
 auto pam(const T& points, size_t k, URBG&& engine, size_t max_iteration=10ul) {
-    return PAM<typename T::value_type::value_type, URBG>(points, k, std::forward<URBG>(engine), max_iteration);
+    return PAM<typename T::value_type, URBG>(points, k, std::forward<URBG>(engine), max_iteration);
 }
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
