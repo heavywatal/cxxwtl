@@ -4,6 +4,7 @@
 
 #include "random.hpp"
 
+#include <cmath>
 #include <vector>
 #include <limits>
 
@@ -11,9 +12,15 @@
 namespace wtl { namespace cluster {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
-template <class ValArray>
-double euclidean_distance(ValArray&& v) {
-    return std::sqrt((v * v).sum());
+template <class Array>
+double euclidean_distance(const Array& lhs, const Array& rhs) {
+    using T = typename Array::value_type;
+    T sum_squared{0};
+    for (size_t i=0; i<lhs.size(); ++i) {
+        T d = lhs[i] - rhs[i];
+        sum_squared += d * d;
+    }
+    return std::sqrt(sum_squared);
 }
 
 template <class T, class URBG>
@@ -46,7 +53,7 @@ class PAM {
         double min_dist = std::numeric_limits<double>::max();
         size_t best_cluster = std::numeric_limits<size_t>::max();
         for (size_t cluster=0; cluster<medoids_.size(); ++cluster) {
-            const auto dist = euclidean_distance(x - points_[medoids_[cluster]]);
+            const auto dist = euclidean_distance(x, points_[medoids_[cluster]]);
             if (dist < min_dist) {
                 min_dist = dist;
                 best_cluster = cluster;
@@ -64,7 +71,7 @@ class PAM {
             double dist = 0.0;
             for (size_t j=0; j<n; ++j) {
                 if (labels_[j] != cluster) continue;
-                dist += euclidean_distance(points_[i] - points_[j]);
+                dist += euclidean_distance(points_[i], points_[j]);
             }
             if (dist < min_dist) {
                 min_dist = dist;

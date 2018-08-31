@@ -3,19 +3,20 @@
 #include <iostr.hpp>
 
 template <class T> inline
-void write(std::ostream& ost, const std::vector<std::valarray<T>>& points, const std::vector<size_t>& labels) {
+void write(std::ostream& ost, const std::vector<T>& points, const std::vector<size_t>& labels) {
     ost << "x\ty\tcluster\n";
     for (size_t i=0; i<points.size(); ++i) {
         wtl::join(points[i], ost, "\t") << "\t" << labels[i] << "\n";
     }
 }
 
-inline std::vector<std::valarray<double>> make_points(size_t n) {
+template <class T> inline
+std::vector<T> make_points(size_t n) {
     std::uniform_real_distribution<double> unif(-1.0, 1.0);
-    std::vector<std::valarray<double>> points;
+    std::vector<T> points;
     points.reserve(n);
     for (size_t i=0; i<n; ++i) {
-        points.emplace_back(std::initializer_list<double>{unif(wtl::mt64()), unif(wtl::mt64())});
+        points.push_back({{unif(wtl::mt64()), unif(wtl::mt64())}});
     }
     return points;
 }
@@ -25,7 +26,8 @@ int main(int argc, char* argv[]) {
     std::vector<std::string> arguments(argv + 1, argv + argc);
     const size_t n = (arguments.size() > 0u) ? std::stoul(arguments[0u]) : 20;
     const size_t k = (arguments.size() > 1u) ? std::stoul(arguments[1u]) : 3;
-    const auto points = make_points(n);
+    const auto points = make_points<std::valarray<double>>(n);
+    // const auto points = make_points<std::array<double, 2>>(n);
     auto cl = wtl::cluster::pam(points, k, wtl::mt64());
     write(std::cout, cl.points(), cl.labels());
     return 0;
