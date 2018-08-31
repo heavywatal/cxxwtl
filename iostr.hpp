@@ -11,6 +11,7 @@
 
 #include <vector>
 #include <valarray>
+#include <array>
 #include <map>
 #include <unordered_map>
 #include <set>
@@ -305,6 +306,13 @@ namespace detail {
 // global operator<< for containers
 
 namespace std {
+
+template <class T, std::size_t N> inline
+std::ostream& operator<< (std::ostream& ost, const std::array<T, N>& v) {
+    ost << '[';
+    std::copy(std::begin(v), std::end(v), wtl::make_ostream_joiner(ost, ", "));
+    return ost << ']';
+}
 
 template <class T> inline
 std::ostream& operator<< (std::ostream& ost, const std::valarray<T>& v) {
