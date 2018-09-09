@@ -10,14 +10,30 @@ if("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
 endif()
 add_compile_options(-march=native -Wall -Wextra -Wpedantic)
 
-find_package(Threads)
-find_package(ZLIB)
-link_libraries(wtl ${CMAKE_THREAD_LIBS_INIT})
+set(source_files
+  cluster.cpp
+  genetic.cpp
+  iostr.cpp
+  math.cpp
+  numeric.cpp
+  random.cpp
+  scope.cpp
+)
 
-aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR} source_files)
+find_package(Threads)
+if(Threads_FOUND)
+  set(source_files ${source_files} concurrent.cpp)
+  link_libraries(wtl ${CMAKE_THREAD_LIBS_INIT})
+endif()
+
+find_package(ZLIB)
+if(ZLIB_FOUND)
+  set(source_files ${source_files} zlib.cpp)
+  link_libraries(wtl ZLIB::ZLIB)
+endif()
+
 foreach(src IN LISTS source_files)
   get_filename_component(name_we ${src} NAME_WE)
   add_executable(test-${name_we} ${src})
   add_test(NAME ${name_we} COMMAND $<TARGET_FILE:test-${name_we}>)
 endforeach()
-target_link_libraries(test-zlib ZLIB::ZLIB)
