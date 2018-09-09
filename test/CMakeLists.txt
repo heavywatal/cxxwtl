@@ -20,6 +20,13 @@ set(source_files
   scope.cpp
 )
 
+find_package(clipp)
+find_path(nlohmann_path nlohmann/json.hpp)
+if(clipp_FOUND AND IS_DIRECTORY ${nlohmann_path})
+  set(source_files ${source_files} clipp.cpp)
+  link_libraries(wtl clipp)
+endif()
+
 find_package(Threads)
 if(Threads_FOUND)
   set(source_files ${source_files} concurrent.cpp)
