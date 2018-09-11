@@ -16,9 +16,6 @@ Personal C++ header library
 - `grn.hpp` uses [boost::graph](http://www.boost.org/doc/libs/release/libs/graph/doc/)
 - `eigen.hpp` uses [Eigen](https://eigen.tuxfamily.org/)
 - `zlib.hpp` uses [zlib](https://github.com/madler/zlib)
-- `clipp.hpp` uses
-  [muellan/clipp](https://github.com/muellan/clipp) and
-  [nlohmann/json](https://github.com/nlohmann/json)
 
 
 ### Installation
