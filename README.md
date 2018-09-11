@@ -9,7 +9,6 @@ Personal C++ header library
 
 - C++14 compiler
 - CMake
-- `filesystem.hpp` uses [boost::filesystem](http://www.boost.org/doc/libs/release/libs/filesystem/doc/)
 - `zfstream.hpp` uses [boost::iostreams](http://www.boost.org/doc/libs/release/libs/iostreams/doc/)
 - `itertools.hpp` uses [boost::coroutine2](http://www.boost.org/doc/libs/release/libs/coroutine2/doc/html/)
 - `getopt.hpp` uses [boost::program_options](http://www.boost.org/doc/libs/release/libs/program_options/doc/)

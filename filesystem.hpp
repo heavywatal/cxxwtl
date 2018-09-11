@@ -2,36 +2,74 @@
 #ifndef WTL_FILESYSTEM_HPP_
 #define WTL_FILESYSTEM_HPP_
 
-#include "debug.hpp"
+#if defined(_WIN32)
+  #include <direct.h>
+#else
+  #include <sys/stat.h>
+  #include <unistd.h>
+#endif
+#include <cerrno>
+#include <stdexcept>
+#include <string>
 
-#include <boost/filesystem.hpp>
-
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 namespace wtl {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
+namespace filesystem {
 
-namespace fs = boost::filesystem;
+inline bool create_directory(const std::string& path) {
+#if defined(_WIN32)
+    const int status = ::_mkdir(path.c_str());
+#else
+    const int status = ::mkdir(path.c_str(), 0755);
+#endif
+    if (status && errno != EEXIST) {
+        throw std::runtime_error(path);
+    }
+    return status == 0;
+}
 
+inline void current_path(const std::string& path) {
+#if defined(_WIN32)
+    if (::_chdir(path.c_str())) {
+#else
+    if (::chdir(path.c_str())) {
+#endif
+        throw std::runtime_error(path);
+    }
+}
+
+inline std::string current_path() {
+    char buffer[1024];
+#if defined(_WIN32)
+    if (!::_getcwd(buffer, sizeof(buffer))) {
+#else
+    if (!::getcwd(buffer, sizeof(buffer))) {
+#endif
+        throw std::runtime_error(buffer);
+    }
+    return std::string(buffer);
+}
+
+} // namespace filesystem
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
+
+// RAII
 class ChDir {
   public:
-    ChDir(const fs::path& dst, bool mkdir=false) {
+    ChDir(const std::string& dst, bool mkdir=false) {
         if (dst.empty() || dst == ".") return;
         if (mkdir) {
-            fs::create_directory(dst);
+            filesystem::create_directory(dst);
         }
-        fs::current_path(dst);
-        DCERR("cd " << fs::current_path().string() << "\n");
+        filesystem::current_path(dst);
     }
     ~ChDir() {
-        fs::current_path(origin_);
-        DCERR("cd " << fs::current_path().string() << "\n");
+        filesystem::current_path(origin_);
     }
   private:
-    const fs::path origin_ = fs::current_path();
+    const std::string origin_ = filesystem::current_path();
 };
 
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 } // namespace wtl
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
 #endif /* WTL_FILESYSTEM_HPP_ */
