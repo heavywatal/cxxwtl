@@ -90,41 +90,25 @@ inline std::vector<std::string> split_algorithm(const std::string& src, const st
 
 inline std::vector<std::string>
 split(const std::string& src, const std::string& delimiter=" \t\n") {
+    if (src.empty()) return {};
     std::vector<std::string> dst;
-    size_t start = 0, offset = 0;
-    while (true) {
-        offset = src.find_first_of(delimiter, start);
-        offset -= start;
-        dst.push_back(src.substr(start, offset));
-        start += offset;
-        if (start == src.npos) break;
-        ++start;
+    for (size_t start = 0, pos = 0; pos != src.npos; start = pos + 1u) {
+        pos = src.find_first_of(delimiter, start);
+        dst.push_back(src.substr(start, pos - start));
     }
     return dst;
 }
 
-inline std::string rstrip(std::string src, const std::string& chars=" ") {
-    size_t pos(src.find_last_not_of(chars));
-    if (pos == std::string::npos) {
-        src.clear();
-    } else {
-        src.erase(++pos);
-    }
-    return src;
+inline std::string rstrip(const std::string& s, const std::string& chars=" ") {
+    return s.substr(0u, s.find_last_not_of(chars) + 1u);
 }
 
-inline std::string lstrip(std::string src, const std::string& chars=" ") {
-    const size_t pos(src.find_first_not_of(chars));
-    if (pos == std::string::npos) {
-        src.clear();
-    } else {
-        src.erase(0, pos);
-    }
-    return src;
+inline std::string lstrip(const std::string& s, const std::string& chars=" ") {
+    return s.substr(s.find_first_not_of(chars));
 }
 
-inline std::string strip(std::string src, const std::string& chars=" ") {
-    return rstrip(lstrip(src, chars), chars);
+inline std::string strip(const std::string& s, const std::string& chars=" ") {
+    return rstrip(lstrip(s, chars), chars);
 }
 
 inline bool startswith(const std::string& str, const std::string& prefix) {
