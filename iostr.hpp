@@ -189,38 +189,6 @@ std::vector<T> readlines(std::istream& ist) {
     return lines;
 }
 
-inline std::vector<std::pair<std::string, std::string> >
-read_ini(std::istream& ist) {
-    std::vector<std::string> lines = readlines(ist);
-    std::vector<std::pair<std::string, std::string> > dst;
-    dst.reserve(lines.size());
-    for (auto line_: lines) {
-        line_ = strip(line_);
-        if (startswith(line_, "[")) {continue;} // TODO
-        auto pair_ = split(line_, ":="); // TODO
-        if (pair_.size() < 2) {continue;}
-        dst.emplace_back(rstrip(pair_[0]), lstrip(pair_[1]));
-    }
-    return dst;
-}
-
-inline std::vector<std::string>
-read_header(std::istream& ist, const char* sep="\t") {
-    std::string buffer;
-    std::getline(ist, buffer, '\n');
-    return split(buffer, sep);
-}
-
-template <class T> inline std::vector<std::valarray<T>>
-read_valarrays(std::istream& ist) {
-    std::vector<std::valarray<T>> matrix;
-    std::vector<T> buffer;
-    while (wtl::getline(ist, buffer)) {
-        matrix.emplace_back(buffer.data(), buffer.size());
-    }
-    return matrix;
-}
-
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 // experimental iterator
 
