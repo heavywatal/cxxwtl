@@ -26,12 +26,27 @@ inline void string_manipulation() {
     WTL_ASSERT(!wtl::endswith("suffix", "suf"));
 }
 
-inline void read_tuple() {
+inline void read_array() {
     std::tuple<int, double, std::string> t;
     wtl::read("42 2.718 hello", &t);
     WTL_ASSERT(std::get<0>(t) == 42);
     WTL_ASSERT(std::abs(std::get<1>(t) - 2.718) < 1e-9);
     WTL_ASSERT(std::get<2>(t) == "hello");
+    std::vector<int> v;
+    wtl::read("-1 0 1", &v);
+    WTL_ASSERT(v.at(0u) == -1);
+    WTL_ASSERT(v.at(1u) == 0);
+    WTL_ASSERT(v.at(2u) == 1);
+}
+
+inline void read_lines() {
+    std::istringstream issv("1 2 3\n4 5 6\n");
+    WTL_ASSERT(wtl::readlines<std::vector<int>>(issv) ==
+        (std::vector<std::vector<int>>{{1, 2, 3}, {4, 5, 6}}));
+
+    std::istringstream iss("1 2 3\n4 5 6\n");
+    WTL_ASSERT(wtl::readlines(iss) ==
+        (std::vector<std::string>{"1 2 3", "4 5 6"}));
 }
 
 int main(int argc, char* argv[]) {
@@ -40,6 +55,7 @@ int main(int argc, char* argv[]) {
     manipulator();
     stream_op_for_containers();
     string_manipulation();
-    read_tuple();
+    read_array();
+    read_lines();
     return 0;
 }

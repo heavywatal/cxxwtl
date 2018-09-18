@@ -140,10 +140,50 @@ inline std::string replace_all(const std::string& patt, const std::string& repl,
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 // Reader
 
-inline std::vector<std::string> readlines(std::istream& ist) {
-    std::vector<std::string> lines;
-    std::string buffer;
-    while (std::getline(ist, buffer)) {
+template <class T> inline
+void read(std::istream& ist, std::vector<T>* v) {
+    v->assign(std::istream_iterator<T>(ist), std::istream_iterator<T>{});
+}
+
+template <class T> inline
+void read(const std::string& line, std::vector<T>* v) {
+    std::istringstream iss(line);
+    read(iss, v);
+}
+
+template <size_t I, typename... Ts, typename std::enable_if<I == sizeof...(Ts), std::nullptr_t>::type = nullptr> inline
+void read(std::istream&, std::tuple<Ts...>*) {;}
+
+template <size_t I=0u, typename... Ts, typename std::enable_if<I < sizeof...(Ts), std::nullptr_t>::type = nullptr> inline
+void read(std::istream& ist, std::tuple<Ts...>* x) {
+    ist >> std::get<I>(*x);
+    read<I + 1u>(ist, x);
+}
+
+template <typename... Ts> inline
+void read(const std::string& line, std::tuple<Ts...>* x) {
+    std::istringstream iss(line);
+    read<0u>(iss, x);
+}
+
+template <class T> inline
+std::istream& getline(std::istream& ist, T& buffer) {
+    std::string buffer_impl;
+    auto& ret = std::getline(ist, buffer_impl);
+    if (ret) read(buffer_impl, &buffer);
+    return ret;
+}
+
+template <> inline
+std::istream& getline<std::string>(std::istream& ist, std::string& buffer) {
+    return std::getline(ist, buffer);
+}
+
+template <class T = std::string> inline
+std::vector<T> readlines(std::istream& ist) {
+    std::vector<T> lines;
+    T buffer;
+    while (wtl::getline(ist, buffer)) {
         lines.push_back(buffer);
     }
     return lines;
@@ -174,29 +214,11 @@ read_header(std::istream& ist, const char* sep="\t") {
 template <class T> inline std::vector<std::valarray<T>>
 read_valarrays(std::istream& ist) {
     std::vector<std::valarray<T>> matrix;
-    std::string buffer;
-    std::istream_iterator<T> end;
-    while (std::getline(ist, buffer)) {
-        std::istringstream iss(buffer);
-        std::vector<T> vec(std::istream_iterator<T>(iss), end);
-        matrix.emplace_back(vec.data(), vec.size());
+    std::vector<T> buffer;
+    while (wtl::getline(ist, buffer)) {
+        matrix.emplace_back(buffer.data(), buffer.size());
     }
     return matrix;
-}
-
-template <size_t I, typename... Ts, typename std::enable_if<I == sizeof...(Ts), std::nullptr_t>::type = nullptr> inline
-void read(std::istream&, std::tuple<Ts...>*) {;}
-
-template <size_t I=0u, typename... Ts, typename std::enable_if<I < sizeof...(Ts), std::nullptr_t>::type = nullptr> inline
-void read(std::istream& ist, std::tuple<Ts...>* x) {
-    ist >> std::get<I>(*x);
-    read<I + 1u>(ist, x);
-}
-
-template <typename... Ts> inline
-void read(const std::string& line, std::tuple<Ts...>* x) {
-    std::istringstream iss(line);
-    read<0u>(iss, x);
 }
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
