@@ -184,6 +184,21 @@ read_valarrays(std::istream& ist) {
     return matrix;
 }
 
+template <size_t I, typename... Ts, typename std::enable_if<I == sizeof...(Ts), std::nullptr_t>::type = nullptr> inline
+void read(std::istream&, std::tuple<Ts...>*) {;}
+
+template <size_t I=0u, typename... Ts, typename std::enable_if<I < sizeof...(Ts), std::nullptr_t>::type = nullptr> inline
+void read(std::istream& ist, std::tuple<Ts...>* x) {
+    ist >> std::get<I>(*x);
+    read<I + 1u>(ist, x);
+}
+
+template <typename... Ts> inline
+void read(const std::string& line, std::tuple<Ts...>* x) {
+    std::istringstream iss(line);
+    read<0u>(iss, x);
+}
+
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 // experimental iterator
 
