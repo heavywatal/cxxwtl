@@ -20,6 +20,7 @@ set(source_files
   numeric.cpp
   random.cpp
   scope.cpp
+  string.cpp
 )
 
 find_package(Threads)

@@ -17,15 +17,6 @@ inline void stream_op_for_containers() {
     std::cout << m << std::endl;
 }
 
-inline void string_manipulation() {
-    WTL_ASSERT((wtl::split("a b\tc") == std::vector<std::string>{"a", "b", "c"}));
-    WTL_ASSERT(wtl::strip("  str  ") == "str");
-    WTL_ASSERT(wtl::startswith("prefix", "pre"));
-    WTL_ASSERT(!wtl::startswith("prefix", "post"));
-    WTL_ASSERT(wtl::endswith("suffix", "fix"));
-    WTL_ASSERT(!wtl::endswith("suffix", "suf"));
-}
-
 inline void read_array() {
     std::tuple<int, double, std::string> t;
     wtl::read("42 2.718 hello", &t);
@@ -54,7 +45,6 @@ int main(int argc, char* argv[]) {
     wtl::join(argv, argv + argc, std::cout, " ") << std::endl;
     manipulator();
     stream_op_for_containers();
-    string_manipulation();
     read_array();
     read_lines();
     return 0;
