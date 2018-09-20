@@ -7,14 +7,49 @@
 
 namespace wtl {
 
-inline std::vector<std::string>
-split(const std::string& src, const std::string& delimiter=" \t\n") {
-    if (src.empty()) return {};
-    std::vector<std::string> dst;
+template <class T> inline T
+sto(const std::string& s) {return s;}
+
+template <> inline const char*
+sto(const std::string& s) {return s.c_str();}
+
+template <> inline bool
+sto<bool>(const std::string&) {return true;}
+
+template <> inline int
+sto<int>(const std::string& s) {return std::stoi(s);}
+
+template <> inline long
+sto<long>(const std::string& s) {return std::stol(s);}
+
+template <> inline long long
+sto<long long>(const std::string& s) {return std::stoll(s);}
+
+template <> inline unsigned
+sto<unsigned>(const std::string& s) {return static_cast<unsigned>(std::stoul(s));}
+
+template <> inline unsigned long
+sto<unsigned long>(const std::string& s) {return std::stoul(s);}
+
+template <> inline unsigned long long
+sto<unsigned long long>(const std::string& s) {return std::stoull(s);}
+
+template <> inline double
+sto<double>(const std::string& s) {return std::stod(s);}
+
+template <class T> inline void
+split(const std::string& src, T* dst, const std::string& delimiter=" \t\n") {
+    if (src.empty()) return;
     for (size_t start = 0, pos = 0; pos != src.npos; start = pos + 1u) {
         pos = src.find_first_of(delimiter, start);
-        dst.push_back(src.substr(start, pos - start));
+        dst->push_back(sto<typename T::value_type>(src.substr(start, pos - start)));
     }
+}
+
+template <class T = std::string> inline std::vector<T>
+split(const std::string& src, const std::string& delimiter=" \t\n") {
+    std::vector<T> dst;
+    split(src, &dst, delimiter);
     return dst;
 }
 
