@@ -10,9 +10,15 @@
 namespace wtl {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
+#ifndef NDEBUG
+#  define WTL_EXCEPTION_STR(x) "\033[1;30m" x "\033[0m"
+#else
+#  define WTL_EXCEPTION_STR(x) ""
+#endif // NDEBUG
+
 class ExitSuccess: public std::runtime_error {
   public:
-    ExitSuccess(const char* msg="EXIT_SUCCESS") noexcept:
+    ExitSuccess(const char* msg=WTL_EXCEPTION_STR("EXIT_SUCCESS")) noexcept:
       std::runtime_error(msg) {}
 };
 
