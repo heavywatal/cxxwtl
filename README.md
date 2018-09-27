@@ -33,9 +33,13 @@ Alternatively, you can get the source code from GitHub, and install it with CMak
 % cmake -DCMAKE_INSTALL_PREFIX=${HOME}/local ..
 % make install
 ```
-Header files are installed to `${CMAKE_INSTALL_PREFIX}/include/wtl/`.
-This library can be used with `find_package()` from other CMake projects.
 
+Header files are installed to `${CMAKE_INSTALL_PREFIX}/include/wtl/`.
+This library can be imported from other CMake projects:
+```cmake
+find_package(wtl)
+target_link_libraries(${YOUR_TARGET} PRIVATE wtl::wtl)
+```
 
 ### Usage
 
