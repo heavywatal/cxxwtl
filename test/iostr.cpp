@@ -1,5 +1,5 @@
-#include "iostr.hpp"
-#include "exception.hpp"
+#include <wtl/iostr.hpp>
+#include <wtl/exception.hpp>
 
 inline void manipulator() {
     std::cout << wtl::setfill0w(3) << 7u << std::endl;

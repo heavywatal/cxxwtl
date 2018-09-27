@@ -1,6 +1,6 @@
-#include "genetic.hpp"
-#include "random.hpp"
-#include "exception.hpp"
+#include <wtl/genetic.hpp>
+#include <wtl/random.hpp>
+#include <wtl/exception.hpp>
 
 #include <iostream>
 

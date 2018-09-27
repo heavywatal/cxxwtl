@@ -1,6 +1,6 @@
-#include "numeric.hpp"
-#include "exception.hpp"
-#include "iostr.hpp"
+#include <wtl/numeric.hpp>
+#include <wtl/exception.hpp>
+#include <wtl/iostr.hpp>
 
 inline void test_integral() {
     constexpr double pi = 3.14159265358979323846;

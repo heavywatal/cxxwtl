@@ -1,5 +1,5 @@
-#include "zlib.hpp"
-#include "exception.hpp"
+#include <wtl/zlib.hpp>
+#include <wtl/exception.hpp>
 
 #include <cerrno>
 #include <sstream>

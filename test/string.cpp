@@ -1,5 +1,5 @@
-#include "string.hpp"
-#include "exception.hpp"
+#include <wtl/string.hpp>
+#include <wtl/exception.hpp>
 
 #include <iostream>
 

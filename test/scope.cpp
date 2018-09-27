@@ -1,4 +1,4 @@
-#include "scope.hpp"
+#include <wtl/scope.hpp>
 
 #include <iostream>
 

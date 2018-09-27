@@ -1,5 +1,5 @@
-#include "math.hpp"
-#include "exception.hpp"
+#include <wtl/math.hpp>
+#include <wtl/exception.hpp>
 
 int main() {
     WTL_ASSERT(wtl::pow(2u, 0u) == 1u);

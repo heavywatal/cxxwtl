@@ -1,6 +1,6 @@
-#include <cluster.hpp>
-#include <random.hpp>
-#include <iostr.hpp>
+#include <wtl/cluster.hpp>
+#include <wtl/random.hpp>
+#include <wtl/iostr.hpp>
 
 template <class T> inline
 void write(std::ostream& ost, const std::vector<T>& points, const std::vector<size_t>& labels) {
