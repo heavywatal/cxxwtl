@@ -6,8 +6,6 @@ project(wtl
 include(GNUInstallDirs)
 set(CMAKE_VERBOSE_MAKEFILE TRUE)
 
-message(STATUS "CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
-
 add_library(${PROJECT_NAME} INTERFACE)
 add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 target_include_directories(${PROJECT_NAME} INTERFACE
@@ -36,6 +34,6 @@ install(FILES ${VERSION_CONFIG}
 )
 
 include(CTest)
-if(BUILD_TESTING)
+if(BUILD_TESTING AND "${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_PROJECT_DIR}")
   add_subdirectory(test)
 endif()
