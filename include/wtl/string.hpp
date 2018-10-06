@@ -38,7 +38,7 @@ template <> inline double
 sto<double>(const std::string& s) {return std::stod(s);}
 
 template <class T> inline void
-split(const std::string& src, T* dst, const std::string& delimiter=" \t\n") {
+split(const std::string& src, const std::string& delimiter, T* dst) {
     if (src.empty()) return;
     for (size_t start = 0, pos = 0; pos != src.npos; start = pos + 1u) {
         pos = src.find_first_of(delimiter, start);
@@ -49,7 +49,7 @@ split(const std::string& src, T* dst, const std::string& delimiter=" \t\n") {
 template <class T = std::string> inline std::vector<T>
 split(const std::string& src, const std::string& delimiter=" \t\n") {
     std::vector<T> dst;
-    split(src, &dst, delimiter);
+    split(src, delimiter, &dst);
     return dst;
 }
 
