@@ -2,7 +2,6 @@
 #include <thread>
 #include <iostream>
 
-
 inline void do_something() {
     unsigned sum = 0;
     for (unsigned i = 0; i < 100u; ++i) {
@@ -13,14 +12,11 @@ inline void do_something() {
 }
 
 int main() {
-    struct rusage ru_start;
-    struct rusage ru_end;
-    getrusage(RUSAGE_SELF, &ru_start);
+    wtl::ru_epoch();
     do_something();
-    getrusage(RUSAGE_SELF, &ru_end);
-    auto utime = wtl::utime<std::micro>(ru_end, ru_start);
-    auto stime = wtl::stime<std::micro>(ru_end, ru_start);
-    std::cout << "usr: " << utime << "\n";
-    std::cout << "sys: " << stime << "\n";
+    auto ru = wtl::getrusage<std::micro, std::kilo>();
+    std::cout << "user:   " << ru.utime << "\n";
+    std::cout << "system: " << ru.stime << "\n";
+    std::cout << "memory: " << ru.maxrss << "\n";
     return 0;
 }
