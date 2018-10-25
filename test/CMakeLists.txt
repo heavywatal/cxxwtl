@@ -22,6 +22,7 @@ set(source_files
   math.cpp
   numeric.cpp
   random.cpp
+  resource.cpp
   scope.cpp
   string.cpp
 )
