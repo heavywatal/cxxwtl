@@ -71,15 +71,15 @@ inline rusage& ru_epoch(int who = RUSAGE_SELF) {
 
 template <class Period=std::micro, class Memory=std::ratio<1>>
 struct ResourceUsage {
-    ResourceUsage(const rusage& ru_start = ru_epoch(), int who = RUSAGE_SELF) {
-        auto ru_now = getrusage(who);
-        utime = wtl::utime<Period>(ru_now, ru_start);
-        stime = wtl::stime<Period>(ru_now, ru_start);
-        maxrss = detail::unit<Memory>(ru_now.ru_maxrss);
-    }
-    long utime;
-    long stime;
-    long maxrss;
+    ResourceUsage(const rusage& ru_start = ru_epoch(), int who = RUSAGE_SELF)
+    : data(getrusage(who)),
+      utime(wtl::utime<Period>(data, ru_start)),
+      stime(wtl::stime<Period>(data, ru_start)),
+      maxrss(detail::unit<Memory>(data.ru_maxrss)) {}
+    const rusage data;
+    const long utime;
+    const long stime;
+    const long maxrss;
 };
 
 template <class Period=std::micro, class Memory=std::ratio<1>>
