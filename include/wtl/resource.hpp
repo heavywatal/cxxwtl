@@ -4,7 +4,7 @@
 
 #include <sys/time.h>
 #include <sys/resource.h>
-#include <chrono>
+#include <ratio>
 
 namespace wtl {
 
@@ -65,8 +65,8 @@ inline rusage getrusage(int who = RUSAGE_SELF) {
 }
 
 inline rusage& ru_epoch(int who = RUSAGE_SELF) {
-    static rusage ru = getrusage(who);
-    return ru;
+    static rusage epoch = getrusage(who);
+    return epoch;
 }
 
 template <class Period=std::micro, class Memory=std::ratio<1>>
@@ -90,4 +90,4 @@ getrusage(const rusage& start = ru_epoch(), int who = RUSAGE_SELF) {
 
 } // namespace wtl
 
-#endif /* WTL_RESOURCE_HPP_ */
+#endif // WTL_RESOURCE_HPP_

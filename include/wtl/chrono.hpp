@@ -24,11 +24,11 @@ inline Time stopwatch (Fn&& fn) {
 
 template <class Fn>
 void benchmark(Fn&& fn, const std::string& label="", size_t times=3) {
+    std::cerr << "#BENCHMARK[ms] " << label << "\n";
     for (; times>0; --times) {
-        const auto t = stopwatch(fn);
-        std::cerr << "#BENCHMARK "
-                  << t.count() << " [ms] " << label << std::endl;
+        std::cerr << stopwatch(fn).count() << "\t" << std::flush;
     }
+    std::cout << "\n";
 }
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
@@ -57,4 +57,4 @@ inline std::string iso8601datetime() {return strftime("%FT%T%z");}
 
 } // namespace wtl
 
-#endif /* WTL_CHRONO_HPP_ */
+#endif // WTL_CHRONO_HPP_

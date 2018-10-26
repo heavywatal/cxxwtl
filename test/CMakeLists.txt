@@ -32,6 +32,7 @@ endif()
 
 find_package(Threads)
 if(Threads_FOUND)
+  set(source_files ${source_files} chrono.cpp)
   set(source_files ${source_files} concurrent.cpp)
   link_libraries(Threads::Threads)
 endif()
