@@ -22,10 +22,13 @@ set(source_files
   math.cpp
   numeric.cpp
   random.cpp
-  resource.cpp
   scope.cpp
   string.cpp
 )
+
+if(UNIX)
+  set(source_files ${source_files} resource.cpp)
+endif()
 
 find_package(Threads)
 if(Threads_FOUND)
