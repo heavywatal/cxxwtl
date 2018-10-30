@@ -44,17 +44,20 @@ namespace detail {
 template <bool Condition>
 using enable_if_t = typename std::enable_if<Condition, std::nullptr_t>::type;
 
-template <class T, detail::enable_if_t<std::is_same<T, std::ratio<1>>{}> = nullptr>
-inline long unit(long x) noexcept {return x;}
-
 template <class T, detail::enable_if_t<std::is_same<T, std::kilo>{}> = nullptr>
-inline long unit(long x) noexcept {return x >> 10;}
+inline long unit(long x) noexcept {
+#ifdef __APPLE__
+    return x >> 10;
+#else
+    return x;
+#endif
+}
 
 template <class T, detail::enable_if_t<std::is_same<T, std::mega>{}> = nullptr>
-inline long unit(long x) noexcept {return x >> 20;}
+inline long unit(long x) noexcept {return unit<std::kilo>(x) >> 10;}
 
 template <class T, detail::enable_if_t<std::is_same<T, std::giga>{}> = nullptr>
-inline long unit(long x) noexcept {return x >> 30;}
+inline long unit(long x) noexcept {return unit<std::kilo>(x) >> 20;}
 
 }
 
@@ -69,7 +72,7 @@ inline rusage& ru_epoch(int who = RUSAGE_SELF) {
     return epoch;
 }
 
-template <class Period=std::micro, class Memory=std::ratio<1>>
+template <class Period=std::micro, class Memory=std::kilo>
 struct ResourceUsage {
     ResourceUsage(const rusage& ru_start = ru_epoch(), int who = RUSAGE_SELF)
     : data(getrusage(who)),

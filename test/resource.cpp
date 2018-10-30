@@ -12,9 +12,9 @@ inline void do_something() {
 }
 
 int main() {
-    wtl::ru_epoch();
+    const auto epoch = wtl::getrusage();
     do_something();
-    auto ru = wtl::getrusage<std::micro, std::kilo>();
+    auto ru = wtl::getrusage<std::micro, std::kilo>(epoch);
     std::cout << "user:   " << ru.utime << "\n";
     std::cout << "system: " << ru.stime << "\n";
     std::cout << "memory: " << ru.maxrss << "\n";
