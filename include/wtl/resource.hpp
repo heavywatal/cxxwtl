@@ -74,12 +74,10 @@ inline rusage& ru_epoch(int who = RUSAGE_SELF) {
 
 template <class Period=std::micro, class Memory=std::kilo>
 struct ResourceUsage {
-    ResourceUsage(const rusage& ru_start = ru_epoch(), int who = RUSAGE_SELF)
-    : data(getrusage(who)),
-      utime(wtl::utime<Period>(data, ru_start)),
-      stime(wtl::stime<Period>(data, ru_start)),
-      maxrss(detail::unit<Memory>(data.ru_maxrss)) {}
-    const rusage data;
+    ResourceUsage(const rusage& ru_start = ru_epoch(), const rusage ru_now = getrusage(RUSAGE_SELF))
+    : utime(wtl::utime<Period>(ru_now, ru_start)),
+      stime(wtl::stime<Period>(ru_now, ru_start)),
+      maxrss(detail::unit<Memory>(ru_now.ru_maxrss)) {}
     const long utime;
     const long stime;
     const long maxrss;
@@ -87,8 +85,8 @@ struct ResourceUsage {
 
 template <class Period=std::micro, class Memory=std::ratio<1>>
 inline ResourceUsage<Period, Memory>
-getrusage(const rusage& start = ru_epoch(), int who = RUSAGE_SELF) {
-    return ResourceUsage<Period, Memory>(start, who);
+getrusage(const rusage& ru_start = ru_epoch(), const rusage ru_now = getrusage(RUSAGE_SELF)) {
+    return ResourceUsage<Period, Memory>(ru_start, ru_now);
 }
 
 } // namespace wtl
