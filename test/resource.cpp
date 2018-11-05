@@ -15,6 +15,7 @@ int main() {
     const auto epoch = wtl::getrusage();
     do_something();
     auto ru = wtl::getrusage<std::micro, std::kilo>(epoch);
+    std::cout << wtl::RUSAGE_HEADER << "\n" << ru << "\n";
     std::cout << "user:   " << ru.utime << "\n";
     std::cout << "system: " << ru.stime << "\n";
     std::cout << "memory: " << ru.maxrss << "\n";

@@ -5,6 +5,7 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <ratio>
+#include <iosfwd>
 
 namespace wtl {
 
@@ -88,6 +89,15 @@ inline ResourceUsage<Period, Memory>
 getrusage(const rusage& ru_start = ru_epoch(), const rusage ru_now = getrusage(RUSAGE_SELF)) {
     return ResourceUsage<Period, Memory>(ru_start, ru_now);
 }
+
+template <class Period, class Memory>
+std::ostream& operator<<(std::ostream& ost, const ResourceUsage<Period, Memory>& x) {
+    return ost << x.utime << "\t"
+               << x.stime << "\t"
+               << x.maxrss;
+}
+
+static constexpr const char* RUSAGE_HEADER = "utime\tstime\tmaxrss";
 
 } // namespace wtl
 
