@@ -97,7 +97,7 @@ std::ostream& operator<<(std::ostream& ost, const ResourceUsage<Period, Memory>&
                << x.maxrss;
 }
 
-static constexpr const char* RUSAGE_HEADER = "utime\tstime\tmaxrss";
+constexpr const char* rusage_header() {return "utime\tstime\tmaxrss";}
 
 } // namespace wtl
 
