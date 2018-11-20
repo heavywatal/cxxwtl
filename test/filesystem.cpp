@@ -4,7 +4,16 @@
 
 namespace fs = wtl::filesystem;
 
+void test_path() {
+    fs::path p("/path/to/file.tar.gz");
+    WTL_ASSERT(p.parent_path().string() == "/path/to");
+    WTL_ASSERT(p.filename().string() == "file.tar.gz");
+    WTL_ASSERT(p.stem().string() == "file.tar");
+    WTL_ASSERT(p.extension().string() == ".gz");
+}
+
 int main() {
+    test_path();
     fs::create_directory("filesystem");
     auto path0 = fs::current_path();
     std::cout << "pwd: " << path0 << std::endl;
