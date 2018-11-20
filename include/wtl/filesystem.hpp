@@ -11,6 +11,7 @@
 #include <cerrno>
 #include <stdexcept>
 #include <string>
+#include <ostream>
 #include <regex>
 
 namespace wtl {
@@ -19,7 +20,11 @@ namespace filesystem {
 
 class path {
   public:
-    path(const std::string& x): data_(x) {}
+    path(std::string&& x): data_(std::move(x)) {}
+
+    template <class T>
+    path(const T& x): data_(x) {}
+
     path parent_path() const {
         std::regex patt("/[^/]*$");
         std::string fmt = "";
@@ -41,6 +46,15 @@ class path {
         std::regex patt("\\.[^.]*$");
         std::regex_search(data_, mobj, patt);
         return path(mobj.str(0));
+    }
+    friend bool operator==(const path& lhs, const path& rhs) noexcept {
+        return lhs.data_ == rhs.data_;
+    }
+    friend bool operator!=(const path& lhs, const path& rhs) noexcept {
+        return lhs.data_ != rhs.data_;
+    }
+    friend std::ostream& operator<<(std::ostream& ost, const path& p) noexcept {
+        return ost << '"' << p.string() << '"';
     }
     std::string string() const {return data_;}
   private:
