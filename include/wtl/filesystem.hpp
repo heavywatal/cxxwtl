@@ -61,29 +61,29 @@ class path {
     const std::string data_;
 };
 
-inline bool create_directory(const std::string& path) {
+inline bool create_directory(const path& p) {
 #if defined(_WIN32)
-    const int status = ::_mkdir(path.c_str());
+    const int status = ::_mkdir(p.string().c_str());
 #else
-    const int status = ::mkdir(path.c_str(), 0755);
+    const int status = ::mkdir(p.string().c_str(), 0755);
 #endif
     if (status && errno != EEXIST) {
-        throw std::runtime_error(path);
+        throw std::runtime_error(p.string());
     }
     return status == 0;
 }
 
-inline void current_path(const std::string& path) {
+inline void current_path(const path& p) {
 #if defined(_WIN32)
-    if (::_chdir(path.c_str())) {
+    if (::_chdir(p.string().c_str())) {
 #else
-    if (::chdir(path.c_str())) {
+    if (::chdir(p.string().c_str())) {
 #endif
-        throw std::runtime_error(path);
+        throw std::runtime_error(p.string());
     }
 }
 
-inline std::string current_path() {
+inline path current_path() {
     char buffer[1024];
 #if defined(_WIN32)
     if (!::_getcwd(buffer, sizeof(buffer))) {
@@ -92,7 +92,7 @@ inline std::string current_path() {
 #endif
         throw std::runtime_error(buffer);
     }
-    return std::string(buffer);
+    return path(std::string(buffer));
 }
 
 } // namespace filesystem
@@ -112,7 +112,7 @@ class ChDir {
         filesystem::current_path(origin_);
     }
   private:
-    const std::string origin_ = filesystem::current_path();
+    const filesystem::path origin_ = filesystem::current_path();
 };
 
 } // namespace wtl
