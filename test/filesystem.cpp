@@ -12,8 +12,7 @@ void test_path() {
     WTL_ASSERT(p.extension().string() == ".gz");
 }
 
-int main() {
-    test_path();
+void test_functions() {
     fs::create_directory("filesystem");
     auto path0 = fs::current_path();
     std::cout << "pwd: " << path0 << std::endl;
@@ -26,5 +25,10 @@ int main() {
       WTL_ASSERT(fs::current_path() != path1);
     }
     WTL_ASSERT(fs::current_path() == path1);
+}
+
+int main() {
+    test_path();
+    test_functions();
     return 0;
 }
