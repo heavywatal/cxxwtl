@@ -10,6 +10,7 @@ void test_path() {
     WTL_ASSERT(p.filename().string() == "file.tar.gz");
     WTL_ASSERT(p.stem().string() == "file.tar");
     WTL_ASSERT(p.extension().string() == ".gz");
+    WTL_ASSERT((p / "sub").string() == "/path/to/file.tar.gz/sub");
 }
 
 void test_functions() {

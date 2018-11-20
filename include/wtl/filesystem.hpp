@@ -47,6 +47,13 @@ class path {
         std::regex_search(data_, mobj, patt);
         return path(mobj.str(0));
     }
+    path& operator/=(const path& p) noexcept {
+        data_ += "/" + p.string();
+        return *this;
+    }
+    friend path operator/(const path& lhs, const path& rhs) noexcept {
+        return path(lhs.string()) /= rhs;
+    }
     friend bool operator==(const path& lhs, const path& rhs) noexcept {
         return lhs.data_ == rhs.data_;
     }
@@ -56,9 +63,9 @@ class path {
     friend std::ostream& operator<<(std::ostream& ost, const path& p) noexcept {
         return ost << '"' << p.string() << '"';
     }
-    std::string string() const {return data_;}
+    std::string string() const noexcept {return data_;}
   private:
-    const std::string data_;
+    std::string data_;
 };
 
 inline bool create_directory(const path& p) {
