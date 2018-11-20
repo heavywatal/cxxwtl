@@ -11,10 +11,41 @@
 #include <cerrno>
 #include <stdexcept>
 #include <string>
+#include <regex>
 
 namespace wtl {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 namespace filesystem {
+
+class path {
+  public:
+    path(const std::string& x): data_(x) {}
+    path parent_path() const {
+        std::regex patt("/[^/]*$");
+        std::string fmt = "";
+        return path(std::regex_replace(data_, patt, fmt));
+    }
+    path filename() const {
+        std::smatch mobj;
+        std::regex patt("[^/]*$");
+        std::regex_search(data_, mobj, patt);
+        return path(mobj.str(0));
+    }
+    path stem() const {
+        std::regex patt("\\.[^.]*$");
+        std::string fmt = "";
+        return path(std::regex_replace(data_, patt, fmt)).filename();
+    }
+    path extension() const {
+        std::smatch mobj;
+        std::regex patt("\\.[^.]*$");
+        std::regex_search(data_, mobj, patt);
+        return path(mobj.str(0));
+    }
+    std::string string() const {return data_;}
+  private:
+    const std::string data_;
+};
 
 inline bool create_directory(const std::string& path) {
 #if defined(_WIN32)
