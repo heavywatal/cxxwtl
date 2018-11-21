@@ -12,7 +12,6 @@
 #include <stdexcept>
 #include <string>
 #include <ostream>
-#include <regex>
 
 namespace wtl {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
@@ -27,27 +26,27 @@ class path {
 
     path parent_path() const {
         if (data_ == "/") return *this;
-        std::regex patt("/[^/]*$");
-        std::string fmt = "";
-        return path(std::regex_replace(data_, patt, fmt));
+        auto pos = data_.find_last_of('/');
+        return path(data_.substr(0u, pos));
     }
     path filename() const {
         if (data_ == "/") return *this;
-        std::smatch mobj;
-        std::regex patt("[^/]*$");
-        std::regex_search(data_, mobj, patt);
-        return path(mobj.str(0));
+        auto pos = data_.find_last_of('/');
+        return path(data_.substr(++pos));
     }
     path stem() const {
-        std::regex patt("\\.[^.]+$");
-        std::string fmt = "";
-        return path(std::regex_replace(data_, patt, fmt)).filename();
+        auto name = filename().string();
+        auto pos = name.find_last_of('.');
+        if (pos == std::string::npos) return path("");
+        if (pos == name.size() - 1u) return path(name);
+        return path(name.substr(0u, pos));
     }
     path extension() const {
-        std::smatch mobj;
-        std::regex patt("\\.[^.]+$");
-        std::regex_search(data_, mobj, patt);
-        return path(mobj.str(0));
+        auto name = filename().string();
+        auto pos = name.find_last_of('.');
+        if (pos == std::string::npos) return path("");
+        if (pos == name.size() - 1u) return path("");
+        return path(name.substr(pos));
     }
     path& append(const path& p) {
         if (p.is_absolute()) {
@@ -82,7 +81,7 @@ class path {
     friend std::ostream& operator<<(std::ostream& ost, const path& p) {
         return ost << '"' << p.string() << '"';
     }
-    bool is_absolute() const {return data_[0] == '/';}
+    bool is_absolute() const {return data_[0u] == '/';}
     bool is_relative() const {return !is_absolute();}
     std::string string() const noexcept {return data_;}
   private:

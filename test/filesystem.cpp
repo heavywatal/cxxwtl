@@ -1,6 +1,5 @@
 #include <wtl/filesystem.hpp>
 #include <wtl/exception.hpp>
-#include <iostream>
 
 namespace fs = wtl::filesystem;
 
@@ -42,8 +41,8 @@ inline void test_append() {
 }
 
 inline void test_functions() {
-    fs::create_directory("filesystem");
     auto path0 = fs::current_path();
+    fs::create_directory("filesystem");
     fs::current_path("filesystem");
     auto path1 = fs::current_path();
     WTL_ASSERT(path1.parent_path() == path0);
