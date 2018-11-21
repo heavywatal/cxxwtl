@@ -5,32 +5,42 @@ namespace fs = wtl::filesystem;
 
 inline void test_parent_path() {
     WTL_ASSERT(fs::path("/dir/file.txt").parent_path().string() == "/dir");
-    WTL_ASSERT(fs::path("/dir/sub/").parent_path().string() == "/dir/sub");
+    WTL_ASSERT(fs::path("/dir/.").parent_path().string() == "/dir");
+    WTL_ASSERT(fs::path("/dir/..").parent_path().string() == "/dir");
+    WTL_ASSERT(fs::path("/dir/").parent_path().string() == "/dir");
+    WTL_ASSERT(fs::path("/dir").parent_path().string() == "/");
     WTL_ASSERT(fs::path("/").parent_path().string() == "/");
+    WTL_ASSERT(fs::path("dir").parent_path().string() == "");
 }
 
 inline void test_filename() {
     WTL_ASSERT(fs::path("/dir/file.txt").filename().string() == "file.txt");
-    WTL_ASSERT(fs::path("/dir/sub/").filename().string() == "");
-    WTL_ASSERT(fs::path("/").filename().string() == "/");
-    WTL_ASSERT(fs::path(".").filename().string() == ".");
-    WTL_ASSERT(fs::path("..").filename().string() == "..");
+    WTL_ASSERT(fs::path("/dir/.").filename().string() == ".");
+    WTL_ASSERT(fs::path("/dir/..").filename().string() == "..");
+    WTL_ASSERT(fs::path("/dir/").filename().string() == "");
+    WTL_ASSERT(fs::path("/dir").filename().string() == "dir");
+    WTL_ASSERT(fs::path("/").filename().string() == "");
+    WTL_ASSERT(fs::path("dir").filename().string() == "dir");
 }
 
 inline void test_stem() {
     WTL_ASSERT(fs::path("/dir/file.txt").stem().string() == "file");
     WTL_ASSERT(fs::path("/dir/file.tar.gz").stem().string() == "file.tar");
-    WTL_ASSERT(fs::path("/dir/").stem().string() == "");
+    WTL_ASSERT(fs::path("/dir/file").stem().string() == "file");
+    WTL_ASSERT(fs::path("/dir/.dotfile").stem().string() == ".dotfile");
     WTL_ASSERT(fs::path("/dir/.").stem().string() == ".");
-    WTL_ASSERT(fs::path("..").stem().string() == "..");
+    WTL_ASSERT(fs::path("/dir/..").stem().string() == "..");
+    WTL_ASSERT(fs::path("/dir/").stem().string() == "");
 }
 
 inline void test_extension() {
     WTL_ASSERT(fs::path("/dir/file.txt").extension().string() == ".txt");
     WTL_ASSERT(fs::path("/dir/file.tar.gz").extension().string() == ".gz");
-    WTL_ASSERT(fs::path("/dir/").extension().string() == "");
+    WTL_ASSERT(fs::path("/dir/file").extension().string() == "");
+    WTL_ASSERT(fs::path("/dir/.dotfile").extension().string() == "");
     WTL_ASSERT(fs::path("/dir/.").extension().string() == "");
-    WTL_ASSERT(fs::path("..").extension().string() == "");
+    WTL_ASSERT(fs::path("/dir/..").extension().string() == "");
+    WTL_ASSERT(fs::path("/dir/").extension().string() == "");
 }
 
 inline void test_append() {

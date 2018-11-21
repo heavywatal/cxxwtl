@@ -31,27 +31,27 @@ class path {
     path(const T& x): data_(x) {}
 
     path parent_path() const {
-        if (data_ == "/") return *this;
         auto pos = data_.find_last_of('/');
+        if (pos == std::string::npos) return path("");
+        if (pos == 0u) return path("/");
         return path(data_.substr(0u, pos));
     }
     path filename() const {
-        if (data_ == "/") return *this;
         auto pos = data_.find_last_of('/');
         return path(data_.substr(++pos));
     }
     path stem() const {
         auto name = filename().string();
         auto pos = name.find_last_of('.');
-        if (pos == std::string::npos) return path("");
-        if (pos == name.size() - 1u) return path(name);
+        if (pos == std::string::npos || pos == 0u) return path(name);
+        if (pos == name.size() - 1u && name == "..") return path(name);
         return path(name.substr(0u, pos));
     }
     path extension() const {
         auto name = filename().string();
         auto pos = name.find_last_of('.');
-        if (pos == std::string::npos) return path("");
-        if (pos == name.size() - 1u) return path("");
+        if (pos == std::string::npos || pos == 0u) return path("");
+        if (pos == name.size() - 1u && name == "..") return path("");
         return path(name.substr(pos));
     }
     path& append(const path& p) {
@@ -87,7 +87,7 @@ class path {
     friend std::ostream& operator<<(std::ostream& ost, const path& p) {
         return ost << '"' << p.string() << '"';
     }
-    bool is_absolute() const {return data_[0u] == '/';}
+    bool is_absolute() const {return data_.front() == '/';}
     bool is_relative() const {return !is_absolute();}
     const char* c_str() const noexcept {return data_.c_str();}
     std::string string() const noexcept {return data_;}
@@ -114,7 +114,7 @@ inline path current_path() {
     if (!::getcwd(buffer, sizeof(buffer))) {
         throw std::runtime_error(buffer);
     }
-    return path(std::string(buffer));
+    return path(buffer);
 }
 
 inline bool exists(const path& p) {
