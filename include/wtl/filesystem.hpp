@@ -83,6 +83,7 @@ class path {
     }
     bool is_absolute() const {return data_[0u] == '/';}
     bool is_relative() const {return !is_absolute();}
+    const char* c_str() const noexcept {return data_.c_str();}
     std::string string() const noexcept {return data_;}
   private:
     std::string data_;
@@ -90,9 +91,9 @@ class path {
 
 inline bool create_directory(const path& p) {
 #if defined(_WIN32)
-    const int status = ::_mkdir(p.string().c_str());
+    const int status = ::_mkdir(p.c_str());
 #else
-    const int status = ::mkdir(p.string().c_str(), 0755);
+    const int status = ::mkdir(p.c_str(), 0755);
 #endif
     if (status && errno != EEXIST) {
         throw std::runtime_error(p.string());
@@ -102,9 +103,9 @@ inline bool create_directory(const path& p) {
 
 inline void current_path(const path& p) {
 #if defined(_WIN32)
-    if (::_chdir(p.string().c_str())) {
+    if (::_chdir(p.c_str())) {
 #else
-    if (::chdir(p.string().c_str())) {
+    if (::chdir(p.c_str())) {
 #endif
         throw std::runtime_error(p.string());
     }
