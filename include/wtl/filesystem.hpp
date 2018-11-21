@@ -5,10 +5,10 @@
 #if defined(_WIN32)
   #include <direct.h>
   #include <io.h>
+  #define mkdir(name, mode) _mkdir(name)
+  #define chdir _chdir
+  #define getcwd _getcwd
   #define access _access
-  #define R_OK 4
-  #define W_OK 2
-  #define X_OK R_OK
   #define F_OK 0
 #else
   #include <sys/stat.h>
@@ -96,11 +96,7 @@ class path {
 };
 
 inline bool create_directory(const path& p) {
-#if defined(_WIN32)
-    const int status = ::_mkdir(p.c_str());
-#else
     const int status = ::mkdir(p.c_str(), 0755);
-#endif
     if (status && errno != EEXIST) {
         throw std::runtime_error(p.string());
     }
@@ -108,22 +104,14 @@ inline bool create_directory(const path& p) {
 }
 
 inline void current_path(const path& p) {
-#if defined(_WIN32)
-    if (::_chdir(p.c_str())) {
-#else
     if (::chdir(p.c_str())) {
-#endif
         throw std::runtime_error(p.string());
     }
 }
 
 inline path current_path() {
     char buffer[1024];
-#if defined(_WIN32)
-    if (!::_getcwd(buffer, sizeof(buffer))) {
-#else
     if (!::getcwd(buffer, sizeof(buffer))) {
-#endif
         throw std::runtime_error(buffer);
     }
     return path(std::string(buffer));
