@@ -43,6 +43,7 @@ inline void test_append() {
 inline void test_functions() {
     auto path0 = fs::current_path();
     fs::create_directory("filesystem");
+    WTL_ASSERT(fs::exists("filesystem"));
     fs::current_path("filesystem");
     auto path1 = fs::current_path();
     WTL_ASSERT(path1.parent_path() == path0);

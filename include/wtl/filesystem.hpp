@@ -4,6 +4,12 @@
 
 #if defined(_WIN32)
   #include <direct.h>
+  #include <io.h>
+  #define access _access
+  #define R_OK 4
+  #define W_OK 2
+  #define X_OK R_OK
+  #define F_OK 0
 #else
   #include <sys/stat.h>
   #include <unistd.h>
@@ -121,6 +127,10 @@ inline path current_path() {
         throw std::runtime_error(buffer);
     }
     return path(std::string(buffer));
+}
+
+inline bool exists(const path& p) {
+    return !::access(p.c_str(), F_OK);
 }
 
 } // namespace filesystem
