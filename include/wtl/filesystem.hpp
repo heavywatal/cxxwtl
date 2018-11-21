@@ -47,9 +47,19 @@ class path {
         std::regex_search(data_, mobj, patt);
         return path(mobj.str(0));
     }
-    path& operator/=(const path& p) noexcept {
+    path& append(const path& p) noexcept {
         data_ += "/" + p.string();
         return *this;
+    }
+    path& operator/=(const path& p) noexcept {
+        return append(p);
+    }
+    path& concat(const path& p) noexcept {
+        data_ += p.string();
+        return *this;
+    }
+    path& operator+=(const path& p) noexcept {
+        return concat(p);
     }
     friend path operator/(const path& lhs, const path& rhs) noexcept {
         return path(lhs.string()) /= rhs;
