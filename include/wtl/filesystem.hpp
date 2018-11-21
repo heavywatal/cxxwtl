@@ -26,42 +26,51 @@ class path {
     path(const T& x): data_(x) {}
 
     path parent_path() const {
+        if (data_ == "/") return *this;
         std::regex patt("/[^/]*$");
         std::string fmt = "";
         return path(std::regex_replace(data_, patt, fmt));
     }
     path filename() const {
+        if (data_ == "/") return *this;
         std::smatch mobj;
         std::regex patt("[^/]*$");
         std::regex_search(data_, mobj, patt);
         return path(mobj.str(0));
     }
     path stem() const {
-        std::regex patt("\\.[^.]*$");
+        std::regex patt("\\.[^.]+$");
         std::string fmt = "";
         return path(std::regex_replace(data_, patt, fmt)).filename();
     }
     path extension() const {
         std::smatch mobj;
-        std::regex patt("\\.[^.]*$");
+        std::regex patt("\\.[^.]+$");
         std::regex_search(data_, mobj, patt);
         return path(mobj.str(0));
     }
-    path& append(const path& p) noexcept {
-        data_ += "/" + p.string();
+    path& append(const path& p) {
+        if (p.is_absolute()) {
+            data_ = p.data_;
+        } else {
+            if (data_.back() != '/') {
+                data_ += '/';
+            }
+            data_ += p.string();
+        }
         return *this;
     }
-    path& operator/=(const path& p) noexcept {
+    path& operator/=(const path& p) {
         return append(p);
     }
-    path& concat(const path& p) noexcept {
+    path& concat(const path& p) {
         data_ += p.string();
         return *this;
     }
-    path& operator+=(const path& p) noexcept {
+    path& operator+=(const path& p) {
         return concat(p);
     }
-    friend path operator/(const path& lhs, const path& rhs) noexcept {
+    friend path operator/(const path& lhs, const path& rhs) {
         return path(lhs.string()) /= rhs;
     }
     friend bool operator==(const path& lhs, const path& rhs) noexcept {
@@ -70,9 +79,11 @@ class path {
     friend bool operator!=(const path& lhs, const path& rhs) noexcept {
         return lhs.data_ != rhs.data_;
     }
-    friend std::ostream& operator<<(std::ostream& ost, const path& p) noexcept {
+    friend std::ostream& operator<<(std::ostream& ost, const path& p) {
         return ost << '"' << p.string() << '"';
     }
+    bool is_absolute() const {return data_[0] == '/';}
+    bool is_relative() const {return !is_absolute();}
     std::string string() const noexcept {return data_;}
   private:
     std::string data_;
