@@ -17,6 +17,7 @@
 #include <cerrno>
 #include <stdexcept>
 #include <string>
+#include <algorithm>
 #include <ostream>
 
 namespace wtl {
