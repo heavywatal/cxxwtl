@@ -4,6 +4,7 @@
 #include <iostream>
 
 void test_sto() {
+    WTL_ASSERT(!wtl::sto<bool>("0"));
     WTL_ASSERT(wtl::sto<bool>("1"));
     WTL_ASSERT(wtl::sto<int>("42") == 42);
     WTL_ASSERT(wtl::sto<long>("1729") == 1729l);

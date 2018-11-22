@@ -14,7 +14,7 @@ template <> inline const char*
 sto(const std::string& s) {return s.c_str();}
 
 template <> inline bool
-sto<bool>(const std::string&) {return true;}
+sto<bool>(const std::string& s) {return static_cast<bool>(std::stoi(s));}
 
 template <> inline int
 sto<int>(const std::string& s) {return std::stoi(s);}
