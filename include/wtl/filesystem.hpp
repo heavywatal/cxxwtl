@@ -37,11 +37,39 @@ class path {
     path() = default;
     path(const path&) = default;
     path(path&&) = default;
-    ~path() = default;
-
+    path(string_type&& x): native_(std::move(x)) {to_native(native_);}
     template <class T>
     path(const T& x): native_(x) {to_native(native_);}
-    path(string_type&& x): native_(std::move(x)) {to_native(native_);}
+
+    ~path() = default;
+
+    path& operator=(const path&) = default;
+    path& operator=(path&&) = default;
+    path& operator=(string_type&& s) {return *this = path(std::move(s));}
+    template <class T>
+    path& operator=(const T& s) {return *this = path(s);}
+
+    path& append(const path& p) {
+        if (p.is_absolute()) {
+            native_ = p.native_;
+        } else {
+            if (native_.back() != preferred_separator) {
+                native_ += preferred_separator;
+            }
+            native_ += p.native();
+        }
+        return *this;
+    }
+    path& operator/=(const path& p) {
+        return append(p);
+    }
+    path& concat(const path& p) {
+        native_ += p.native();
+        return *this;
+    }
+    path& operator+=(const path& p) {
+        return concat(p);
+    }
 
     path parent_path() const {
         auto pos = native_.find_last_of(preferred_separator);
@@ -67,29 +95,11 @@ class path {
         if (pos == name.size() - 1u && name == "..") return path();
         return path(name.substr(pos));
     }
-    path& append(const path& p) {
-        if (p.is_absolute()) {
-            native_ = p.native_;
-        } else {
-            if (native_.back() != preferred_separator) {
-                native_ += preferred_separator;
-            }
-            native_ += p.native();
-        }
-        return *this;
-    }
-    path& operator/=(const path& p) {
-        return append(p);
-    }
-    path& concat(const path& p) {
-        native_ += p.native();
-        return *this;
-    }
-    path& operator+=(const path& p) {
-        return concat(p);
-    }
+
+    bool empty() const noexcept {return native_.empty();}
     bool is_absolute() const {return native_.front() == preferred_separator;}
     bool is_relative() const {return !is_absolute();}
+
     const string_type& native() const noexcept {return native_;}
     const value_type* c_str() const noexcept {return native_.c_str();}
     operator string_type() const noexcept {return native_;}
@@ -99,6 +109,7 @@ class path {
         to_generic(copy);
         return copy;
     }
+
   private:
 #ifdef _WIN32
     void to_native(string_type& data) const {
