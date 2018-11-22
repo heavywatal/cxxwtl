@@ -76,19 +76,19 @@ inline bool endswith(const std::string& str, const std::string& suffix) {
            (str.compare(str_size -= suffix.size(), suffix.size(), suffix) == 0);
 }
 
-inline std::string replace_all(const std::string& patt, const std::string& repl, const std::string& src) {
-    std::string result;
-    std::string::size_type pos_before(0);
-    std::string::size_type pos(0);
-    std::string::size_type len(patt.size());
-    while ((pos = src.find(patt, pos)) != std::string::npos) {
-        result.append(src, pos_before, pos-pos_before);
-        result.append(repl);
-        pos += len;
-        pos_before = pos;
+// Use std::replace() in <algorithm> for single char substitution
+inline void replace(std::string* s, const std::string& patt, const std::string& repl) {
+    const auto pattsize = patt.size();
+    std::string::size_type pos = 0u;
+    while ((pos = s->find(patt, pos)) != std::string::npos) {
+        s->replace(pos, pattsize, repl);
+        pos += pattsize;
     }
-    result.append(src, pos_before, src.size()-pos_before);
-    return result;
+}
+
+inline std::string replace(std::string s, const std::string& patt, const std::string& repl) {
+    replace(&s, patt, repl);
+    return s;
 }
 
 } // namespace wtl
