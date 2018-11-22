@@ -5,11 +5,12 @@
 #ifdef _WIN32
   #include <direct.h>
   #include <io.h>
-  #define mkdir(name, mode) _mkdir(name)
+  #define mkdir(path, mode) _mkdir(path)
   #define chdir _chdir
   #define getcwd _getcwd
   #define access _access
   #define F_OK 0
+  #include <algorithm> // replace()
 #else
   #include <sys/stat.h>
   #include <unistd.h>
@@ -17,7 +18,6 @@
 #include <cerrno>
 #include <stdexcept>
 #include <string>
-#include <algorithm>
 #include <ostream>
 
 namespace wtl {
@@ -27,27 +27,31 @@ namespace filesystem {
 class path {
   public:
     using value_type = char;
-    using string_type = std::basic_string<value_type>;
 #ifdef _WIN32
     static constexpr value_type preferred_separator = '\\';
 #else
     static constexpr value_type preferred_separator = '/';
 #endif
+    using string_type = std::basic_string<value_type>;
 
-    path(string_type&& x): data_(std::move(x)) {to_native(data_);}
+    path() = default;
+    path(const path&) = default;
+    path(path&&) = default;
+    ~path() = default;
 
     template <class T>
-    path(const T& x): data_(x) {to_native(data_);}
+    path(const T& x): native_(x) {to_native(native_);}
+    path(string_type&& x): native_(std::move(x)) {to_native(native_);}
 
     path parent_path() const {
-        auto pos = data_.find_last_of(preferred_separator);
-        if (pos == string_type::npos) return path("");
+        auto pos = native_.find_last_of(preferred_separator);
+        if (pos == string_type::npos) return path();
         if (pos == 0u) return path("/");
-        return path(data_.substr(0u, pos));
+        return path(native_.substr(0u, pos));
     }
     path filename() const {
-        auto pos = data_.find_last_of(preferred_separator);
-        return path(data_.substr(++pos));
+        auto pos = native_.find_last_of(preferred_separator);
+        return path(native_.substr(++pos));
     }
     path stem() const {
         auto name = filename().native();
@@ -59,18 +63,18 @@ class path {
     path extension() const {
         auto name = filename().native();
         auto pos = name.find_last_of('.');
-        if (pos == string_type::npos || pos == 0u) return path("");
-        if (pos == name.size() - 1u && name == "..") return path("");
+        if (pos == string_type::npos || pos == 0u) return path();
+        if (pos == name.size() - 1u && name == "..") return path();
         return path(name.substr(pos));
     }
     path& append(const path& p) {
         if (p.is_absolute()) {
-            data_ = p.data_;
+            native_ = p.native_;
         } else {
-            if (data_.back() != preferred_separator) {
-                data_ += preferred_separator;
+            if (native_.back() != preferred_separator) {
+                native_ += preferred_separator;
             }
-            data_ += p.native();
+            native_ += p.native();
         }
         return *this;
     }
@@ -78,32 +82,20 @@ class path {
         return append(p);
     }
     path& concat(const path& p) {
-        data_ += p.native();
+        native_ += p.native();
         return *this;
     }
     path& operator+=(const path& p) {
         return concat(p);
     }
-    friend path operator/(const path& lhs, const path& rhs) {
-        return path(lhs.native()) /= rhs;
-    }
-    friend bool operator==(const path& lhs, const path& rhs) noexcept {
-        return lhs.data_ == rhs.data_;
-    }
-    friend bool operator!=(const path& lhs, const path& rhs) noexcept {
-        return lhs.data_ != rhs.data_;
-    }
-    friend std::ostream& operator<<(std::ostream& ost, const path& p) {
-        return ost << '"' << p.string() << '"';
-    }
-    bool is_absolute() const {return data_.front() == preferred_separator;}
+    bool is_absolute() const {return native_.front() == preferred_separator;}
     bool is_relative() const {return !is_absolute();}
-    const string_type& native() const noexcept {return data_;}
-    const value_type* c_str() const noexcept {return data_.c_str();}
-    operator string_type() const noexcept {return data_;}
-    std::string string() const noexcept {return data_;}
+    const string_type& native() const noexcept {return native_;}
+    const value_type* c_str() const noexcept {return native_.c_str();}
+    operator string_type() const noexcept {return native_;}
+    std::string string() const noexcept {return native_;}
     std::string generic_string() const noexcept {
-        std::string copy(data_);
+        std::string copy(native_);
         to_generic(copy);
         return copy;
     }
@@ -116,11 +108,24 @@ class path {
         std::replace(data.begin(), data.end(), preferred_separator, '/');
     }
 #else
-    void to_native(string_type&) const {}
-    void to_generic(string_type&) const {}
+    void to_native(string_type&) const noexcept {}
+    void to_generic(string_type&) const noexcept {}
 #endif
-    string_type data_;
+    string_type native_;
 };
+
+path operator/(const path& lhs, const path& rhs) {
+    return path(lhs) /= rhs;
+}
+bool operator==(const path& lhs, const path& rhs) noexcept {
+    return lhs.native() == rhs.native();
+}
+bool operator!=(const path& lhs, const path& rhs) noexcept {
+    return lhs.native() != rhs.native();
+}
+std::ostream& operator<<(std::ostream& ost, const path& p) {
+    return ost << '"' << p.string() << '"';
+}
 
 inline bool create_directory(const path& p) {
     const int status = ::mkdir(p.c_str(), 0755);
