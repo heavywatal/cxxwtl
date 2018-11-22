@@ -114,16 +114,16 @@ class path {
     string_type native_;
 };
 
-path operator/(const path& lhs, const path& rhs) {
+inline path operator/(const path& lhs, const path& rhs) {
     return path(lhs) /= rhs;
 }
-bool operator==(const path& lhs, const path& rhs) noexcept {
+inline bool operator==(const path& lhs, const path& rhs) noexcept {
     return lhs.native() == rhs.native();
 }
-bool operator!=(const path& lhs, const path& rhs) noexcept {
+inline bool operator!=(const path& lhs, const path& rhs) noexcept {
     return lhs.native() != rhs.native();
 }
-std::ostream& operator<<(std::ostream& ost, const path& p) {
+inline std::ostream& operator<<(std::ostream& ost, const path& p) {
     return ost << '"' << p.string() << '"';
 }
 
