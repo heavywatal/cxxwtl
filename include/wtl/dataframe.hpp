@@ -35,6 +35,7 @@ class Column: public ColumnBase {
     std::ostream& write_at(std::ostream& ost, size_t i) const override {
         return ost << vec_[i];
     }
+    const std::vector<T>& data() const noexcept {return vec_;}
   private:
     std::vector<T> vec_;
 };
@@ -64,12 +65,16 @@ class DataFrame {
     std::ostream& write(std::ostream& ost, const char* sep = "\t") const {
         write_header(ost, sep);
         for (size_t i = 0; i < nrow_; ++i) {
-            write_at(ost, i, sep);
+            write_row(ost, i, sep);
         }
         return ost;
     }
     friend std::ostream& operator<<(std::ostream &ost, const DataFrame& x) {
         return x.write(ost);
+    }
+    template <class T>
+    const std::vector<T>& at(size_t i) const {
+        return dynamic_cast<detail::Column<T>*>(table_.at(i).get())->data();
     }
     size_t nrow() const noexcept {return nrow_;}
     size_t ncol() const noexcept {return colnames_.size();}
@@ -94,7 +99,7 @@ class DataFrame {
         ost << "\n";
         return ost;
     }
-    std::ostream& write_at(std::ostream& ost, size_t i, const char* sep = "\t") const {
+    std::ostream& write_row(std::ostream& ost, size_t i, const char* sep = "\t") const {
         if (table_.empty()) return ost;
         auto it = table_.begin();
         (*it)->write_at(ost, i);
