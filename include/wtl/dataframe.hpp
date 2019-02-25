@@ -44,22 +44,31 @@ class Column: public ColumnBase {
 
 class DataFrame {
   public:
+    DataFrame() = default;
+    DataFrame(const DataFrame&) = delete;
+    DataFrame(DataFrame&&) = delete;
+    ~DataFrame() noexcept = default;
+
     template <class T>
-    void add_column(const std::string& name) {
+    DataFrame& init_column(std::string name) {
         if (nrow_ > 0u) {
-            throw std::runtime_error("cannot add a column after append()");
+            throw std::logic_error("cannot add columns after add_row()");
         }
-        colnames_.push_back(name);
-        table_.emplace_back(std::make_unique<detail::Column<T>>());
+        colnames_.emplace_back(std::move(name));
+        columns_.emplace_back(std::make_unique<detail::Column<T>>());
+        return *this;
     }
-    void reserve(size_t n) {
-        for (const auto& column: table_) {
+    void reserve_cols(size_t n) {
+        columns_.reserve(n);
+    }
+    void reserve_rows(size_t n) {
+        for (const auto& column: columns_) {
             column->reserve(n);
         }
     }
     template <class... Args>
-    void append(Args&&... args) {
-        append_impl(0, std::forward<Args>(args)...);
+    void add_row(Args&&... args) {
+        add_row_impl(0, std::forward<Args>(args)...);
         ++nrow_;
     }
     std::ostream& write(std::ostream& ost, const char* sep = "\t") const {
@@ -74,19 +83,21 @@ class DataFrame {
     }
     template <class T>
     const std::vector<T>& at(size_t i) const {
-        return dynamic_cast<detail::Column<T>*>(table_.at(i).get())->data();
+        return dynamic_cast<detail::Column<T>*>(columns_.at(i).get())->data();
     }
+    const std::vector<std::string> colnames() const noexcept {return colnames_;}
+    size_t ncol() const noexcept {return columns_.size();}
     size_t nrow() const noexcept {return nrow_;}
-    size_t ncol() const noexcept {return colnames_.size();}
+
   private:
-    template <class T, class... Args>
-    void append_impl(size_t i, T&& x, Args&&... args) {
-        append_impl(i, std::forward<T>(x));
-        append_impl(++i, std::forward<Args>(args)...);
+    template <class T, class... Rest>
+    void add_row_impl(size_t i, T&& x, Rest&&... rest) {
+        add_row_impl(i, std::forward<T>(x));
+        add_row_impl(++i, std::forward<Rest>(rest)...);
     }
     template <class T>
-    void append_impl(size_t i, T&& x) {
-        auto p = dynamic_cast<detail::Column<T>*>(table_[i].get());
+    void add_row_impl(size_t i, T&& x) {
+        auto p = dynamic_cast<detail::Column<T>*>(columns_[i].get());
         p->push_back(std::forward<T>(x));
     }
     std::ostream& write_header(std::ostream& ost, const char* sep = "\t") const {
@@ -100,16 +111,16 @@ class DataFrame {
         return ost;
     }
     std::ostream& write_row(std::ostream& ost, size_t i, const char* sep = "\t") const {
-        if (table_.empty()) return ost;
-        auto it = table_.begin();
+        if (columns_.empty()) return ost;
+        auto it = columns_.begin();
         (*it)->write_at(ost, i);
-        while (++it != table_.end()) {
+        while (++it != columns_.end()) {
             (*it)->write_at(ost << sep, i);
         }
         ost << "\n";
         return ost;
     }
-    std::vector<std::unique_ptr<detail::ColumnBase>> table_;
+    std::vector<std::unique_ptr<detail::ColumnBase>> columns_;
     std::vector<std::string> colnames_;
     size_t nrow_ = 0u;
 };

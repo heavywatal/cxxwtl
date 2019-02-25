@@ -3,16 +3,18 @@
 
 int main() {
     wtl::DataFrame df;
-    df.add_column<int>("id");
-    df.add_column<double>("value");
-    df.add_column<std::string>("label");
-    df.reserve(8u);
-    df.append(1, 0.1, std::string("a"));
-    df.append(2, 0.2, std::string("b"));
-    df.append(3, 0.3, std::string("c"));
+    df.reserve_cols(3u);
+    df.init_column<int>("id")
+      .init_column<double>("value")
+      .init_column<std::string>("label");
+    df.reserve_rows(3u);
+    df.add_row(1, 0.1, std::string("a"));
+    df.add_row(2, 0.2, std::string("b"));
+    df.add_row(3, 0.3, std::string("c"));
     std::cout << df;
-    std::cout << df.at<int>(0u) << std::endl;
-    std::cout << df.at<double>(1u) << std::endl;
-    std::cout << df.at<std::string>(2u) << std::endl;
+    std::cout << df.colnames() << "\n";
+    std::cout << df.at<int>(0u) << "\n";
+    std::cout << df.at<double>(1u) << "\n";
+    std::cout << df.at<std::string>(2u) << "\n";
     return 0;
 }
