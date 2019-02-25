@@ -58,7 +58,8 @@ class DataFrame {
     }
     template <class... Args>
     void append(Args&&... args) {
-        append_impl(std::tuple<Args...>(args...));
+        append_impl(0, std::forward<Args>(args)...);
+        ++nrow_;
     }
     std::ostream& write(std::ostream& ost, const char* sep = "\t") const {
         write_header(ost, sep);
@@ -73,21 +74,13 @@ class DataFrame {
     size_t nrow() const noexcept {return nrow_;}
     size_t ncol() const noexcept {return colnames_.size();}
   private:
-    template <class ...T>
-    void append_impl(std::tuple<T...>&& x) {
-        append_impl(x, std::make_index_sequence<sizeof...(T)>{});
-        ++nrow_;
-    }
-    template <class Tuple, std::size_t ...Is>
-    void append_impl(Tuple& x, std::index_sequence<Is...>) {
-        (append_at<typename std::tuple_element<Is, Tuple>::type>(
-          std::integral_constant<std::size_t, Is>{},
-          std::move(std::get<Is>(x))
-        ), ...);
-        // warning: pack fold expression is a C++17 extension [-Wc++17-extensions]
+    template <class T, class... Args>
+    void append_impl(size_t i, T&& x, Args&&... args) {
+        append_impl(i, std::forward<T>(x));
+        append_impl(++i, std::forward<Args>(args)...);
     }
     template <class T>
-    void append_at(size_t i, T&& x) {
+    void append_impl(size_t i, T&& x) {
         auto p = dynamic_cast<detail::Column<T>*>(table_[i].get());
         p->push_back(std::forward<T>(x));
     }
