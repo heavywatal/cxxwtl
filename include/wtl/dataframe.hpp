@@ -26,18 +26,15 @@ class Column: public ColumnBase {
   public:
     Column() = default;
     ~Column() = default;
-    void push_back(T&& x) {
-        vec_.push_back(std::forward<T>(x));
-    }
     void reserve(size_t n) override {
-        vec_.reserve(n);
+        data_.reserve(n);
     }
     std::ostream& write_at(std::ostream& ost, size_t i) const override {
-        return ost << vec_[i];
+        return ost << data_[i];
     }
-    const std::vector<T>& data() const noexcept {return vec_;}
+    std::vector<T>& data() noexcept {return data_;}
   private:
-    std::vector<T> vec_;
+    std::vector<T> data_;
 };
 
 } // namespace detail
@@ -97,8 +94,9 @@ class DataFrame {
     }
     template <class T>
     void add_row_impl(size_t i, T&& x) {
-        auto p = dynamic_cast<detail::Column<T>*>(columns_[i].get());
-        p->push_back(std::forward<T>(x));
+        using value_type = typename std::remove_const<typename std::remove_reference<T>::type>::type;
+        auto col_i = dynamic_cast<detail::Column<value_type>*>(columns_[i].get());
+        col_i->data().push_back(std::forward<T>(x));
     }
     std::ostream& write_header(std::ostream& ost, const char* sep = "\t") const {
         if (colnames_.empty()) return ost;
