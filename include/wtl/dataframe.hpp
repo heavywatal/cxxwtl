@@ -55,18 +55,21 @@ class DataFrame {
         columns_.emplace_back(std::make_unique<detail::Column<T>>());
         return *this;
     }
-    void reserve_cols(size_t n) {
+    DataFrame& reserve_cols(size_t n) {
         columns_.reserve(n);
+        return *this;
     }
-    void reserve_rows(size_t n) {
+    DataFrame& reserve_rows(size_t n) {
         for (const auto& column: columns_) {
             column->reserve(n);
         }
+        return *this;
     }
     template <class... Args>
-    void add_row(Args&&... args) {
+    DataFrame& add_row(Args&&... args) {
         add_row_impl(0, std::forward<Args>(args)...);
         ++nrow_;
+        return *this;
     }
     std::ostream& write(std::ostream& ost, const char* sep = "\t") const {
         write_header(ost, sep);
