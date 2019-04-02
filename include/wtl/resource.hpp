@@ -5,7 +5,10 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <ratio>
+#include <string>
 #include <iosfwd>
+
+#include "dataframe.hpp"
 
 namespace wtl {
 
@@ -88,6 +91,31 @@ template <class Period=std::micro, class Memory=std::kilo>
 inline ResourceUsage<Period, Memory>
 getrusage(const rusage& ru_start = ru_epoch(), int who = RUSAGE_SELF) {
     return ResourceUsage<Period, Memory>(ru_start, getrusage(who));
+}
+
+template <class Period=std::micro, class Memory=std::kilo, class Function>
+inline ResourceUsage<Period, Memory>
+getrusage(Function&& fun) {
+    const auto epoch = getrusage();
+    fun();
+    return getrusage<Period, Memory>(epoch);
+}
+
+template <class Period=std::micro, class Memory=std::kilo, class Function>
+inline DataFrame
+benchmark(Function&& fun, const std::string& label="", unsigned times = 1u) {
+    DataFrame df;
+    df.reserve_cols(4u)
+      .init_column<long>("utime")
+      .init_column<long>("stime")
+      .init_column<long>("maxrss")
+      .init_column<std::string>("label")
+      .reserve_rows(times);
+    for (unsigned i = 0u; i < times; ++i) {
+        auto ru = getrusage(std::forward<Function>(fun));
+        df.add_row(ru.utime, ru.stime, ru.maxrss, label);
+    }
+    return df;
 }
 
 template <class Period, class Memory>
