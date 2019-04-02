@@ -42,8 +42,8 @@ class Column: public ColumnBase {
 class DataFrame {
   public:
     DataFrame() = default;
-    DataFrame(const DataFrame&) = delete;
-    DataFrame(DataFrame&&) = delete;
+    DataFrame(const DataFrame&) = default;
+    DataFrame(DataFrame&&) = default;
     ~DataFrame() noexcept = default;
 
     template <class T>
