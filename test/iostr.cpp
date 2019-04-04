@@ -2,7 +2,9 @@
 #include <wtl/exception.hpp>
 
 inline void manipulator() {
-    std::cout << wtl::setfill0w(3) << 7u << std::endl;
+    std::ostringstream oss;
+    oss << wtl::setfill0w(3) << 7u;
+    WTL_ASSERT(oss.str() == "007");
 }
 
 inline void stream_op_for_containers() {
@@ -13,8 +15,12 @@ inline void stream_op_for_containers() {
         v.push_back(i);
         m[i] = 0.5 * i;
     }
-    std::cout << v << std::endl;
-    std::cout << m << std::endl;
+    std::ostringstream oss;
+    oss << v;
+    WTL_ASSERT(oss.str() == "[0, 1, 2, 3, 4, 5]");
+    oss.str(std::string{});
+    oss << m;
+    WTL_ASSERT(oss.str() == "{0: 0, 1: 0.5, 2: 1, 3: 1.5, 4: 2, 5: 2.5}");
 }
 
 inline void read_array() {
