@@ -40,6 +40,11 @@ inline void read_lines() {
         (std::vector<std::string>{"1 2 3", "4 5 6"}));
 }
 
+inline void null_stream() {
+    wtl::null_ostream nost;
+    nost << "Error: this must no be printed\n";
+}
+
 int main(int argc, char* argv[]) {
     std::cout << "__cplusplus: " << __cplusplus << std::endl;
     wtl::join(argv, argv + argc, std::cout, " ") << std::endl;
@@ -47,5 +52,6 @@ int main(int argc, char* argv[]) {
     stream_op_for_containers();
     read_array();
     read_lines();
+    null_stream();
     return 0;
 }

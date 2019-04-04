@@ -21,6 +21,18 @@
 
 namespace wtl {
 
+class null_streambuf: public std::streambuf {
+  public:
+    int overflow(int c) {return c;}
+};
+
+class null_ostream: public std::ostream {
+  public:
+    null_ostream(): std::ostream(&streambuf_) {}
+  private:
+    null_streambuf streambuf_;
+};
+
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 // stream factory
 
