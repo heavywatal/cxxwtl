@@ -33,6 +33,16 @@ class null_ostream: public std::ostream {
     null_streambuf streambuf_;
 };
 
+inline null_streambuf* nstreambuf() {
+    static null_streambuf streambuf;
+    return &streambuf;
+}
+
+inline null_ostream& nout() {
+    static null_ostream ostream;
+    return ostream;
+}
+
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 // stream factory
 

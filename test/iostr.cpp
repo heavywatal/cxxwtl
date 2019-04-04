@@ -47,8 +47,10 @@ inline void read_lines() {
 }
 
 inline void null_stream() {
-    wtl::null_ostream nost;
-    nost << "Error: this must no be printed\n";
+    wtl::nout() << "Error: this must no be printed\n";
+    auto coutbuf = std::cout.rdbuf(wtl::nstreambuf());
+    std::cout << "Error: this must no be printed\n";
+    std::cout.rdbuf(coutbuf);
 }
 
 int main(int argc, char* argv[]) {
