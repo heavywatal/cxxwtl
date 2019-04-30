@@ -9,9 +9,6 @@ if("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
   add_compile_options(-stdlib=libc++)
 endif()
 add_compile_options(-march=native -Wall -Wextra -pedantic)
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_FLAGS_DEV "-O2 -g")
 
 set(source_files
@@ -47,5 +44,10 @@ endif()
 foreach(src IN LISTS source_files)
   get_filename_component(name_we ${src} NAME_WE)
   add_executable(test-${name_we} ${src})
+  set_target_properties(test-${name_we} PROPERTIES
+    CXX_STANDARD 14
+    CXX_STANDARD_REQUIRED ON
+    CXX_EXTENSIONS OFF
+  )
   add_test(NAME ${name_we} COMMAND $<TARGET_FILE:test-${name_we}>)
 endforeach()
