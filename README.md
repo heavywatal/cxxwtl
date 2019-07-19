@@ -19,7 +19,7 @@ Personal C++ header library
 
 ### Installation
 
-The easiest way is to use [Homebrew](https://brew.sh/)/[Linuxbrew](http://linuxbrew.sh/):
+The easiest way is to use [Homebrew](https://brew.sh/):
 ```sh
 % brew install heavywatal/tap/cxxwtl
 ```
