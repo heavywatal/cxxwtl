@@ -19,28 +19,29 @@ inline timeval operator-(const timeval& lhs, const timeval& rhs) {
     return diff;
 }
 
-template <class Period=std::micro>
+template <class TimePrefix=std::micro>
 class duration {
   public:
     duration(const timeval& tv): tv_(tv) {}
     duration(const timeval& lhs, const timeval& rhs)
     : tv_(lhs - rhs) {}
     long count() const noexcept {
-        constexpr auto denom = std::ratio_multiply<std::mega, Period>::num;
-        return Period::den * tv_.tv_sec + tv_.tv_usec / denom;
+        using FromMicro = std::ratio_divide<TimePrefix, std::micro>;
+        return TimePrefix::den * tv_.tv_sec / TimePrefix::num
+               + FromMicro::den * tv_.tv_usec / FromMicro::num;
     }
   private:
     timeval tv_;
 };
 
-template <class Period=std::micro>
+template <class TimePrefix=std::micro>
 inline long utime(const rusage& lhs, const rusage& rhs) {
-    return duration<Period>(lhs.ru_utime, rhs.ru_utime).count();
+    return duration<TimePrefix>(lhs.ru_utime, rhs.ru_utime).count();
 }
 
-template <class Period=std::micro>
+template <class TimePrefix=std::micro>
 inline long stime(const rusage& lhs, const rusage& rhs) {
-    return duration<Period>(lhs.ru_stime, rhs.ru_stime).count();
+    return duration<TimePrefix>(lhs.ru_stime, rhs.ru_stime).count();
 }
 
 namespace detail {
@@ -76,32 +77,32 @@ inline rusage& ru_epoch(int who = RUSAGE_SELF) {
     return epoch;
 }
 
-template <class Period=std::micro, class Memory=std::kilo>
+template <class TimePrefix=std::micro, class MemoryPrefix=std::kilo>
 struct ResourceUsage {
     ResourceUsage(const rusage& ru_start = ru_epoch(), rusage ru_now = getrusage(RUSAGE_SELF))
-    : utime(wtl::utime<Period>(ru_now, ru_start)),
-      stime(wtl::stime<Period>(ru_now, ru_start)),
-      maxrss(detail::unit<Memory>(ru_now.ru_maxrss)) {}
+    : utime(wtl::utime<TimePrefix>(ru_now, ru_start)),
+      stime(wtl::stime<TimePrefix>(ru_now, ru_start)),
+      maxrss(detail::unit<MemoryPrefix>(ru_now.ru_maxrss)) {}
     const long utime;
     const long stime;
     const long maxrss;
 };
 
-template <class Period=std::micro, class Memory=std::kilo>
-inline ResourceUsage<Period, Memory>
+template <class TimePrefix=std::micro, class MemoryPrefix=std::kilo>
+inline ResourceUsage<TimePrefix, MemoryPrefix>
 getrusage(const rusage& ru_start = ru_epoch(), int who = RUSAGE_SELF) {
-    return ResourceUsage<Period, Memory>(ru_start, getrusage(who));
+    return ResourceUsage<TimePrefix, MemoryPrefix>(ru_start, getrusage(who));
 }
 
-template <class Period=std::micro, class Memory=std::kilo, class Function>
-inline ResourceUsage<Period, Memory>
+template <class TimePrefix=std::micro, class MemoryPrefix=std::kilo, class Function>
+inline ResourceUsage<TimePrefix, MemoryPrefix>
 getrusage(Function&& fun) {
     const auto epoch = getrusage();
     fun();
-    return getrusage<Period, Memory>(epoch);
+    return getrusage<TimePrefix, MemoryPrefix>(epoch);
 }
 
-template <class Period=std::micro, class Memory=std::kilo, class Function>
+template <class TimePrefix=std::micro, class MemoryPrefix=std::kilo, class Function>
 inline DataFrame
 benchmark(Function&& fun, const std::string& label="", unsigned times = 1u) {
     DataFrame df;
@@ -112,14 +113,14 @@ benchmark(Function&& fun, const std::string& label="", unsigned times = 1u) {
       .init_column<std::string>("label")
       .reserve_rows(times);
     for (unsigned i = 0u; i < times; ++i) {
-        auto ru = getrusage(std::forward<Function>(fun));
+        auto ru = getrusage<TimePrefix, MemoryPrefix>(std::forward<Function>(fun));
         df.add_row(ru.utime, ru.stime, ru.maxrss, label);
     }
     return df;
 }
 
-template <class Period, class Memory>
-std::ostream& operator<<(std::ostream& ost, const ResourceUsage<Period, Memory>& x) {
+template <class TimePrefix, class MemoryPrefix>
+std::ostream& operator<<(std::ostream& ost, const ResourceUsage<TimePrefix, MemoryPrefix>& x) {
     return ost << x.utime << "\t"
                << x.stime << "\t"
                << x.maxrss;
