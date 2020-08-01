@@ -1,6 +1,6 @@
 ## cxxwtl
 
-[![Build Status](https://travis-ci.org/heavywatal/cxxwtl.svg?branch=master)](https://travis-ci.org/heavywatal/cxxwtl)
+[![Build status](https://github.com/heavywatal/cxxwtl/workflows/build/badge.svg)](https://github.com/heavywatal/cxxwtl/actions)
 
 Personal C++ header library
 
