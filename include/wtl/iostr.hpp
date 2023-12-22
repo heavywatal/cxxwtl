@@ -152,6 +152,14 @@ std::vector<T> readlines(std::istream& ist) {
 }
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
+// Writer
+
+inline std::ostream& write_if_avail(std::ostream& ost, std::streambuf* buf) {
+    if (buf->in_avail()) ost << buf;
+    return ost;
+}
+
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 // experimental iterator
 
 struct Forward {
