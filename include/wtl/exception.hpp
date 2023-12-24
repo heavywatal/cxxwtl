@@ -43,8 +43,7 @@ inline std::atomic_bool& SIGINT_RAISED() {
 
 inline void set_SIGINT_handler() {
     std::signal(SIGINT, [](int signum) {
-        signum += 0; // suppress warning of unused parameter
-        SIGINT_RAISED() = true;
+        SIGINT_RAISED() = (signum > 0);
     });
 }
 
