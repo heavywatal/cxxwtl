@@ -170,8 +170,13 @@ struct Forward {
 };
 
 template <class DelimT, class Func=Forward, class charT=char, class traitsT=std::char_traits<charT>>
-class ostream_joiner : public std::iterator<std::output_iterator_tag,void,void,void,void> {
+class ostream_joiner {
   public:
+    using iterator_category = std::output_iterator_tag;
+    using value_type = void;
+    using difference_type = void;
+    using pointer = void;
+    using reference = void;
     using char_type = charT;
     using traits_type = traitsT;
     using ostream_type = std::basic_ostream<char_type, traits_type>;
