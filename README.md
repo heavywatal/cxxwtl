@@ -21,17 +21,16 @@ Personal C++ header library
 
 The easiest way is to use [Homebrew](https://brew.sh/):
 ```sh
-% brew install heavywatal/tap/cxxwtl
+brew install heavywatal/tap/cxxwtl
 ```
 
 Alternatively, you can get the source code from GitHub, and install it with CMake:
 ```sh
-% git clone https://github.com/heavywatal/cxxwtl.git
-% cd cxxwtl/
-% mkdir build
-% cd build/
-% cmake -DCMAKE_INSTALL_PREFIX=${HOME}/local ..
-% make install
+git clone https://github.com/heavywatal/cxxwtl.git
+cd cxxwtl/
+cmake -S . -B build -DCMAKE_INSTALL_PREFIX=${HOME}/local
+cmake --build build
+cmake --install build
 ```
 
 Header files are installed to `${CMAKE_INSTALL_PREFIX}/include/wtl/`.
@@ -57,7 +56,7 @@ int main() {
 Additional include path can be specified with `-I` option or `CPATH` environment variable.
 
 ```sh
-% clang++ -std=c++17 -O2 -Wall -Wextra -Wpedantic -I${HOME}/local/include example.cpp
-% ./a.out
-120
+clang++ -std=c++17 -O2 -Wall -Wextra -Wpedantic -I${HOME}/local/include example.cpp
+./a.out
+# 120
 ```
