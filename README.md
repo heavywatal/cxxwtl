@@ -7,7 +7,7 @@ Personal C++ header library
 
 ### Dependency
 
-- C++14 compiler
+- C++17 compiler
 - CMake
 - `zfstream.hpp` uses [boost::iostreams](http://www.boost.org/doc/libs/release/libs/iostreams/doc/)
 - `itertools.hpp` uses [boost::coroutine2](http://www.boost.org/doc/libs/release/libs/coroutine2/doc/html/)
@@ -57,7 +57,7 @@ int main() {
 Additional include path can be specified with `-I` option or `CPATH` environment variable.
 
 ```sh
-% clang++ -std=c++14 -O2 -Wall -Wextra -Wpedantic -I${HOME}/local/include example.cpp
+% clang++ -std=c++17 -O2 -Wall -Wextra -Wpedantic -I${HOME}/local/include example.cpp
 % ./a.out
 120
 ```
