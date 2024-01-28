@@ -111,11 +111,7 @@ class ThreadPool {
 
     template <class Func, class... Args>
     auto submit(Func&& func, Args&&... args) {
-#if __cplusplus >= 201703L
         using result_t = std::invoke_result_t<Func, Args...>;
-#else
-        using result_t = std::result_of_t<Func(Args...)>;
-#endif
         std::lock_guard<std::mutex> lck(mutex_);
         auto task = std::make_unique<Task<result_t>>(
             [&func, args...]{return func(args...);}
