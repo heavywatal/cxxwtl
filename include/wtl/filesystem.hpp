@@ -2,6 +2,7 @@
 #ifndef WTL_FILESYSTEM_HPP_
 #define WTL_FILESYSTEM_HPP_
 
+#include <filesystem>
 #ifdef _WIN32
   #include <direct.h>
   #include <io.h>
@@ -24,7 +25,7 @@ namespace wtl {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 namespace filesystem {
 
-class path {
+class [[deprecated("use std::filesystem")]] path {
   public:
     using value_type = char;
 #ifdef _WIN32
@@ -138,6 +139,7 @@ inline std::ostream& operator<<(std::ostream& ost, const path& p) {
     return ost << '"' << p.string() << '"';
 }
 
+[[deprecated("use std::filesystem")]]
 inline bool create_directory(const path& p) {
     const int status = ::mkdir(p.c_str(), 0755);
     if (status && errno != EEXIST) {
@@ -146,12 +148,14 @@ inline bool create_directory(const path& p) {
     return status == 0;
 }
 
+[[deprecated("use std::filesystem")]]
 inline void current_path(const path& p) {
     if (::chdir(p.c_str())) {
         throw std::runtime_error(p.native());
     }
 }
 
+[[deprecated("use std::filesystem")]]
 inline path current_path() {
     char buffer[1024];
     if (!::getcwd(buffer, sizeof(buffer))) {
@@ -160,6 +164,7 @@ inline path current_path() {
     return path(buffer);
 }
 
+[[deprecated("use std::filesystem")]]
 inline bool exists(const path& p) {
     return !::access(p.c_str(), F_OK);
 }
@@ -167,21 +172,23 @@ inline bool exists(const path& p) {
 } // namespace filesystem
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
+namespace fs = std::filesystem;
+
 // RAII
 class ChDir {
   public:
-    ChDir(const std::string& dst, bool mkdir=false) {
+    ChDir(const fs::path& dst, bool mkdir=false) {
         if (dst.empty() || dst == ".") return;
         if (mkdir) {
-            filesystem::create_directory(dst);
+            fs::create_directory(dst);
         }
-        filesystem::current_path(dst);
+        fs::current_path(dst);
     }
     ~ChDir() {
-        filesystem::current_path(origin_);
+        fs::current_path(origin_);
     }
   private:
-    const filesystem::path origin_ = filesystem::current_path();
+    const fs::path origin_ = fs::current_path();
 };
 
 } // namespace wtl

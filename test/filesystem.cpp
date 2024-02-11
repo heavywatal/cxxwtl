@@ -1,3 +1,5 @@
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
 #include <wtl/filesystem.hpp>
 #include <wtl/exception.hpp>
 
