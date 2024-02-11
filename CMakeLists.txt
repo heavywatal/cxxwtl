@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 project(wtl
-  VERSION 0.8.9
+  VERSION 0.9.0
   LANGUAGES CXX)
 
 include(GNUInstallDirs)
