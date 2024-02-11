@@ -4,6 +4,7 @@
 
 #include "string.hpp"
 
+#include <filesystem>
 #include <iostream>
 #include <sstream>
 #include <fstream>
@@ -46,8 +47,10 @@ inline null_ostream& nout() {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 // stream factory
 
+namespace fs = std::filesystem;
+
 inline std::ofstream
-make_ofs(const std::string& filepath, std::ios_base::openmode mode=std::ios_base::out) {
+make_ofs(const fs::path& filepath, std::ios_base::openmode mode=std::ios_base::out) {
     std::ofstream ofs(filepath, mode | std::ios_base::binary);
     ofs.exceptions(std::ios_base::failbit | std::ios_base::badbit);
     ofs.precision(std::cout.precision());
@@ -55,7 +58,7 @@ make_ofs(const std::string& filepath, std::ios_base::openmode mode=std::ios_base
 }
 
 inline std::ifstream
-make_ifs(const std::string& filepath, std::ios_base::openmode mode=std::ios_base::in) {
+make_ifs(const fs::path& filepath, std::ios_base::openmode mode=std::ios_base::in) {
     std::ifstream ifs(filepath, mode | std::ios_base::binary);
     ifs.exceptions(std::ios_base::failbit | std::ios_base::badbit);
     return ifs;

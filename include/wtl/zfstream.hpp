@@ -2,10 +2,10 @@
 #ifndef WTL_ZFSTREAM_HPP_
 #define WTL_ZFSTREAM_HPP_
 
+#include <filesystem>
 #include <fstream>
 #include <string>
 #include <vector>
-#include <regex>
 
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
@@ -15,27 +15,28 @@
 namespace wtl {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
+namespace fs = std::filesystem;
 namespace bios = boost::iostreams;
 
 class ozfstream: public bios::filtering_ostream {
   public:
-    ozfstream(const std::string& path, std::ios::openmode mode=std::ios::out):
+    ozfstream(const fs::path& path, std::ios::openmode mode=std::ios::out):
       bios::filtering_ostream(), path_(path) {
-        if (std::regex_search(path, std::regex("\\.gz$"))) {
+        if (path.extension() == ".gz") {
             push(bios::gzip_compressor());
         }
         push(bios::file_descriptor_sink(path, mode));
     }
-    const std::string& path() const {return path_;}
+    const fs::path& path() const {return path_;}
   private:
-    const std::string path_;
+    const fs::path path_;
 };
 
 class izfstream: public bios::filtering_istream {
   public:
-    izfstream(const std::string& path, std::ios::openmode mode=std::ios::in):
+    izfstream(const fs::path& path, std::ios::openmode mode=std::ios::in):
       bios::filtering_istream(), path_(path) {
-        if (std::regex_search(path, std::regex("\\.gz$"))) {
+        if (path.extension() == ".gz") {
             push(bios::gzip_decompressor());
         }
         push(bios::file_descriptor_source(path, mode));
@@ -55,9 +56,9 @@ class izfstream: public bios::filtering_istream {
     }
     std::string read(const char delimiter='\0') {return readline(delimiter);}
     void close() {pop();}
-    const std::string& path() const {return path_;}
+    const fs::path& path() const {return path_;}
   private:
-    const std::string path_;
+    const fs::path path_;
 };
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////

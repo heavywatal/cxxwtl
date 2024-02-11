@@ -2,6 +2,7 @@
 #ifndef WTL_ZLIB_HPP_
 #define WTL_ZLIB_HPP_
 
+#include <filesystem>
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -10,6 +11,9 @@
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 namespace wtl { namespace zlib {
+
+namespace fs = std::filesystem;
+
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
 class Exception : public std::runtime_error {
@@ -68,8 +72,8 @@ class oz_stream : public z_stream {
 template <class Fstream, class StreamBuf>
 class Initializer {
   public:
-    Initializer(const std::string& filename, std::ios_base::openmode mode)
-    : fst_(filename, mode),
+    Initializer(const fs::path& path, std::ios_base::openmode mode)
+    : fst_(path, mode),
       strbuf_(fst_.rdbuf()) {}
   protected:
     Fstream fst_;
@@ -178,17 +182,17 @@ class basic_fstream
     using Fstream = typename std::conditional<is_ist, std::ifstream, std::ofstream>::type;
     using StreamBuf = typename std::conditional<is_ist, istreambuf, ostreambuf>::type;
   public:
-    explicit basic_fstream(const std::string& filename,
+    explicit basic_fstream(const fs::path& p,
                            std::ios_base::openmode mode=is_ist ? std::ios_base::in : std::ios_base::out)
-    : detail::Initializer<Fstream, StreamBuf>(filename, mode | std::ios_base::binary),
+    : detail::Initializer<Fstream, StreamBuf>(p, mode | std::ios_base::binary),
       Stream(&this->strbuf_),
-      path_(filename) {
+      path_(p) {
         this->fst_.exceptions(std::ios_base::badbit | std::ios_base::failbit);
         this->exceptions(std::ios_base::badbit);
     }
-    const std::string& path() const noexcept {return path_;}
+    const fs::path& path() const noexcept {return path_;}
   private:
-    const std::string path_;
+    const fs::path path_;
 };
 
 using ifstream = basic_fstream<std::istream>;
