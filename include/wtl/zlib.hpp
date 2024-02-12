@@ -84,7 +84,7 @@ class istreambuf : public std::streambuf {
     istreambuf& operator=(const istreambuf&) = delete;
     istreambuf& operator=(istreambuf&&) = default;
 
-    std::streambuf::int_type underflow() override {
+    int_type underflow() override {
         if (zstrm_.avail_in == 0) {
             std::streamsize num_copied = reader_->sgetn(in_buf_, SIZE);
             zstrm_.next_in = reinterpret_cast<decltype(zstrm_.next_in)>(in_buf_);
@@ -122,14 +122,7 @@ class ostreambuf : public std::streambuf {
         deflateReset(&zstrm_);
     }
 
-    int sync() override {
-        overflow();
-        zstrm_.next_in = nullptr;
-        while (deflate_write(Z_FINISH) != Z_STREAM_END) {;}
-        return 0;
-    }
-
-    std::streambuf::int_type overflow(std::streambuf::int_type c = traits_type::eof()) override {
+    int_type overflow(int_type c = traits_type::eof()) override {
         zstrm_.next_in = reinterpret_cast<decltype(zstrm_.next_in)>(pbase());
         zstrm_.avail_in = static_cast<decltype(zstrm_.avail_in)>(pptr() - pbase());
         while (zstrm_.avail_in > 0) {
@@ -155,6 +148,14 @@ class ostreambuf : public std::streambuf {
         }
         return ret;
     }
+
+  protected:
+    virtual int sync() override {
+        overflow();
+        zstrm_.next_in = nullptr;
+        while (deflate_write(Z_FINISH) != Z_STREAM_END) {;}
+        return std::streambuf::sync();
+    }
   private:
     char in_buf_[SIZE];
     char out_buf_[SIZE];
@@ -164,21 +165,29 @@ class ostreambuf : public std::streambuf {
 
 namespace detail {
 
-template <class Fstream, class StreamBuf>
+template <class Stream>
 class FstrInitializer {
+    static constexpr bool is_ist = std::is_same_v<std::istream, Stream>;
+    using Fstream = typename std::conditional<is_ist, std::ifstream, std::ofstream>::type;
+    using StreamBuf = typename std::conditional<is_ist, istreambuf, ostreambuf>::type;
   public:
     FstrInitializer(const fs::path& path, std::ios_base::openmode mode)
-    : fst_(path, mode),
+    : fst_(path, mode | std::ios_base::binary),
       strbuf_(fst_.rdbuf()) {}
   protected:
     Fstream fst_;
     StreamBuf strbuf_;
 };
 
-template <class StringStream, class StreamBuf>
+template <class Stream>
 class SstrInitializer {
+    static constexpr bool is_ist = std::is_same_v<std::istream, Stream>;
+    using StringStream = typename std::conditional<is_ist, std::istringstream, std::ostringstream>::type;
+    using StreamBuf = typename std::conditional<is_ist, istreambuf, ostreambuf>::type;
   public:
-    SstrInitializer(): strbuf_(sst_.rdbuf()) {}
+    SstrInitializer()
+    : sst_(std::ios_base::binary),
+      strbuf_(sst_.rdbuf()) {}
   protected:
     StringStream sst_;
     StreamBuf strbuf_;
@@ -188,18 +197,12 @@ class SstrInitializer {
 
 template<class Stream>
 class basic_fstream
-: private detail::FstrInitializer<
-    typename std::conditional<std::is_same_v<std::istream, Stream>, std::ifstream, std::ofstream>::type,
-    typename std::conditional<std::is_same_v<std::istream, Stream>, istreambuf, ostreambuf>::type
-  >,
+: private detail::FstrInitializer<Stream>,
   public Stream {
-    static constexpr bool is_ist = std::is_same_v<std::istream, Stream>;
-    using Fstream = typename std::conditional<is_ist, std::ifstream, std::ofstream>::type;
-    using StreamBuf = typename std::conditional<is_ist, istreambuf, ostreambuf>::type;
   public:
     explicit basic_fstream(const fs::path& p,
-                           std::ios_base::openmode mode=is_ist ? std::ios_base::in : std::ios_base::out)
-    : detail::FstrInitializer<Fstream, StreamBuf>(p, mode | std::ios_base::binary),
+                           std::ios_base::openmode mode=std::ios_base::binary)
+    : detail::FstrInitializer<Stream>(p, mode),
       Stream(&this->strbuf_),
       path_(p) {
         this->fst_.exceptions(std::ios_base::badbit | std::ios_base::failbit);
@@ -215,22 +218,18 @@ using ofstream = basic_fstream<std::ostream>;
 
 template<class Stream>
 class basic_stringstream
-: private detail::SstrInitializer<
-    typename std::conditional<std::is_same_v<std::istream, Stream>, std::istringstream, std::ostringstream>::type,
-    typename std::conditional<std::is_same_v<std::istream, Stream>, istreambuf, ostreambuf>::type
-  >,
+: private detail::SstrInitializer<Stream>,
   public Stream {
-    static constexpr bool is_ist = std::is_same_v<std::istream, Stream>;
-    using StringStream = typename std::conditional<is_ist, std::istringstream, std::ostringstream>::type;
-    using StreamBuf = typename std::conditional<is_ist, istreambuf, ostreambuf>::type;
   public:
     explicit basic_stringstream(const std::string& str = "")
-    : detail::SstrInitializer<StringStream, StreamBuf>(),
+    : detail::SstrInitializer<Stream>(),
       Stream(&this->strbuf_) {
+        this->sst_.exceptions(std::ios_base::badbit);
+        this->exceptions(std::ios_base::badbit);
         *this << str;
       }
     std::string str() {
-      this->strbuf_.sync();
+      this->strbuf_.pubsync();
       return this->sst_.str();
     }
 };
