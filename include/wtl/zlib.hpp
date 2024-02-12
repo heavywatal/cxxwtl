@@ -69,17 +69,6 @@ class oz_stream : public z_stream {
     ~oz_stream() {deflateEnd(this);}
 };
 
-template <class Fstream, class StreamBuf>
-class Initializer {
-  public:
-    Initializer(const fs::path& path, std::ios_base::openmode mode)
-    : fst_(path, mode),
-      strbuf_(fst_.rdbuf()) {}
-  protected:
-    Fstream fst_;
-    StreamBuf strbuf_;
-};
-
 } // namespace detail
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
@@ -128,13 +117,15 @@ class ostreambuf : public std::streambuf {
     ostreambuf(ostreambuf&&) = default;
     ostreambuf& operator=(const ostreambuf&) = delete;
     ostreambuf& operator=(ostreambuf&&) = default;
-    ~ostreambuf() {sync();}
+    ~ostreambuf() {
+        sync();
+        deflateReset(&zstrm_);
+    }
 
     int sync() override {
         overflow();
         zstrm_.next_in = nullptr;
         while (deflate_write(Z_FINISH) != Z_STREAM_END) {;}
-        deflateReset(&zstrm_);
         return 0;
     }
 
@@ -171,20 +162,44 @@ class ostreambuf : public std::streambuf {
     std::streambuf* writer_;
 };
 
+namespace detail {
+
+template <class Fstream, class StreamBuf>
+class FstrInitializer {
+  public:
+    FstrInitializer(const fs::path& path, std::ios_base::openmode mode)
+    : fst_(path, mode),
+      strbuf_(fst_.rdbuf()) {}
+  protected:
+    Fstream fst_;
+    StreamBuf strbuf_;
+};
+
+template <class StringStream, class StreamBuf>
+class SstrInitializer {
+  public:
+    SstrInitializer(): strbuf_(sst_.rdbuf()) {}
+  protected:
+    StringStream sst_;
+    StreamBuf strbuf_;
+};
+
+} // namespace detail
+
 template<class Stream>
 class basic_fstream
-: private detail::Initializer<
-    typename std::conditional<std::is_same<std::istream, Stream>::value, std::ifstream, std::ofstream>::type,
-    typename std::conditional<std::is_same<std::istream, Stream>::value, istreambuf, ostreambuf>::type
+: private detail::FstrInitializer<
+    typename std::conditional<std::is_same_v<std::istream, Stream>, std::ifstream, std::ofstream>::type,
+    typename std::conditional<std::is_same_v<std::istream, Stream>, istreambuf, ostreambuf>::type
   >,
   public Stream {
-    static constexpr bool is_ist = std::is_same<std::istream, Stream>::value;
+    static constexpr bool is_ist = std::is_same_v<std::istream, Stream>;
     using Fstream = typename std::conditional<is_ist, std::ifstream, std::ofstream>::type;
     using StreamBuf = typename std::conditional<is_ist, istreambuf, ostreambuf>::type;
   public:
     explicit basic_fstream(const fs::path& p,
                            std::ios_base::openmode mode=is_ist ? std::ios_base::in : std::ios_base::out)
-    : detail::Initializer<Fstream, StreamBuf>(p, mode | std::ios_base::binary),
+    : detail::FstrInitializer<Fstream, StreamBuf>(p, mode | std::ios_base::binary),
       Stream(&this->strbuf_),
       path_(p) {
         this->fst_.exceptions(std::ios_base::badbit | std::ios_base::failbit);
@@ -197,6 +212,31 @@ class basic_fstream
 
 using ifstream = basic_fstream<std::istream>;
 using ofstream = basic_fstream<std::ostream>;
+
+template<class Stream>
+class basic_stringstream
+: private detail::SstrInitializer<
+    typename std::conditional<std::is_same_v<std::istream, Stream>, std::istringstream, std::ostringstream>::type,
+    typename std::conditional<std::is_same_v<std::istream, Stream>, istreambuf, ostreambuf>::type
+  >,
+  public Stream {
+    static constexpr bool is_ist = std::is_same_v<std::istream, Stream>;
+    using StringStream = typename std::conditional<is_ist, std::istringstream, std::ostringstream>::type;
+    using StreamBuf = typename std::conditional<is_ist, istreambuf, ostreambuf>::type;
+  public:
+    explicit basic_stringstream(const std::string& str = "")
+    : detail::SstrInitializer<StringStream, StreamBuf>(),
+      Stream(&this->strbuf_) {
+        *this << str;
+      }
+    std::string str() {
+      this->strbuf_.sync();
+      return this->sst_.str();
+    }
+};
+
+using istringstream = basic_stringstream<std::istream>;
+using ostringstream = basic_stringstream<std::ostream>;
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 }} // namespace wtl::zlib

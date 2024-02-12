@@ -17,6 +17,17 @@ void write_read() {
         archived << ifs.rdbuf();
     }
     WTL_ASSERT(original.str() == archived.str());
+
+    wtl::zlib::ostringstream zoss;
+    zoss << original.str();
+    {
+        std::ofstream{"zlib.cpp.zoss.gz"} << zoss.str();
+        std::ifstream ifs{"zlib.cpp.zoss.gz"};
+        archived.str("");
+        archived << ifs.rdbuf();
+    }
+    WTL_ASSERT(zoss.str() == archived.str());
+    WTL_ASSERT(2 * zoss.str().size() < original.str().size());
 }
 
 void exception() {
