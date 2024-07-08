@@ -58,9 +58,9 @@ inline Graph make_graph(const std::vector<std::vector<double> >& adj_matrix) {
 
 template <class GraphType, class Value> inline
 void insert_graphattr(GraphType* graph, const std::string& key, const Value& value) {
-    auto attrmap = boost::get_property(*graph, boost::graph_graph_attribute);
-    attrmap[key] = std::to_string(value);
-    boost::set_property(*graph, boost::graph_graph_attribute, attrmap);
+    auto attr_map = boost::get_property(*graph, boost::graph_graph_attribute);
+    attr_map[key] = std::to_string(value);
+    boost::set_property(*graph, boost::graph_graph_attribute, attr_map);
 }
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////

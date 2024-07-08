@@ -12,11 +12,11 @@ void write(std::ostream& ost, const std::vector<T>& points, const std::vector<si
 
 template <class T> inline
 std::vector<T> make_points(size_t n) {
-    std::uniform_real_distribution<double> unif(-1.0, 1.0);
+    std::uniform_real_distribution<double> uniform(-1.0, 1.0);
     std::vector<T> points;
     points.reserve(n);
     for (size_t i=0; i<n; ++i) {
-        points.push_back({{unif(wtl::mt64()), unif(wtl::mt64())}});
+        points.push_back({{uniform(wtl::mt64()), uniform(wtl::mt64())}});
     }
     return points;
 }

@@ -8,7 +8,7 @@
 namespace wtl {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
-// interger powers at compile time
+// integer powers at compile time
 template <class T>
 constexpr T pow(T base, unsigned int exponent) noexcept {
     return exponent == 0 ? 1 : base * pow(base, --exponent);

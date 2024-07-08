@@ -37,20 +37,20 @@ inline void read_array() {
 }
 
 inline void read_lines() {
-    std::istringstream issv("1 2 3\n4 5 6\n");
-    WTL_ASSERT(wtl::readlines<std::vector<int>>(issv) ==
+    std::istringstream iss_vi("1 2 3\n4 5 6\n");
+    WTL_ASSERT(wtl::readlines<std::vector<int>>(iss_vi) ==
         (std::vector<std::vector<int>>{{1, 2, 3}, {4, 5, 6}}));
 
-    std::istringstream iss("1 2 3\n4 5 6\n");
-    WTL_ASSERT(wtl::readlines(iss) ==
+    std::istringstream iss_vs("1 2 3\n4 5 6\n");
+    WTL_ASSERT(wtl::readlines(iss_vs) ==
         (std::vector<std::string>{"1 2 3", "4 5 6"}));
 }
 
 inline void null_stream() {
     wtl::nout() << "Error: this must no be printed\n";
-    auto coutbuf = std::cout.rdbuf(wtl::nstreambuf());
+    auto cout_buf = std::cout.rdbuf(wtl::nstreambuf());
     std::cout << "Error: this must no be printed\n";
-    std::cout.rdbuf(coutbuf);
+    std::cout.rdbuf(cout_buf);
 }
 
 int main(int argc, char* argv[]) {

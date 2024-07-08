@@ -36,7 +36,7 @@ class Approx {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 // for std::valarray
 
-// Generage valarray with equally spaced values
+// Generate valarray with equally spaced values
 inline std::valarray<double>
 lin_spaced(size_t size, double low=0.0, double high=1.0) {
     const double step = (high - low) / (size - 1u);
@@ -308,7 +308,7 @@ template <class V> inline
 double sem(const V& v, size_t N=0) {return sem(begin(v), end(v), N);}
 
 
-// coveriance
+// covariance
 template <class Iter1, class Iter2> inline
 double cov(const Iter1 begin1, const Iter1 end1, const Iter2 begin2, const Iter2 end2, bool unbiased=true) {
     const double mean_x = mean(begin1, end1);

@@ -14,21 +14,21 @@ namespace wtl {
 
 template <class RNG> inline
 size_t roulette_select(const std::vector<double>& fitnesses, RNG& rng) {
-    const std::vector<double> ubounds = partial_sum(fitnesses);
-    std::uniform_real_distribution<double> uniform(0.0, ubounds.back());
-    return bisect(ubounds, uniform(rng));
+    const std::vector<double> upper_bounds = partial_sum(fitnesses);
+    std::uniform_real_distribution<double> uniform(0.0, upper_bounds.back());
+    return bisect(upper_bounds, uniform(rng));
 }
 
 template <class RNG> inline
 std::vector<size_t> roulette_select(
     const std::vector<double>& fitnesses, size_t n, RNG& rng) {
 
-    const std::vector<double> ubounds = partial_sum(fitnesses);
-    std::uniform_real_distribution<double> uniform(0.0, ubounds.back());
+    const std::vector<double> upper_bounds = partial_sum(fitnesses);
+    std::uniform_real_distribution<double> uniform(0.0, upper_bounds.back());
     std::vector<size_t> indices;
     indices.reserve(n);
     for (size_t i=0; i<n; ++i) {
-        indices.push_back(bisect(ubounds, uniform(rng)));
+        indices.push_back(bisect(upper_bounds, uniform(rng)));
     }
     return indices;
 }
@@ -53,7 +53,7 @@ std::vector<size_t> roulette_select(
     size_t pop_size,
     size_t elites=0) {
 
-    const std::vector<double> ubounds = partial_sum(fitnesses);
+    const std::vector<double> upper_bounds = partial_sum(fitnesses);
 
     std::vector<size_t> candidates(pop_size);
     std::iota(begin(candidates), end(candidates), 0);
@@ -67,7 +67,7 @@ std::vector<size_t> roulette_select(
     }
 
     // poisson selection
-    const double num_fittest_children = pop_size / ubounds.back();
+    const double num_fittest_children = pop_size / upper_bounds.back();
     for (size_t i=0; i<pop_size; ++i) {
         double expected = fitnesses[i];
         expected *= num_fittest_children;
@@ -81,9 +81,9 @@ std::vector<size_t> roulette_select(
         children.resize(pop_size);
     }
     else {
-        std::uniform_real_distribution<double> uniform(0.0, ubounds.back());
+        std::uniform_real_distribution<double> uniform(0.0, upper_bounds.back());
         while (children.size() < pop_size) {
-            children.push_back(bisect(ubounds, uniform(rng)));
+            children.push_back(bisect(upper_bounds, uniform(rng)));
         }
     }
     return children;

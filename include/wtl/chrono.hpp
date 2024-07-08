@@ -38,8 +38,8 @@ void benchmark(Fn&& fn, const std::string& label="", size_t times=3) {
 // which is equivalent to "%a %b %d %T %Y"
 inline std::string strftime(const std::string& format="%c") {
     char cstr[80];
-    const time_t rawtime = time(nullptr);
-    const struct tm* t = localtime(&rawtime);
+    const time_t raw_time = time(nullptr);
+    const struct tm* t = localtime(&raw_time);
     std::strftime(cstr, sizeof(cstr), format.c_str(), t);
     return std::string(cstr);
 }
