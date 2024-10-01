@@ -221,7 +221,7 @@ class basic_stringstream
 : private detail::SstrInitializer<Stream>,
   public Stream {
   public:
-    explicit basic_stringstream(const std::string& str = "")
+    explicit basic_stringstream(std::string_view str = "")
     : detail::SstrInitializer<Stream>(),
       Stream(&this->strbuf_) {
         this->sst_.exceptions(std::ios_base::badbit);

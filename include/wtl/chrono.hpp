@@ -23,7 +23,7 @@ inline Time stopwatch (Fn&& fn) {
 }
 
 template <class Fn>
-void benchmark(Fn&& fn, const std::string& label="", size_t times=3) {
+void benchmark(Fn&& fn, std::string_view label="", size_t times=3) {
     std::cerr << "#BENCHMARK[ms] " << label << "\n";
     for (; times>0; --times) {
         std::cerr << stopwatch(fn).count() << "\t" << std::flush;
@@ -43,12 +43,12 @@ inline std::string strftime(const std::string& format="%c") {
     std::strftime(cstr, sizeof(cstr), format.c_str(), t);
     return std::string(cstr);
 }
-inline std::string iso8601date(const std::string& sep="-") {
+inline std::string iso8601date(std::string_view sep="-") {
     std::ostringstream oss;
     oss << "%Y" << sep << "%m" << sep << "%d";
     return strftime(oss.str());
 }
-inline std::string iso8601time(const std::string& sep=":") {
+inline std::string iso8601time(std::string_view sep=":") {
     std::ostringstream oss;
     oss << "%H" << sep << "%M" << sep << "%S";
     return strftime(oss.str());

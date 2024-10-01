@@ -45,7 +45,7 @@ ArrayXX(const std::vector<std::string>& rows) {
     const size_t ncol = rows[0].length();
     Eigen::Array<T, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> array(nrow, ncol);
     for (size_t i=0; i<nrow; ++i) {
-        const std::string& s = rows[i];
+        std::string_view s = rows[i];
         const auto bytes = std::vector<uint8_t>(s.begin(), s.end());
         array.row(i) = RowVectorX(bytes).cast<T>();
     }
@@ -96,7 +96,7 @@ T select(const Eigen::DenseBase<T>& orig, const Vector& predicate) {
     return slice_cols(orig, which(predicate));
 }
 
-inline Eigen::IOFormat tsv(const int precision=Eigen::StreamPrecision, const std::string& sep="\t") {
+inline Eigen::IOFormat tsv(const int precision=Eigen::StreamPrecision, std::string_view sep="\t") {
     return {precision, Eigen::DontAlignCols, sep, "\n"};
 }
 
