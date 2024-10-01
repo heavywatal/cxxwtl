@@ -46,23 +46,21 @@ inline long stime(const rusage& lhs, const rusage& rhs) {
 
 namespace detail {
 
-template <bool Condition>
-using enable_if_t = typename std::enable_if<Condition, std::nullptr_t>::type;
-
-template <class T, detail::enable_if_t<std::is_same<T, std::kilo>{}> = nullptr>
+template <class T>
 inline long unit(long x) noexcept {
+    if constexpr (std::is_same_v<T, std::kilo>) {
 #ifdef __APPLE__
-    return x >> 10;
-#else
-    return x;
+        return x >> 10;
 #endif
+    }
+    else if constexpr (std::is_same_v<T, std::mega>) {
+        return unit<std::kilo>(x) >> 10;
+    }
+    else if constexpr (std::is_same_v<T, std::giga>) {
+        return unit<std::kilo>(x) >> 20;
+    }
+    return x;
 }
-
-template <class T, detail::enable_if_t<std::is_same<T, std::mega>{}> = nullptr>
-inline long unit(long x) noexcept {return unit<std::kilo>(x) >> 10;}
-
-template <class T, detail::enable_if_t<std::is_same<T, std::giga>{}> = nullptr>
-inline long unit(long x) noexcept {return unit<std::kilo>(x) >> 20;}
 
 }
 

@@ -116,13 +116,12 @@ void read(const std::string& line, std::vector<T>* v) {
     read(iss, v);
 }
 
-template <size_t I, typename... Ts, typename std::enable_if<I == sizeof...(Ts), std::nullptr_t>::type = nullptr> inline
-void read(std::istream&, std::tuple<Ts...>*) {;}
-
-template <size_t I=0u, typename... Ts, typename std::enable_if<I < sizeof...(Ts), std::nullptr_t>::type = nullptr> inline
+template <size_t I=0u, typename... Ts> inline
 void read(std::istream& ist, std::tuple<Ts...>* x) {
-    ist >> std::get<I>(*x);
-    read<I + 1u>(ist, x);
+    if constexpr (I < sizeof...(Ts)) {
+        ist >> std::get<I>(*x);
+        read<I + 1u>(ist, x);
+    }
 }
 
 template <typename... Ts> inline
