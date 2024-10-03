@@ -21,10 +21,10 @@ int main() {
     WTL_ASSERT((wtl::split("a b\tc") == std::vector<std::string>{"a", "b", "c"}));
     WTL_ASSERT((wtl::split<int>("1 2\t3") == std::vector<int>{1, 2, 3}));
     WTL_ASSERT(wtl::strip("  str  ") == "str");
-    WTL_ASSERT(wtl::startswith("abracadabra", "abr"));
-    WTL_ASSERT(!wtl::startswith("abracadabra", "bra"));
-    WTL_ASSERT(wtl::endswith("abracadabra", "bra"));
-    WTL_ASSERT(!wtl::endswith("abracadabra", "abr"));
+    WTL_ASSERT(wtl::starts_with("abracadabra", "abr"));
+    WTL_ASSERT(!wtl::starts_with("abracadabra", "bra"));
+    WTL_ASSERT(wtl::ends_with("abracadabra", "bra"));
+    WTL_ASSERT(!wtl::ends_with("abracadabra", "abr"));
     WTL_ASSERT(wtl::replace("abracadabra", "br", "_") == "a_acada_a");
     return 0;
 }

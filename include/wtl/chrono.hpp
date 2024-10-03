@@ -36,22 +36,22 @@ void benchmark(Fn&& fn, std::string_view label="", size_t times=3) {
 
 // default is the same as ctime(): Thu Aug 23 14:55:02 2001
 // which is equivalent to "%a %b %d %T %Y"
-inline std::string strftime(const std::string& format="%c") {
+inline std::string strftime(const char* format="%c") {
     char cstr[80];
-    const time_t raw_time = time(nullptr);
-    const struct tm* t = localtime(&raw_time);
-    std::strftime(cstr, sizeof(cstr), format.c_str(), t);
+    const std::time_t raw_time = std::time(nullptr);
+    const struct std::tm* t = std::localtime(&raw_time);
+    std::strftime(cstr, sizeof(cstr), format, t);
     return std::string(cstr);
 }
 inline std::string iso8601date(std::string_view sep="-") {
     std::ostringstream oss;
     oss << "%Y" << sep << "%m" << sep << "%d";
-    return strftime(oss.str());
+    return strftime(oss.str().c_str());
 }
 inline std::string iso8601time(std::string_view sep=":") {
     std::ostringstream oss;
     oss << "%H" << sep << "%M" << sep << "%S";
-    return strftime(oss.str());
+    return strftime(oss.str().c_str());
 }
 inline std::string iso8601datetime() {return strftime("%FT%T%z");}
 

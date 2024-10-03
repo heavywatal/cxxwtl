@@ -102,13 +102,13 @@ getrusage(Function&& fun) {
 
 template <class TimePrefix=std::micro, class MemoryPrefix=std::kilo, class Function>
 inline DataFrame
-benchmark(Function&& fun, const std::string& label="", unsigned times = 1u) {
+benchmark(Function&& fun, std::string_view label="", unsigned times = 1u) {
     DataFrame df;
     df.reserve_cols(4u)
       .init_column<long>("utime")
       .init_column<long>("stime")
       .init_column<long>("maxrss")
-      .init_column<std::string>("label")
+      .init_column<std::string_view>("label")
       .reserve_rows(times);
     for (unsigned i = 0u; i < times; ++i) {
         auto ru = getrusage<TimePrefix, MemoryPrefix>(std::forward<Function>(fun));
