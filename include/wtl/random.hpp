@@ -47,9 +47,9 @@ class random_device_64 {
 
 template <class URBG> inline
 double generate_canonical(URBG& gen) {
-    if (URBG::max() == std::numeric_limits<uint64_t>::max()) {
+    if constexpr (URBG::max() == std::numeric_limits<uint64_t>::max()) {
         return bits64_t(gen()).as_canonical();
-    } else if (URBG::max() == std::numeric_limits<uint32_t>::max()) {
+    } else if constexpr (URBG::max() == std::numeric_limits<uint32_t>::max()) {
         return bits64_t(gen(), gen()).as_canonical();
     } else {
         return std::generate_canonical<double, std::numeric_limits<double>::digits>(gen);
