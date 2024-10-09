@@ -151,7 +151,7 @@ sample(const Container& src, size_t k, URBG& engine) {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 // a variant that accepts double k parameter
 
-template<class IntType = int>
+template <class IntType = int>
 class negative_binomial_distribution {
   public:
     using result_type = IntType;
@@ -174,7 +174,8 @@ class negative_binomial_distribution {
         double _p;
     };
 
-    explicit negative_binomial_distribution(double k = 1.0, double p = 0.5) noexcept:
+    negative_binomial_distribution() noexcept: negative_binomial_distribution(1.0) {}
+    explicit negative_binomial_distribution(double k, double p = 0.5) noexcept:
       _param(k, p) {}
     explicit negative_binomial_distribution(const param_type& parameter) noexcept:
       _param(parameter) {}
@@ -182,14 +183,15 @@ class negative_binomial_distribution {
 
     void reset() noexcept {}
 
-    template<class URBG>
+    template <class URBG>
     result_type operator()(URBG& engine) const {
         return operator()(engine, _param);
     }
-    template<class URBG>
+    template <class URBG>
     result_type operator()(URBG& engine, const param_type& parameter) const {
+        auto k = parameter.k();
         auto p = parameter.p();
-        double lambda = std::gamma_distribution<double>(parameter.k(), (1.0 - p) / p)(engine);
+        double lambda = std::gamma_distribution<double>(k, (1.0 - p) / p)(engine);
         return std::poisson_distribution<result_type>(lambda)(engine);
     }
 
@@ -211,14 +213,14 @@ class negative_binomial_distribution {
         return !(lhs == rhs);
     }
 
-    template<class CharT, class Traits>
+    template <class CharT, class Traits>
     friend std::basic_ostream<CharT, Traits>&
     operator<<(std::basic_ostream<CharT, Traits>& ost,
                const negative_binomial_distribution& dist) {
         ost << dist.param().p() << " " << dist.param().k();
         return ost;
     }
-    template<class CharT, class Traits>
+    template <class CharT, class Traits>
     friend std::basic_istream<CharT, Traits>&
     operator>>(std::basic_istream<CharT, Traits>& ist,
                negative_binomial_distribution& dist) {
