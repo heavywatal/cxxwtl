@@ -20,18 +20,20 @@ install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/
 install(TARGETS ${PROJECT_NAME}
   EXPORT ${PROJECT_NAME}-config
 )
+
+set(config_destination ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
 install(EXPORT ${PROJECT_NAME}-config
-  DESTINATION ${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}
+  DESTINATION ${config_destination}
   NAMESPACE ${PROJECT_NAME}::
 )
 
-set(VERSION_CONFIG ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config-version.cmake)
+set(version_file ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config-version.cmake)
 include(CMakePackageConfigHelpers)
-write_basic_package_version_file(
-  ${VERSION_CONFIG} COMPATIBILITY AnyNewerVersion
+write_basic_package_version_file(${version_file}
+  COMPATIBILITY AnyNewerVersion
 )
-install(FILES ${VERSION_CONFIG}
-  DESTINATION ${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}
+install(FILES ${version_file}
+  DESTINATION ${config_destination}
 )
 
 include(CTest)
