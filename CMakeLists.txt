@@ -21,7 +21,7 @@ install(TARGETS ${PROJECT_NAME}
   EXPORT ${PROJECT_NAME}-config
 )
 
-set(config_destination ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
+set(config_destination share/cmake/${PROJECT_NAME})
 install(EXPORT ${PROJECT_NAME}-config
   DESTINATION ${config_destination}
   NAMESPACE ${PROJECT_NAME}::
