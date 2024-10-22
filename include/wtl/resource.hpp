@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <ratio>
 #include <vector>
-#include <iosfwd>
+#include <ostream>
 
 namespace wtl {
 
