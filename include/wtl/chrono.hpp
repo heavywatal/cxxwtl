@@ -14,21 +14,46 @@ namespace wtl {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 // speed test
 
-template <typename Time = std::chrono::milliseconds, typename Fn>
-inline Time stopwatch (Fn&& fn) {
+#if __cplusplus < 202002L
+
+template <class Rep, class Period> inline
+std::ostream& operator<<(std::ostream& ost, const std::chrono::duration<Rep, Period>& d) {
+    ost << d.count();
+    if constexpr (std::is_same_v<Period, std::nano>) {
+      ost << "ns";
+    } else if constexpr (std::is_same_v<Period, std::micro>) {
+      ost << "us";
+    } else if constexpr (std::is_same_v<Period, std::milli>) {
+      ost << "ms";
+    } else if constexpr (std::is_same_v<Period, std::ratio<1>>) {
+      ost << "s";
+    }
+    return ost;
+}
+
+#endif
+
+template <class Duration = std::chrono::milliseconds, class Fn> inline
+Duration stopwatch(Fn&& fn) {
     using Clock = std::chrono::high_resolution_clock;
     const auto start = Clock::now();
     fn();
-    return std::chrono::duration_cast<Time>(Clock::now() - start);
+    return std::chrono::duration_cast<Duration>(Clock::now() - start);
+}
+
+template <class Duration = std::chrono::milliseconds, class Fn> inline
+std::ostream& stopwatch(std::ostream& ost, Fn&& fn, unsigned times=3u) {
+    for (; times>0u; --times) {
+        ost << stopwatch<Duration>(std::forward<Fn>(fn)) << "\t" << std::flush;
+    }
+    return ost << "\n";
 }
 
 template <class Fn>
+[[deprecated("use getrusage() for benchmarking CPU time")]]
 void benchmark(Fn&& fn, std::string_view label="", size_t times=3) {
     std::cerr << "#BENCHMARK[ms] " << label << "\n";
-    for (; times>0; --times) {
-        std::cerr << stopwatch(fn).count() << "\t" << std::flush;
-    }
-    std::cout << "\n";
+    stopwatch<std::chrono::milliseconds>(std::cerr, std::forward<Fn>(fn), times);
 }
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
