@@ -28,7 +28,7 @@
 
 #include <random>
 #include <limits>
-#include <iosfwd>
+#include <ios>
 #include <array>
 #include <type_traits>
 
