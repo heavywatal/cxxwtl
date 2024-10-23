@@ -106,12 +106,12 @@ class pcg_engine {
 
     result_type operator()() {
         if constexpr (sizeof(state_type) <= 8) {
-            auto res = xsh_rr_output();
+            auto res = output();
             bump();
             return res;
         } else {
             bump();
-            return xsl_rr_output();
+            return output();
         }
     }
 
@@ -146,28 +146,13 @@ class pcg_engine {
     static constexpr unsigned streams_pow2() {return period_pow2() - 1u;}
 
   private:
-    result_type xsh_rr_output() const {
+    result_type output() const {
         constexpr unsigned st_digits = std::numeric_limits<state_type>::digits;
         constexpr unsigned res_digits = std::numeric_limits<result_type>::digits;
         constexpr unsigned spare_digits = st_digits - res_digits;
         constexpr unsigned log2_res_digits = floor_log2(res_digits);
-        constexpr unsigned bottom_spare = spare_digits - log2_res_digits;
-        constexpr unsigned xshift = (res_digits + log2_res_digits) / 2u;
-        constexpr unsigned rshift = st_digits - log2_res_digits;
-        state_type internal = state_;
-        internal ^= (internal >> xshift);
-        result_type result = internal >> bottom_spare;
-        const unsigned rot = state_ >> rshift;
-        return unsigned_rotr(result, rot);
-    }
-
-    result_type xsl_rr_output() const {
-        constexpr unsigned st_digits = std::numeric_limits<state_type>::digits;
-        constexpr unsigned res_digits = std::numeric_limits<result_type>::digits;
-        constexpr unsigned spare_digits = st_digits - res_digits;
-        constexpr unsigned log2_res_digits = floor_log2(res_digits);
-        constexpr unsigned bottom_spare = 0u;
-        constexpr unsigned xshift = (spare_digits + res_digits) / 2u;
+        constexpr unsigned bottom_spare = sizeof(state_type) <= 8 ? spare_digits - log2_res_digits : 0u;
+        constexpr unsigned xshift = (spare_digits + res_digits - bottom_spare) / 2u;
         constexpr unsigned rshift = st_digits - log2_res_digits;
         state_type internal = state_;
         internal ^= (internal >> xshift);
