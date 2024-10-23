@@ -4,22 +4,8 @@
 #include <iostream>
 #include <random>
 
-int test_eq(wtl::pcg32& origin, pcg32& upstream, unsigned n = 3u) {
-    int ret = 0;
-    std::cout << origin << std::endl;
-    std::cout << upstream << std::endl;
-    for (unsigned i=0u; i<n; ++i) {
-        const auto expected = upstream();
-        const auto observed = origin();
-        if (observed != expected) {
-            std::cout << observed << " != " << expected << "\n";
-            ret = 1;
-        }
-    }
-    return ret;
-}
-
-int test_eq(wtl::pcg64& origin, pcg64& upstream, unsigned n = 3u) {
+template <class T, class PCG>
+int test_eq(wtl::pcg_engine<T>& origin, PCG& upstream, unsigned n = 3u) {
     int ret = 0;
     std::cout << origin << std::endl;
     std::cout << upstream << std::endl;

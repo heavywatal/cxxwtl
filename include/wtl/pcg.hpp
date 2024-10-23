@@ -30,6 +30,7 @@
 #include <limits>
 #include <iosfwd>
 #include <array>
+#include <type_traits>
 
 namespace wtl {
 
@@ -49,41 +50,44 @@ constexpr __uint128_t constexpr_uint128(uint64_t high, uint64_t low) {
     return (static_cast<__uint128_t>(high) << 64u) + low;
 }
 
-template <class CharT, class Traits>
-std::basic_ostream<CharT, Traits>&
-operator<<(std::basic_ostream<CharT, Traits>& ost, __uint128_t x) {
-    auto fillch = ost.fill('0');
-    auto flags = ost.flags(std::ios_base::hex);
-    uint64_t high(x >> 64u);
-    if (high) {ost << high;}
-    ost.width(16);
-    ost << uint64_t(x);
-    ost.fill(fillch);
-    ost.flags(flags);
-    return ost;
-}
+template <class T> constexpr T pcg_default_multiplier;
+template <class T> constexpr T pcg_default_increment;
+template <class T> constexpr T pcg_default_state;
+
+template <> constexpr uint64_t pcg_default_multiplier<uint64_t>
+  = 6364136223846793005ULL;
+template <> constexpr uint64_t pcg_default_increment<uint64_t>
+  = 1442695040888963407ULL;
+template <> constexpr uint64_t pcg_default_state<uint64_t>
+  = 0x4d595df4d0f33173ULL;
+
+template <> constexpr __uint128_t pcg_default_multiplier<__uint128_t>
+  = constexpr_uint128(2549297995355413924ULL, 4865540595714422341ULL);
+template <> constexpr __uint128_t pcg_default_increment<__uint128_t>
+  = constexpr_uint128(6364136223846793005ULL, 1442695040888963407ULL);
+template <> constexpr __uint128_t pcg_default_state<__uint128_t>
+  = constexpr_uint128(0xb8dc10e158a92392ULL, 0x98046df007ec0a53ULL);
 
 } // namespace
 
-class pcg32 {
+template <class UIntType>
+class pcg_engine {
   public:
-    using result_type = uint32_t;
-    using state_type = uint64_t;
+    using result_type = UIntType;
+    using state_type = std::conditional_t<std::is_same_v<UIntType,uint32_t>,uint64_t,__uint128_t>;
 
     static constexpr result_type min() {return 0u;}
     static constexpr result_type max() {return std::numeric_limits<result_type>::max();}
     static constexpr state_type default_seed = 0xcafef00dd15ea5e5ULL;
-    static constexpr state_type default_state = 0x4d595df4d0f33173ULL;
-    static constexpr state_type default_increment = 1442695040888963407ULL;
-    static constexpr state_type multiplier = 6364136223846793005ULL;
+    static constexpr state_type multiplier = pcg_default_multiplier<state_type>;
 
     // constructors
-    pcg32() = default;
-    pcg32(const pcg32&) = default;
-    pcg32(pcg32&&) = default;
-    explicit pcg32(state_type s) {seed(s);}
-    explicit pcg32(state_type s, state_type inc) {seed(s, inc);}
-    explicit pcg32(std::seed_seq& q) {seed(q);}
+    pcg_engine() = default;
+    pcg_engine(const pcg_engine&) = default;
+    pcg_engine(pcg_engine&&) = default;
+    explicit pcg_engine(state_type s) {seed(s);}
+    explicit pcg_engine(state_type s, state_type inc) {seed(s, inc);}
+    explicit pcg_engine(std::seed_seq& q) {seed(q);}
 
     void seed(state_type s) {
         state_ = s;
@@ -100,10 +104,15 @@ class pcg32 {
         seed(data[0], data[1]);
     }
 
-    result_type operator()() {// output_previous = true
-        auto res = output();
-        bump();
-        return res;
+    result_type operator()() {
+        if constexpr (sizeof(state_type) <= 8) {
+            auto res = xsh_rr_output();
+            bump();
+            return res;
+        } else {
+            bump();
+            return xsl_rr_output();
+        }
     }
 
     void discard(unsigned long long n) {
@@ -111,8 +120,8 @@ class pcg32 {
     }
 
   private:
-    state_type increment_ = default_increment;
-    state_type state_ = default_state;
+    state_type increment_ = pcg_default_increment<state_type>;
+    state_type state_ = pcg_default_state<state_type>;
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
@@ -129,7 +138,7 @@ class pcg32 {
         discard(-delta);
     }
 
-    state_type operator-(const pcg32& old) const {
+    state_type operator-(const pcg_engine& old) const {
         return distance(old.state_);
     }
 
@@ -137,7 +146,7 @@ class pcg32 {
     static constexpr unsigned streams_pow2() {return period_pow2() - 1u;}
 
   private:
-    result_type output() const {// xsh_rr_mixin
+    result_type xsh_rr_output() const {
         constexpr unsigned st_digits = std::numeric_limits<state_type>::digits;
         constexpr unsigned res_digits = std::numeric_limits<result_type>::digits;
         constexpr unsigned spare_digits = st_digits - res_digits;
@@ -152,133 +161,7 @@ class pcg32 {
         return unsigned_rotr(result, rot);
     }
 
-    state_type advance(state_type delta) const {
-        state_type cur_mult = multiplier;
-        state_type cur_plus = increment_;
-        state_type acc_mult = 1u;
-        state_type acc_plus = 0u;
-        while (delta > 0u) {
-            if (delta & 1u) {
-                acc_mult *= cur_mult;
-                acc_plus *= cur_mult;
-                acc_plus += cur_plus;
-            }
-            cur_plus *= (cur_mult + 1u);
-            cur_mult *= cur_mult;
-            delta >>= 1u;
-        }
-        return acc_mult * state_ + acc_plus;
-    }
-
-    state_type distance(state_type cur_state) const {
-        state_type cur_mult = multiplier;
-        state_type cur_plus = increment_;
-        state_type the_bit = 1u;
-        state_type delta = 0u;
-        while (state_ != cur_state) {
-            if ((state_ & the_bit) != (cur_state & the_bit)) {
-                cur_state *= cur_mult;
-                cur_state += cur_plus;
-                delta |= the_bit;
-            }
-            cur_plus *= (cur_mult + 1u);
-            cur_mult *= cur_mult;
-            the_bit <<= 1u;
-        }
-        return delta;
-    }
-
-    void bump() {
-        state_ *= multiplier;
-        state_ += increment_;
-    }
-
-    template <class CharT, class Traits>
-    friend std::basic_ostream<CharT, Traits>&
-    operator<<(std::basic_ostream<CharT, Traits>& ost, const wtl::pcg32& x) {
-        return ost << x.multiplier << " "
-                   << x.increment_ << " "
-                   << x.state_;
-    }
-};
-
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
-
-class pcg64 {
-  public:
-    using result_type = uint64_t;
-    using state_type = __uint128_t;
-
-    static constexpr result_type min() {return 0u;}
-    static constexpr result_type max() {return std::numeric_limits<result_type>::max();}
-    static constexpr state_type default_seed = 0xcafef00dd15ea5e5ULL;
-    static constexpr state_type default_state =
-      constexpr_uint128(0xb8dc10e158a92392ULL, 0x98046df007ec0a53ULL);
-    static constexpr state_type default_increment =
-      constexpr_uint128(6364136223846793005ULL, 1442695040888963407ULL);
-    static constexpr state_type multiplier =
-      constexpr_uint128(2549297995355413924ULL, 4865540595714422341ULL);
-
-    // constructors
-    pcg64() = default;
-    pcg64(const pcg64&) = default;
-    pcg64(pcg64&&) = default;
-    explicit pcg64(state_type s) {seed(s);}
-    explicit pcg64(state_type s, state_type inc) {seed(s, inc);}
-    explicit pcg64(std::seed_seq& q) {seed(q);}
-
-    void seed(state_type s) {
-        state_ = s;
-        state_ += increment_;
-        bump();
-    }
-    void seed(state_type s, state_type inc) {
-        increment_ = (inc << 1u) | 1u;
-        seed(s);
-    }
-    void seed(std::seed_seq& q) {
-        std::array<state_type, 2u> data;
-        q.generate(data.begin(), data.end());
-        seed(data[0], data[1]);
-    }
-
-    result_type operator()() {// output_previous = false
-        bump();
-        return output();
-    }
-
-    void discard(unsigned long long n) {
-        state_ = advance(n);
-    }
-
-  private:
-    state_type increment_ = default_increment;
-    state_type state_ = default_state;
-
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
-
-  public: // for pcg-test.cpp
-    result_type operator()(result_type upper_bound) {
-        const result_type threshold = (max() - min() - upper_bound + 1u) % upper_bound;
-        while (true) {
-            result_type r = (*this)() - min();
-            if (r >= threshold) return r % upper_bound;
-        }
-    }
-
-    void backstep(state_type delta) {
-        discard(-delta);
-    }
-
-    state_type operator-(const pcg64& old) const {
-        return distance(old.state_);
-    }
-
-    static constexpr unsigned period_pow2() {return std::numeric_limits<state_type>::digits;}
-    static constexpr unsigned streams_pow2() {return period_pow2() - 1u;}
-
-  private:
-    result_type output() const {// xsl_rr_mixin
+    result_type xsl_rr_output() const {
         constexpr unsigned st_digits = std::numeric_limits<state_type>::digits;
         constexpr unsigned res_digits = std::numeric_limits<result_type>::digits;
         constexpr unsigned spare_digits = st_digits - res_digits;
@@ -334,14 +217,35 @@ class pcg64 {
         state_ += increment_;
     }
 
-    template <class CharT, class Traits>
+    template <class CharT, class Traits, class T>
     friend std::basic_ostream<CharT, Traits>&
-    operator<<(std::basic_ostream<CharT, Traits>& ost, const pcg64& x) {
-        return ost << x.multiplier << " "
-                   << x.increment_ << " "
-                   << x.state_;
-    }
+    operator<<(std::basic_ostream<CharT, Traits>& ost, const wtl::pcg_engine<T>& x);
 };
+
+template <class CharT, class Traits>
+std::basic_ostream<CharT, Traits>&
+operator<<(std::basic_ostream<CharT, Traits>& ost, __uint128_t x) {
+    auto fillch = ost.fill('0');
+    auto flags = ost.flags(std::ios_base::hex);
+    uint64_t high(x >> 64u);
+    if (high) {ost << high;}
+    ost.width(16);
+    ost << uint64_t(x);
+    ost.fill(fillch);
+    ost.flags(flags);
+    return ost;
+}
+
+template <class CharT, class Traits, class T>
+inline std::basic_ostream<CharT, Traits>&
+operator<<(std::basic_ostream<CharT, Traits>& ost, const wtl::pcg_engine<T>& x) {
+    return ost << x.multiplier << " "
+               << x.increment_ << " "
+               << x.state_;
+}
+
+using pcg32 = pcg_engine<uint32_t>;
+using pcg64 = pcg_engine<uint64_t>;
 
 } // namespace wtl
 
