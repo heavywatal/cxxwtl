@@ -4,16 +4,6 @@
 #include <iostream>
 #include <random>
 
-namespace wtl {
-
-std::ostream& operator<<(std::ostream& ost, const wtl::pcg32& x) {
-    return ost << x.multiplier << " "
-               << x.increment_ << " "
-               << x.state_;
-}
-
-}
-
 int test_eq(wtl::pcg32& origin, pcg32& upstream, unsigned n = 3u) {
     int ret = 0;
     std::cout << origin << std::endl;

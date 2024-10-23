@@ -29,6 +29,7 @@
 #include <random>
 #include <limits>
 #include <iosfwd>
+#include <array>
 
 namespace wtl {
 
@@ -171,7 +172,13 @@ class pcg32 {
         state_ += increment_;
     }
 
-    friend std::ostream& operator<<(std::ostream&, const pcg32&);
+    template <class CharT, class Traits>
+    friend std::basic_ostream<CharT, Traits>&
+    operator<<(std::basic_ostream<CharT, Traits>& ost, const wtl::pcg32& x) {
+        return ost << x.multiplier << " "
+                   << x.increment_ << " "
+                   << x.state_;
+    }
 };
 
 } // namespace wtl
