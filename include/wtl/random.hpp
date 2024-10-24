@@ -242,7 +242,7 @@ class negative_binomial_distribution {
 
 //! Pythonic engine object
 template <class Generator>
-class Prandom{
+class [[deprecated]] Prandom{
   public:
     // alias
     using result_type = unsigned int;
@@ -376,6 +376,7 @@ inline std::mt19937_64& mt64() {
     return generator;
 }
 
+[[deprecated]]
 inline Prandom<std::mt19937>& prandom() {
     static Prandom<std::mt19937> generator;
     return generator;
