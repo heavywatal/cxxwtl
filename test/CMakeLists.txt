@@ -41,12 +41,6 @@ if(ZLIB_FOUND)
   link_libraries(ZLIB::ZLIB)
 endif()
 
-find_package(pcg)
-if(pcg_FOUND)
-  set(source_files ${source_files} pcg.cpp)
-  link_libraries(pcg::pcg)
-endif()
-
 foreach(src IN LISTS source_files)
   get_filename_component(name_we ${src} NAME_WE)
   add_executable(test-${name_we} ${src})
