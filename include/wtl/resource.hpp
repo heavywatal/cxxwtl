@@ -11,7 +11,7 @@
 
 namespace wtl {
 
-namespace {
+namespace detail {
 
 template <class TimePrefix=std::micro>
 struct TimeVal {
@@ -55,7 +55,7 @@ T median(std::vector<T>* v) {
     return v->at(i);
 }
 
-} // namaspace
+} // namespace detail
 
 inline rusage getrusage(int who = RUSAGE_SELF) {
     rusage ru;
@@ -66,16 +66,16 @@ inline rusage getrusage(int who = RUSAGE_SELF) {
 template <class TimePrefix=std::micro, class MemoryPrefix=std::kilo, int Who=RUSAGE_SELF>
 struct ResourceUsage {
     ResourceUsage(const rusage& ru = getrusage(Who)) noexcept
-    : utime(unit<TimePrefix>(ru.ru_utime)),
-      stime(unit<TimePrefix>(ru.ru_stime)),
-      maxrss(unit<MemoryPrefix>(ru.ru_maxrss)) {}
+    : utime(detail::unit<TimePrefix>(ru.ru_utime)),
+      stime(detail::unit<TimePrefix>(ru.ru_stime)),
+      maxrss(detail::unit<MemoryPrefix>(ru.ru_maxrss)) {}
     ResourceUsage(const long u, const long s, const long m) noexcept
     : utime(u), stime(s), maxrss(m) {}
     ResourceUsage(const ResourceUsage& other) noexcept {
         const rusage ru = getrusage(Who);
-        utime = unit<TimePrefix>(ru.ru_utime) - other.utime;
-        stime = unit<TimePrefix>(ru.ru_stime) - other.stime;
-        maxrss = unit<MemoryPrefix>(ru.ru_maxrss) - other.maxrss;
+        utime = detail::unit<TimePrefix>(ru.ru_utime) - other.utime;
+        stime = detail::unit<TimePrefix>(ru.ru_stime) - other.stime;
+        maxrss = detail::unit<MemoryPrefix>(ru.ru_maxrss) - other.maxrss;
     }
     ResourceUsage(ResourceUsage&&) = default;
     std::ostream& write(std::ostream& ost) const {
@@ -117,7 +117,7 @@ diff_rusage(Fn&& fun, unsigned times) {
         maxrss.push_back(ru.maxrss);
     }
     return ResourceUsage<TimePrefix, MemoryPrefix, Who>(
-        median(&utime), median(&stime), median(&maxrss)
+        detail::median(&utime), detail::median(&stime), detail::median(&maxrss)
     );
 }
 

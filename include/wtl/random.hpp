@@ -11,7 +11,7 @@
 
 namespace wtl {
 
-namespace {
+namespace detail {
     union bits64_t {
         uint64_t as_uint64_t;
         uint32_t as_uint32_t[2];
@@ -27,7 +27,7 @@ namespace {
             return as_double -= 1.0;
         }
     };
-}
+} // namespace detail
 
 class random_device_64 {
   public:
@@ -36,7 +36,7 @@ class random_device_64 {
     static constexpr result_type max() {return std::numeric_limits<result_type>::max();}
 
     result_type operator()() {
-        return bits64_t(std_rd(), std_rd()).as_uint64_t;
+        return detail::bits64_t(std_rd(), std_rd()).as_uint64_t;
     }
     double entropy() const noexcept {return std_rd.entropy();}
   private:
@@ -46,9 +46,9 @@ class random_device_64 {
 template <class URBG> inline
 double generate_canonical(URBG& gen) {
     if constexpr (URBG::max() == std::numeric_limits<uint64_t>::max()) {
-        return bits64_t(gen()).as_canonical();
+        return detail::bits64_t(gen()).as_canonical();
     } else if constexpr (URBG::max() == std::numeric_limits<uint32_t>::max()) {
-        return bits64_t(gen(), gen()).as_canonical();
+        return detail::bits64_t(gen(), gen()).as_canonical();
     } else {
         return std::generate_canonical<double, std::numeric_limits<double>::digits>(gen);
     }
