@@ -150,7 +150,7 @@ class ostreambuf : public std::streambuf {
     }
 
   protected:
-    virtual int sync() final {
+    int sync() final {
         overflow();
         zstrm_.next_in = nullptr;
         while (deflate_write(Z_FINISH) != Z_STREAM_END) {;}

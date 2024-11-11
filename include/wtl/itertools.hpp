@@ -63,7 +63,7 @@ class Product final: public Generator<value_type> {
     }
 
   private:
-    virtual void source(typename coro_t::push_type& yield, size_type skip) override {
+    void source(typename coro_t::push_type& yield, size_type skip) override {
         if (--pos_ > 0) {
             const value_size_t n = axes_[pos_].size();
             for (value_size_t i=0; i<n; ++i) {
@@ -112,7 +112,7 @@ class UniAxes final: public Generator<value_type> {
     UniAxes(const UniAxes&) = default;
 
   private:
-    virtual void source(typename coro_t::push_type& yield, size_type skip) override {
+    void source(typename coro_t::push_type& yield, size_type skip) override {
         for (size_t i=0; i<axes_.size(); ++i) {
             auto value = center_;
             const auto& axis = axes_[i];
@@ -147,7 +147,7 @@ class UniAxis final: public Generator<value_type> {
     UniAxis(const UniAxis&) = default;
 
   private:
-    virtual void source(typename coro_t::push_type& yield, size_type skip) override {
+    void source(typename coro_t::push_type& yield, size_type skip) override {
         auto value = center_;
         for (value_size_t j=0; j<axis_.size(); ++j) {
             value[idx_] = axis_[j];
@@ -189,7 +189,7 @@ class Simplex  final: public Generator<value_type> {
     size_type raw_count() const {return product_.count();}
 
   private:
-    virtual void source(typename coro_t::push_type& yield, const size_type skip) override {
+    void source(typename coro_t::push_type& yield, const size_type skip) override {
         for (const auto& v: product_()) {
             if (wtl::approx(sum_, v.sum())) {
                 if (++this->cnt_ > skip) yield(v);
