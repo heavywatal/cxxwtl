@@ -9,9 +9,7 @@
 #include <unordered_set>
 #include <ios>
 
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 namespace wtl {
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
 namespace {
     union bits64_t {
@@ -239,131 +237,6 @@ class negative_binomial_distribution {
 };
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
-
-//! Pythonic engine object
-template <class Generator>
-class [[deprecated]] Prandom{
-  public:
-    // alias
-    using result_type = unsigned int;
-    using argument_type = result_type;
-
-    static constexpr result_type min() {return Generator::min();}
-    static constexpr result_type max() {return Generator::max();}
-
-    // constructors
-    explicit Prandom(result_type s=std::random_device{}())
-    : seed_(s), generator_(s) {seed(s);}
-
-    Prandom(const Prandom&) = delete;
-
-    ////////////////////////////////////////
-    // methods
-
-    void seed(result_type s) {seed_ = s; generator_.seed(seed_);}
-    void discard(unsigned long long n) {generator_.discard(n);}
-
-    ////////////////////
-    // integer
-
-    // [0, 2^32-1]
-    result_type operator()() {return generator_();}
-    // [0, n-1]
-    unsigned int randrange(unsigned int n) {
-        return std::uniform_int_distribution<unsigned int>(0, --n)(generator_);
-    }
-    // [a, b-1]
-    int randrange(int a, int b) {
-        return randint(a, --b);
-    }
-    // [a, b]
-    int randint(int a, int b) {
-        return std::uniform_int_distribution<int>(a, b)(generator_);
-    }
-
-    ////////////////////
-    // uniform real
-
-    // [0.0, 1.0)
-    double random() {
-        return std::uniform_real_distribution<double>()(generator_);
-    }
-    // (0.0, 1.0]
-    double random_oc() {return 1.0 - random();}
-    // [0.0, n)
-    double uniform(double n) {
-        return std::uniform_real_distribution<double>(0, n)(generator_);
-    }
-    // [a, b)
-    double uniform(double a, double b) {
-        return std::uniform_real_distribution<double>(a, b)(generator_);
-    }
-
-    ////////////////////
-    // continuous
-
-    // E = 1/lambda, V = 1/lambda^2
-    double exponential(double lambda=1.0) {
-        return std::exponential_distribution<double>(lambda)(generator_);
-    }
-
-    // Scale-free: E = ?, V = ?
-    double power(double k=1.0, double min=1.0) {
-        return min * std::pow(random_oc(), -1.0 / k);
-    }
-
-    // E = mu, V = sigma^2
-    double gauss(double mu=0.0, double sigma=1.0) {
-        return std::normal_distribution<double>(mu, sigma)(generator_);
-    }
-    double normal(double mu=0.0, double sigma=1.0) {return gauss(mu, sigma);}
-
-    ////////////////////
-    // discrete
-
-    // return true with probability p
-    // E = p, V = p(1-p)
-    bool bernoulli(double p=0.5) {
-        return std::bernoulli_distribution(p)(generator_);
-    }
-
-    // The number of true in n trials with probability p
-    // E = np, V = np(1-p)
-    unsigned int binomial(unsigned int n, double p=0.5) {
-        return std::binomial_distribution<unsigned int>(n, p)(generator_);
-    }
-
-    // The expected number of occurrences in an unit of time/space
-    // E = V = lambda
-    unsigned int poisson(double lambda) {
-        return std::poisson_distribution<unsigned int>(lambda)(generator_);
-    }
-
-    // The number of trials needed to get first true
-    // E = (1-p)/p, V = (1-p)/p^2
-    unsigned int geometric(double p) {
-        return std::geometric_distribution<unsigned int>(p)(generator_);
-    }
-
-    ////////////////////
-    // sequence
-    template <class Iter>
-    Iter choice(Iter begin_, Iter end_) {
-        return wtl::choice(begin_, end_, generator_);
-    }
-
-    template <class Container>
-    Container sample(Container src, size_t k) {
-        wtl::sample(&src, k, generator_);
-        return src;
-    }
-
-  private:
-    unsigned int seed_;
-    Generator generator_;
-};
-
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 // Global definition/declaration
 
 inline std::mt19937& mt() {
@@ -376,14 +249,6 @@ inline std::mt19937_64& mt64() {
     return generator;
 }
 
-[[deprecated]]
-inline Prandom<std::mt19937>& prandom() {
-    static Prandom<std::mt19937> generator;
-    return generator;
-}
-
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 } // namespace wtl
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
 #endif /* WTL_RANDOM_HPP_ */
