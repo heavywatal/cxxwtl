@@ -84,7 +84,7 @@ class istreambuf : public std::streambuf {
     istreambuf& operator=(const istreambuf&) = delete;
     istreambuf& operator=(istreambuf&&) = default;
 
-    int_type underflow() override {
+    int_type underflow() final {
         if (zstrm_.avail_in == 0) {
             std::streamsize num_copied = reader_->sgetn(in_buf_, SIZE);
             zstrm_.next_in = reinterpret_cast<decltype(zstrm_.next_in)>(in_buf_);
@@ -122,7 +122,7 @@ class ostreambuf : public std::streambuf {
         deflateReset(&zstrm_);
     }
 
-    int_type overflow(int_type c = traits_type::eof()) override {
+    int_type overflow(int_type c = traits_type::eof()) final {
         zstrm_.next_in = reinterpret_cast<decltype(zstrm_.next_in)>(pbase());
         zstrm_.avail_in = static_cast<decltype(zstrm_.avail_in)>(pptr() - pbase());
         while (zstrm_.avail_in > 0) {
@@ -150,7 +150,7 @@ class ostreambuf : public std::streambuf {
     }
 
   protected:
-    virtual int sync() override {
+    virtual int sync() final {
         overflow();
         zstrm_.next_in = nullptr;
         while (deflate_write(Z_FINISH) != Z_STREAM_END) {;}
