@@ -3,7 +3,6 @@
 #define WTL_ZFSTREAM_HPP_
 
 #include <filesystem>
-#include <fstream>
 #include <string>
 #include <vector>
 
@@ -11,14 +10,12 @@
 #include <boost/iostreams/filter/gzip.hpp>
 #include <boost/iostreams/device/file_descriptor.hpp>
 
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 namespace wtl {
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
 namespace fs = std::filesystem;
 namespace bios = boost::iostreams;
 
-class ozfstream: public bios::filtering_ostream {
+class [[deprecated("use wtl::zlib::ofstream")]] ozfstream: public bios::filtering_ostream {
   public:
     ozfstream(const fs::path& path, std::ios::openmode mode=std::ios::out):
       bios::filtering_ostream(), path_(path) {
@@ -32,7 +29,7 @@ class ozfstream: public bios::filtering_ostream {
     const fs::path path_;
 };
 
-class izfstream: public bios::filtering_istream {
+class [[deprecated("use wtl::zlib::ifstream")]] izfstream: public bios::filtering_istream {
   public:
     izfstream(const fs::path& path, std::ios::openmode mode=std::ios::in):
       bios::filtering_istream(), path_(path) {
@@ -61,8 +58,6 @@ class izfstream: public bios::filtering_istream {
     const fs::path path_;
 };
 
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 } // namespace wtl
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
 #endif // WTL_ZFSTREAM_HPP_
