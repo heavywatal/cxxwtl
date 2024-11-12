@@ -4,16 +4,14 @@
 
 #include <utility>
 
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 namespace wtl {
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
 template <class Function>
 class ScopeExit {
   private:
     Function func_;
   public:
-    ScopeExit(Function&& f) noexcept: func_(std::move(f)) {}
+    ScopeExit(Function&& f) noexcept: func_(std::forward<Function>(f)) {}
     ~ScopeExit() noexcept(noexcept(func_())) {func_();}
     ScopeExit(const ScopeExit&) = delete;
     ScopeExit& operator=(const ScopeExit&) = delete;
@@ -21,13 +19,11 @@ class ScopeExit {
     ScopeExit& operator=(ScopeExit&&) noexcept = default;
 };
 
-template <class Function>
+template <class Function> inline
 ScopeExit<Function> scope_exit(Function&& func) {
     return ScopeExit<Function>(std::forward<Function>(func));
 }
 
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 } // namespace wtl
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
-#endif /* WTL_SCOPE_HPP_ */
+#endif // WTL_SCOPE_HPP_
