@@ -3,10 +3,9 @@
 #include "iostr.hpp"
 #include <boost/program_options.hpp>
 
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 namespace wtl {
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
+[[deprecated("use clippson")]]
 inline std::ostream&
 ost_any(std::ostream& ost, const boost::any& value) {
     if (value.type() == typeid(int)) {
@@ -36,12 +35,14 @@ ost_any(std::ostream& ost, const boost::any& value) {
     return ost;
 }
 
+[[deprecated("use clippson")]]
 inline std::string str_any(const boost::any& value) {
     std::ostringstream oss;
     ost_any(oss, value);
     return oss.str();
 }
 
+[[deprecated("use clippson")]]
 inline std::ostream&
 flags_into_stream(std::ostream& ost,
                   const boost::program_options::variables_map& vm) {
@@ -56,6 +57,7 @@ flags_into_stream(std::ostream& ost,
     return ost;
 }
 
+[[deprecated("use clippson")]]
 inline std::string
 flags_into_string(const boost::program_options::variables_map& vm) {
     std::ostringstream oss;
@@ -65,6 +67,7 @@ flags_into_string(const boost::program_options::variables_map& vm) {
 }
 
 template <class DelimT=const char*>
+[[deprecated("use clippson")]]
 inline std::ostream&
 write_table(const boost::program_options::variables_map& vm,
             std::ostream& ost, DelimT&& delim="\t") {
@@ -75,6 +78,4 @@ write_table(const boost::program_options::variables_map& vm,
     return ost;
 }
 
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 } // namespace wtl
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
