@@ -1,4 +1,5 @@
 #include <wtl/genetic.hpp>
+#include <wtl/numeric.hpp>
 #include <wtl/random.hpp>
 #include <wtl/exception.hpp>
 
