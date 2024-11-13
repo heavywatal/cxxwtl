@@ -1,14 +1,6 @@
-link_libraries(${PROJECT_NAME})
-
-if (NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release)
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Dev)
 endif()
-message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
-message(STATUS "CMAKE_CXX_COMPILER_ID: ${CMAKE_CXX_COMPILER_ID}")
-if("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
-  add_compile_options(-stdlib=libc++)
-endif()
-add_compile_options(-march=native -Wall -Wextra -pedantic)
 set(CMAKE_CXX_FLAGS_DEV "-O2 -g")
 
 set(source_files
@@ -44,8 +36,8 @@ endif()
 foreach(src IN LISTS source_files)
   get_filename_component(name_we ${src} NAME_WE)
   add_executable(test-${name_we} ${src})
-  set_target_properties(test-${name_we} PROPERTIES
-    CXX_EXTENSIONS OFF
-  )
+  set_target_properties(test-${name_we} PROPERTIES CXX_EXTENSIONS OFF)
+  target_link_libraries(test-${name_we} PRIVATE ${PROJECT_NAME})
+  target_compile_options(test-${name_we} PRIVATE -Wall -Wextra -pedantic)
   add_test(NAME ${name_we} COMMAND $<TARGET_FILE:test-${name_we}>)
 endforeach()

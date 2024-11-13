@@ -27,16 +27,16 @@ install(EXPORT ${PROJECT_NAME}-config
   NAMESPACE ${PROJECT_NAME}::
 )
 
-set(version_file ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config-version.cmake)
+set(version_file ${PROJECT_NAME}-config-version.cmake)
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file(${version_file}
   COMPATIBILITY AnyNewerVersion
 )
-install(FILES ${version_file}
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${version_file}
   DESTINATION ${config_destination}
 )
 
 include(CTest)
-if(BUILD_TESTING AND ${CMAKE_SOURCE_DIR} STREQUAL ${PROJECT_SOURCE_DIR})
+if(BUILD_TESTING AND "${CMAKE_SOURCE_DIR}" STREQUAL "${PROJECT_SOURCE_DIR}")
   add_subdirectory(test)
 endif()
