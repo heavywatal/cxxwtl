@@ -14,15 +14,24 @@ target_include_directories(${PROJECT_NAME} INTERFACE
 )
 target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_17)
 
+add_library(zlib INTERFACE)
+add_library(${PROJECT_NAME}::zlib ALIAS zlib)
+find_package(ZLIB)
+if(ZLIB_FOUND)
+  target_link_libraries(zlib INTERFACE ZLIB::ZLIB)
+else()
+  target_compile_definitions(zlib INTERFACE "ZLIB_NOT_FOUND")
+endif()
+
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
-install(TARGETS ${PROJECT_NAME}
-  EXPORT ${PROJECT_NAME}-config
+install(TARGETS ${PROJECT_NAME} zlib
+  EXPORT ${PROJECT_NAME}-targets
 )
 
 set(config_destination share/cmake/${PROJECT_NAME})
-install(EXPORT ${PROJECT_NAME}-config
+install(EXPORT ${PROJECT_NAME}-targets
   DESTINATION ${config_destination}
   NAMESPACE ${PROJECT_NAME}::
 )
@@ -32,7 +41,12 @@ include(CMakePackageConfigHelpers)
 write_basic_package_version_file(${version_file}
   COMPATIBILITY AnyNewerVersion
 )
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${version_file}
+configure_package_config_file(config.cmake.in ${PROJECT_NAME}-config.cmake
+  INSTALL_DESTINATION ${config_destination}
+)
+install(FILES
+  ${CMAKE_CURRENT_BINARY_DIR}/${version_file}
+  ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config.cmake
   DESTINATION ${config_destination}
 )
 

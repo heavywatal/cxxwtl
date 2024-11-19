@@ -2,19 +2,31 @@
 #ifndef WTL_ZLIB_HPP_
 #define WTL_ZLIB_HPP_
 
-#include <filesystem>
 #include <fstream>
 #include <sstream>
+
+#ifdef ZLIB_NOT_FOUND
+#pragma message "zlib not found"
+
+namespace wtl { namespace zlib {
+
+using std::ifstream;
+using std::ofstream;
+using std::istringstream;
+using std::ostringstream;
+
+}} // namespace wtl::zlib
+
+#else // ZLIB_NOT_FOUND
+
+#include <filesystem>
 #include <string>
 #include <type_traits>
 #include <zlib.h>
 
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 namespace wtl { namespace zlib {
 
 namespace fs = std::filesystem;
-
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
 class Exception : public std::runtime_error {
   public:
@@ -40,7 +52,7 @@ class Exception : public std::runtime_error {
     std::string what_;
 };
 
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
+
 namespace detail {
 
 class iz_stream : public z_stream {
@@ -70,7 +82,7 @@ class oz_stream : public z_stream {
 };
 
 } // namespace detail
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
+
 
 class istreambuf : public std::streambuf {
     static constexpr std::streamsize SIZE = 4096;
@@ -163,6 +175,7 @@ class ostreambuf : public std::streambuf {
     std::streambuf* writer_;
 };
 
+
 namespace detail {
 
 template <class Stream>
@@ -194,6 +207,7 @@ class SstrInitializer {
 };
 
 } // namespace detail
+
 
 template<class Stream>
 class basic_fstream
@@ -237,8 +251,8 @@ class basic_stringstream
 using istringstream = basic_stringstream<std::istream>;
 using ostringstream = basic_stringstream<std::ostream>;
 
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 }} // namespace wtl::zlib
-/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
+
+#endif // ZLIB_NOT_FOUND
 
 #endif // WTL_ZLIB_HPP_
