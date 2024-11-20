@@ -3,7 +3,7 @@
 
 inline void manipulator() {
     std::ostringstream oss;
-    oss << wtl::setfill0w(3) << 7u;
+    oss << wtl::setfillw('0', 3) << 7u;
     WTL_ASSERT(oss.str() == "007");
 }
 

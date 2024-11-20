@@ -49,6 +49,7 @@ inline null_ostream& nout() {
 
 namespace fs = std::filesystem;
 
+[[deprecated("use std::ofstream directly")]]
 inline std::ofstream
 make_ofs(const fs::path& filepath, std::ios_base::openmode mode=std::ios_base::out) {
     std::ofstream ofs(filepath, mode | std::ios_base::binary);
@@ -57,6 +58,7 @@ make_ofs(const fs::path& filepath, std::ios_base::openmode mode=std::ios_base::o
     return ofs;
 }
 
+[[deprecated("use std::ifstream directly")]]
 inline std::ifstream
 make_ifs(const fs::path& filepath, std::ios_base::openmode mode=std::ios_base::in) {
     std::ifstream ifs(filepath, mode | std::ios_base::binary);
@@ -98,6 +100,7 @@ inline detail::SetFillW<CharT> setfillw(CharT fill, std::streamsize width) {
     return detail::SetFillW<CharT>(fill, width);
 }
 
+[[deprecated("use wtl::setfillw")]]
 inline detail::SetFillW<char> setfill0w(std::streamsize width) {
     return detail::SetFillW<char>('0', width);
 }

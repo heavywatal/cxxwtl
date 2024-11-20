@@ -42,7 +42,7 @@ std::vector<T> rstrip(std::vector<T> seq, const T& value=T{}) {
     return seq;
 }
 
-template <class V, class U> inline
+template <class V, class U> [[deprecated]] inline
 V subscript(const V& seq, const U& indices) {
     V subset;
     subset.reserve(indices.size());
@@ -52,7 +52,7 @@ V subscript(const V& seq, const U& indices) {
     return subset;
 }
 
-template <class T> inline
+template <class T> [[deprecated]] inline
 typename std::vector<typename std::remove_pointer<typename T::value_type>::type>
 dereference(const T& src) {
     typename std::vector<typename std::remove_pointer<typename T::value_type>::type> dst;
@@ -63,28 +63,28 @@ dereference(const T& src) {
     return dst;
 }
 
-template <class Iter, class Distance> inline
+template <class Iter, class Distance> [[deprecated]] inline
 Iter advance_return(Iter i, Distance d) {
     std::advance(i, d); return i;
 }
 
 
 // for vector and deque
-template <class V> inline
+template <class V> [[deprecated]] inline
 typename V::iterator sort_unique_erase(V* v) {
     std::sort(begin(*v), end(*v));
     return v->erase(std::unique(begin(*v), end(*v)), end(*v));
 }
 
 // ceiling of integer division
-template <class T> inline constexpr
+template <class T> [[deprecated]] inline constexpr
 T ceil_int_div(T lhs, T rhs) {
     --lhs /= rhs;
     return ++lhs;
 }
 
 // split a sequence into the equally sized pieces
-template <class V> inline
+template <class V> [[deprecated]] inline
 std::vector<V> chunk(const V& src, size_t unit) {
     std::vector<V> dst(ceil_int_div(src.size(), unit));
     size_t i = 0;
