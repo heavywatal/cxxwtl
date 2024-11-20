@@ -33,14 +33,15 @@ cmake --build build
 cmake --install build
 ```
 
+
+### Usage
+
 Header files are installed to `${CMAKE_INSTALL_PREFIX}/include/wtl/`.
 This library can be imported from other CMake projects:
 ```cmake
-find_package(wtl)
-target_link_libraries(${YOUR_TARGET} PRIVATE wtl::wtl)
+find_package(wtl COMPONENTS zlib)
+target_link_libraries(${YOUR_TARGET} PRIVATE wtl::wtl wtl::zlib)
 ```
-
-### Usage
 
 ```c++
 // example.cpp
@@ -51,12 +52,4 @@ int main() {
     std::cout << wtl::factorial(5) << std::endl;
     return 0;
 }
-```
-
-Additional include path can be specified with `-I` option or `CPATH` environment variable.
-
-```sh
-clang++ -std=c++17 -O2 -Wall -Wextra -Wpedantic -I${HOME}/local/include example.cpp
-./a.out
-# 120
 ```
