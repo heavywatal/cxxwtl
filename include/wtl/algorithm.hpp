@@ -42,59 +42,6 @@ std::vector<T> rstrip(std::vector<T> seq, const T& value=T{}) {
     return seq;
 }
 
-template <class V, class U> [[deprecated]] inline
-V subscript(const V& seq, const U& indices) {
-    V subset;
-    subset.reserve(indices.size());
-    for (auto i: indices) {
-        subset.push_back(seq[i]);
-    }
-    return subset;
-}
-
-template <class T> [[deprecated]] inline
-typename std::vector<typename std::remove_pointer<typename T::value_type>::type>
-dereference(const T& src) {
-    typename std::vector<typename std::remove_pointer<typename T::value_type>::type> dst;
-    dst.reserve(src.size());
-    for (const auto p: src) {
-        dst.push_back(*p);
-    }
-    return dst;
-}
-
-template <class Iter, class Distance> [[deprecated]] inline
-Iter advance_return(Iter i, Distance d) {
-    std::advance(i, d); return i;
-}
-
-
-// for vector and deque
-template <class V> [[deprecated]] inline
-typename V::iterator sort_unique_erase(V* v) {
-    std::sort(begin(*v), end(*v));
-    return v->erase(std::unique(begin(*v), end(*v)), end(*v));
-}
-
-// ceiling of integer division
-template <class T> [[deprecated]] inline constexpr
-T ceil_int_div(T lhs, T rhs) {
-    --lhs /= rhs;
-    return ++lhs;
-}
-
-// split a sequence into the equally sized pieces
-template <class V> [[deprecated]] inline
-std::vector<V> chunk(const V& src, size_t unit) {
-    std::vector<V> dst(ceil_int_div(src.size(), unit));
-    size_t i = 0;
-    for (auto it=begin(src); it!=end(src); ++it) {
-        if (dst[i].size()==unit) {++i;}
-        dst[i].push_back(*it);
-    }
-    return dst;
-}
-
 template <class V, class Fn> inline
 bool equal(const V& v, const V& u, Fn&& fn) {
     return std::equal(begin(v), end(v), begin(u), fn);

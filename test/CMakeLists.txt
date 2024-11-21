@@ -7,7 +7,6 @@ set(source_files
   cluster.cpp
   dataframe.cpp
   filesystem.cpp
-  genetic.cpp
   iostr.cpp
   math.cpp
   numeric.cpp

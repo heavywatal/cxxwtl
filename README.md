@@ -9,9 +9,7 @@ Personal C++ header library
 
 - C++17 compiler
 - CMake
-- `zfstream.hpp` uses [boost::iostreams](http://www.boost.org/doc/libs/release/libs/iostreams/doc/)
 - `itertools.hpp` uses [boost::coroutine2](http://www.boost.org/doc/libs/release/libs/coroutine2/doc/html/)
-- `getopt.hpp` uses [boost::program_options](http://www.boost.org/doc/libs/release/libs/program_options/doc/)
 - `grn.hpp` uses [boost::graph](http://www.boost.org/doc/libs/release/libs/graph/doc/)
 - `eigen.hpp` uses [Eigen](https://eigen.tuxfamily.org/)
 - `zlib.hpp` uses [zlib](https://github.com/madler/zlib)

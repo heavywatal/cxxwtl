@@ -49,13 +49,6 @@ std::ostream& stopwatch(std::ostream& ost, Fn&& fn, unsigned times=3u) {
     return ost << "\n";
 }
 
-template <class Fn>
-[[deprecated("use getrusage() for benchmarking CPU time")]]
-void benchmark(Fn&& fn, std::string_view label="", size_t times=3) {
-    std::cerr << "#BENCHMARK[ms] " << label << "\n";
-    stopwatch<std::chrono::milliseconds>(std::cerr, std::forward<Fn>(fn), times);
-}
-
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 // datetime
 
