@@ -1,5 +1,6 @@
 #include <wtl/random.hpp>
 #include <wtl/exception.hpp>
+#include <wtl/iostr.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -23,17 +24,24 @@ inline void negative_binomial() {
     }
 }
 /* R
-df = read_tsv('test/nbinom.tsv')
+df = readr::read_tsv('test/nbinom.tsv')
 
-ggplot(df, aes(x)) +
-geom_histogram(bins=50L) +
-facet_grid(k ~ mu, scale = "free_x", labeller=label_both)
+ggplot(df) + aes(x) +
+  geom_histogram(bins=50L) +
+  facet_grid(vars(k), vars(mu), scale = "free_x", labeller=label_both)
 
-df %>%
-  dplyr::group_by(mu, k) %>%
-  dplyr::summarise(mean = mean(x), var = var(x)) %>%
+df |>
+  dplyr::group_by(mu, k) |>
+  dplyr::summarise(mean = mean(x), var = var(x)) |>
   dplyr::mutate(p = k / (mu + k), E_var = k * (1 - p) / (p ** 2))
 */
+
+inline void test_multinomial() {
+    wtl::multinomial_distribution multinomial({0.1, 0.2, 0.3});
+    WTL_ASSERT(std::abs(multinomial.probabilities()[2] - 0.5) < 1e-9);
+    std::cout << multinomial.probabilities() << "\n";
+    std::cout << multinomial(wtl::mt64(), 100) << "\n";
+}
 
 inline void canonical() {
     for (size_t i=0; i<6u; ++i) {
@@ -54,5 +62,6 @@ inline void canonical() {
 
 int main() {
     negative_binomial();
+    test_multinomial();
     canonical();
 }

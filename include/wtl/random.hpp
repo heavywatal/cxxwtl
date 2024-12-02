@@ -3,7 +3,9 @@
 #define WTL_RANDOM_HPP_
 
 #include <cstdint>
+#include <initializer_list>
 #include <limits>
+#include <numeric>
 #include <random>
 #include <vector>
 #include <unordered_set>
@@ -230,6 +232,88 @@ class negative_binomial_distribution {
             dist.param(param_type(k, p));
         }
         return ist;
+    }
+
+  private:
+    param_type _param;
+};
+
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
+
+template <class IntType = int>
+class multinomial_distribution {
+  public:
+    using result_type = IntType;
+
+    class param_type {
+      public:
+        using distribution_type = multinomial_distribution;
+        template <class InputIterator>
+        explicit param_type(InputIterator begin, InputIterator end):
+          _p(begin, end) {
+            if (_p.empty()) {
+                _p.assign(1, 1.0);
+                return;
+            }
+            const auto sum_p = std::reduce(_p.begin(), _p.end());
+            for (auto& x: _p) x /= sum_p;
+        }
+        explicit param_type(std::initializer_list<double> wl = {1.0}):
+          param_type(wl.begin(), wl.end()) {}
+        const std::vector<double>& probabilities() const noexcept {return _p;}
+        friend bool operator==(const param_type& lhs, const param_type& rhs) noexcept {
+            return lhs._p == rhs._p;
+        }
+        friend bool operator!=(const param_type& lhs, const param_type& rhs) noexcept {
+            return !(lhs == rhs);
+        }
+      private:
+        std::vector<double> _p;
+    };
+
+    multinomial_distribution(): multinomial_distribution({1.0}) {}
+    template <class InputIterator>
+    explicit multinomial_distribution(InputIterator begin, InputIterator end):
+      _param(begin, end) {}
+    explicit multinomial_distribution(std::initializer_list<double> wl):
+      _param(wl) {}
+    explicit multinomial_distribution(const param_type& parameter):
+      _param(parameter) {}
+    ~multinomial_distribution() noexcept = default;
+
+    template <class URBG>
+    std::vector<result_type> operator()(URBG& engine, result_type n) const {
+        return operator()(engine, n, _param);
+    }
+    template <class URBG>
+    std::vector<result_type>
+    operator()(URBG& engine, result_type n, const param_type& parameter) const {
+        const auto& probs = parameter.probabilities();
+        std::vector<result_type> res(probs.size());
+        const size_t last = probs.size() - 1u;
+        for (size_t i=0; n > 0 && i < last; ++i) {
+          std::binomial_distribution<result_type> binomial(n, probs[i]);
+          n -= (res[i] = binomial(engine));
+        }
+        res[last] = n;
+        return res;
+    }
+
+    const std::vector<double>& probabilities() const noexcept {return _param.probabilities();}
+
+    param_type param() const noexcept {return _param;}
+    void param(const param_type& parameter) noexcept {_param = parameter;}
+
+    result_type constexpr min() const noexcept {return 0;}
+    result_type constexpr max() const noexcept {return std::numeric_limits<result_type>::max();}
+
+    friend bool operator==(const multinomial_distribution& lhs,
+                           const multinomial_distribution& rhs) noexcept {
+        return lhs._param == rhs._param;
+    }
+    friend bool operator!=(const multinomial_distribution& lhs,
+                           const multinomial_distribution& rhs) noexcept {
+        return !(lhs == rhs);
     }
 
   private:
