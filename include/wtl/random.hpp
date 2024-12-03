@@ -291,9 +291,11 @@ class multinomial_distribution {
         const auto& probs = parameter.probabilities();
         std::vector<result_type> res(probs.size());
         const size_t last = probs.size() - 1u;
+        double denom = 1.0;
         for (size_t i=0; n > 0 && i < last; ++i) {
-          std::binomial_distribution<result_type> binomial(n, probs[i]);
+          std::binomial_distribution<result_type> binomial(n, probs[i] / denom);
           n -= (res[i] = binomial(engine));
+          denom -= probs[i];
         }
         res[last] = n;
         return res;
