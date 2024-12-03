@@ -3,6 +3,7 @@
 #include <wtl/iostr.hpp>
 
 #include <iostream>
+#include <limits>
 #include <fstream>
 
 inline void write_negative_binom(const unsigned n, const double mu, const double k, std::ostream& ost) {
@@ -44,6 +45,15 @@ inline void test_multinomial() {
 }
 
 inline void canonical() {
+    constexpr auto max_uint32 = std::numeric_limits<uint32_t>::max();
+    constexpr auto max_uint64 = std::numeric_limits<uint64_t>::max();
+    const wtl::detail::bits64_t max_bits32{max_uint32, max_uint32};
+    const wtl::detail::bits64_t max_bits64{max_uint64};
+    WTL_ASSERT(wtl::detail::bits64_t{0u}.as_canonical() == 0.0);
+    WTL_ASSERT(wtl::detail::bits64_t{1u}.as_canonical() > 0.0);
+    WTL_ASSERT(max_bits64.as_canonical() < 1.0);
+    WTL_ASSERT(max_bits64.as_canonical() == 1.0 - std::numeric_limits<double>::epsilon());
+    WTL_ASSERT(max_bits64.as_canonical() == max_bits32.as_canonical());
     for (size_t i=0; i<6u; ++i) {
         double x = wtl::generate_canonical(wtl::mt64());
         std::cout << x << " ";

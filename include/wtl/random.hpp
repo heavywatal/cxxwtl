@@ -22,11 +22,25 @@ namespace detail {
         bits64_t(uint64_t x): as_uint64_t{x} {}
         bits64_t(uint32_t x, uint32_t y): as_uint32_t{x, y} {}
 
-        // Use 52 bits to make double [0.0, 1.0)
-        double as_canonical() {
+        // [0.0, 1.0)
+        double as_canonical() const {
+            constexpr auto max_uint64 = std::numeric_limits<uint64_t>::max();
+            constexpr double e = std::numeric_limits<double>::epsilon();
+            constexpr double denom = static_cast<double>(max_uint64) * (1.0 + e);
+            return as_uint64_t / denom;
+        }
+
+        double as_canonical_52() const {
+            bits64_t x{as_uint64_t};
+            x.as_canonical_52_inplace();
+            return x.as_double;
+        }
+
+        // Use only 52 bits
+        void as_canonical_52_inplace() {
             as_uint64_t >>= 2;
             as_uint64_t |= 0x3ff0'0000'0000'0000u;
-            return as_double -= 1.0;
+            as_double -= 1.0;
         }
     };
 } // namespace detail
@@ -38,7 +52,7 @@ class random_device_64 {
     static constexpr result_type max() {return std::numeric_limits<result_type>::max();}
 
     result_type operator()() {
-        return detail::bits64_t(std_rd(), std_rd()).as_uint64_t;
+        return detail::bits64_t{std_rd(), std_rd()}.as_uint64_t;
     }
     double entropy() const noexcept {return std_rd.entropy();}
   private:
@@ -48,9 +62,9 @@ class random_device_64 {
 template <class URBG> inline
 double generate_canonical(URBG& gen) {
     if constexpr (URBG::max() == std::numeric_limits<uint64_t>::max()) {
-        return detail::bits64_t(gen()).as_canonical();
+        return detail::bits64_t{gen()}.as_canonical();
     } else if constexpr (URBG::max() == std::numeric_limits<uint32_t>::max()) {
-        return detail::bits64_t(gen(), gen()).as_canonical();
+        return detail::bits64_t{gen(), gen()}.as_canonical();
     } else {
         return std::generate_canonical<double, std::numeric_limits<double>::digits>(gen);
     }
