@@ -14,35 +14,20 @@
 namespace wtl {
 
 namespace detail {
-    union bits64_t {
-        uint64_t as_uint64_t;
-        uint32_t as_uint32_t[2];
-        double as_double;
 
-        bits64_t(uint64_t x): as_uint64_t{x} {}
-        bits64_t(uint32_t x, uint32_t y): as_uint32_t{x, y} {}
+constexpr inline
+uint64_t as_uint64(uint32_t high, uint32_t low) noexcept {
+    return (static_cast<uint64_t>(high) << 32u) + low;
+}
 
-        // [0.0, 1.0)
-        double as_canonical() const {
-            constexpr auto max_uint64 = std::numeric_limits<uint64_t>::max();
-            constexpr double e = std::numeric_limits<double>::epsilon();
-            constexpr double denom = static_cast<double>(max_uint64) * (1.0 + e);
-            return as_uint64_t / denom;
-        }
+template <class UIntType> constexpr inline
+double as_canonical(UIntType x) noexcept {
+    constexpr auto max_uint = std::numeric_limits<UIntType>::max();
+    constexpr double e = std::numeric_limits<double>::epsilon();
+    constexpr double denom = static_cast<double>(max_uint) * (1.0 + e);
+    return x / denom;
+}
 
-        double as_canonical_52() const {
-            bits64_t x{as_uint64_t};
-            x.as_canonical_52_inplace();
-            return x.as_double;
-        }
-
-        // Use only 52 bits
-        void as_canonical_52_inplace() {
-            as_uint64_t >>= 2;
-            as_uint64_t |= 0x3ff0'0000'0000'0000u;
-            as_double -= 1.0;
-        }
-    };
 } // namespace detail
 
 class random_device_64 {
@@ -52,7 +37,7 @@ class random_device_64 {
     static constexpr result_type max() {return std::numeric_limits<result_type>::max();}
 
     result_type operator()() {
-        return detail::bits64_t{std_rd(), std_rd()}.as_uint64_t;
+        return detail::as_uint64(std_rd(), std_rd());
     }
     double entropy() const noexcept {return std_rd.entropy();}
   private:
@@ -62,9 +47,9 @@ class random_device_64 {
 template <class URBG> inline
 double generate_canonical(URBG& gen) {
     if constexpr (URBG::max() == std::numeric_limits<uint64_t>::max()) {
-        return detail::bits64_t{gen()}.as_canonical();
+        return detail::as_canonical(gen());
     } else if constexpr (URBG::max() == std::numeric_limits<uint32_t>::max()) {
-        return detail::bits64_t{gen(), gen()}.as_canonical();
+        return detail::as_canonical(detail::as_uint64(gen(), gen()));
     } else {
         return std::generate_canonical<double, std::numeric_limits<double>::digits>(gen);
     }

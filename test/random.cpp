@@ -45,29 +45,21 @@ inline void test_multinomial() {
 }
 
 inline void canonical() {
+    constexpr auto epsilon = std::numeric_limits<double>::epsilon();
     constexpr auto max_uint32 = std::numeric_limits<uint32_t>::max();
     constexpr auto max_uint64 = std::numeric_limits<uint64_t>::max();
-    const wtl::detail::bits64_t max_bits32{max_uint32, max_uint32};
-    const wtl::detail::bits64_t max_bits64{max_uint64};
-    WTL_ASSERT(wtl::detail::bits64_t{0u}.as_canonical() == 0.0);
-    WTL_ASSERT(wtl::detail::bits64_t{1u}.as_canonical() > 0.0);
-    WTL_ASSERT(max_bits64.as_canonical() < 1.0);
-    WTL_ASSERT(max_bits64.as_canonical() == 1.0 - std::numeric_limits<double>::epsilon());
-    WTL_ASSERT(max_bits64.as_canonical() == max_bits32.as_canonical());
+    static_assert(wtl::detail::as_uint64(max_uint32, max_uint32) == max_uint64);
+    static_assert(wtl::detail::as_uint64(1u, 0u) == (uint64_t{1u} << 32));
+    static_assert(wtl::detail::as_canonical(0u) == 0.0);
+    static_assert(wtl::detail::as_canonical(1u) > epsilon);
+    static_assert(wtl::detail::as_canonical(max_uint64) < 1.0);
+    static_assert(wtl::detail::as_canonical(max_uint64) == 1.0 - epsilon);
     for (size_t i=0; i<6u; ++i) {
         double x = wtl::generate_canonical(wtl::mt64());
         std::cout << x << " ";
         WTL_ASSERT(0.0 <= x && x < 1.0);
     }
     std::cout << "\n";
-    wtl::detail::bits64_t min_0x3ff{uint64_t{0x3ff0'0000'0000'0000u}}; // 1.0
-    wtl::detail::bits64_t max_0x3ff{uint64_t{0x3fff'ffff'ffff'ffffu}}; // 1.999...
-    WTL_ASSERT((min_0x3ff.as_double - 1.0) == 0.0);
-    WTL_ASSERT((max_0x3ff.as_double - 1.0) < 1.0);
-    std::cout.precision(15);
-    std::cout << std::scientific
-              << min_0x3ff.as_double - 1.0 << "\n"
-              << max_0x3ff.as_double - 1.0 << "\n";
 }
 
 int main() {
