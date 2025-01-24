@@ -42,6 +42,11 @@ inline void test_multinomial() {
     WTL_ASSERT(std::abs(multinomial.probabilities()[2] - 0.5) < 1e-9);
     std::cout << multinomial.probabilities() << "\n";
     std::cout << multinomial(wtl::mt64(), 100) << "\n";
+    try {
+      wtl::multinomial_distribution multi_zero({0.0, 0.0});
+    } catch (std::runtime_error &e) {
+      std::cout << e.what() << "\n";
+    }
 }
 
 inline void canonical() {

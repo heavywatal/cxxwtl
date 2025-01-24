@@ -255,6 +255,9 @@ class multinomial_distribution {
                 return;
             }
             const auto sum_p = std::reduce(_p.begin(), _p.end());
+            if (sum_p == 0.0) {
+                throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + ": zero probability");
+            }
             for (auto& x: _p) x /= sum_p;
         }
         explicit param_type(std::initializer_list<double> wl = {1.0}):
