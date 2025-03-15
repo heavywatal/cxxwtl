@@ -82,10 +82,6 @@ class Task: public BasicTask {
     std::packaged_task<result_t()> std_task_;
 };
 
-static_assert(!std::is_default_constructible<Task<void>>{}, "");
-static_assert(!std::is_copy_constructible<Task<void>>{}, "");
-static_assert(std::is_nothrow_move_constructible<Task<void>>{}, "");
-
 class ThreadPool {
   public:
     ThreadPool(unsigned int n) {

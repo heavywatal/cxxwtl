@@ -3,6 +3,10 @@
 #include <iostream>
 #include <sstream>
 
+static_assert(!std::is_default_constructible_v<wtl::Task<void>>, "");
+static_assert(!std::is_copy_constructible_v<wtl::Task<void>>, "");
+static_assert(std::is_nothrow_move_constructible_v<wtl::Task<void>>, "");
+
 int main() {
     wtl::ThreadPool pool(2);
     std::vector<std::future<size_t>> futures;
