@@ -55,7 +55,7 @@ std::ostream& stopwatch(std::ostream& ost, Fn&& fn, unsigned times=3u) {
 // default is the same as ctime(): Thu Aug 23 14:55:02 2001
 // which is equivalent to "%a %b %d %T %Y"
 inline std::string strftime(const char* format="%c") {
-    char cstr[80];
+    char cstr[256];
     const std::time_t raw_time = std::time(nullptr);
     const struct std::tm* t = std::localtime(&raw_time);
     std::strftime(cstr, sizeof(cstr), format, t);
