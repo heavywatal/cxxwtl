@@ -1,7 +1,11 @@
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Dev)
-endif()
-set(CMAKE_CXX_FLAGS_DEV "-O2 -g")
+add_compile_definitions("_LIBCPP_REMOVE_TRANSITIVE_INCLUDES")
+add_compile_options(
+  -Wall -Wextra -Wpedantic
+  $<IF:$<BOOL:$<CONFIG>>,,-O2>
+  $<IF:$<BOOL:$<CONFIG>>,,-g>
+  $<$<STREQUAL:${CMAKE_SYSTEM_PROCESSOR},x86_64>:-march=native>
+  $<$<STREQUAL:${CMAKE_SYSTEM_PROCESSOR},arm64>:-march=armv8.4-a>
+)
 
 set(source_files
   cluster.cpp
@@ -24,7 +28,6 @@ function(add_executable_test src)
   add_executable(test-${name_we} ${src})
   set_target_properties(test-${name_we} PROPERTIES CXX_EXTENSIONS OFF)
   target_link_libraries(test-${name_we} PRIVATE ${PROJECT_NAME})
-  target_compile_options(test-${name_we} PRIVATE -Wall -Wextra -pedantic)
   add_test(NAME ${name_we} COMMAND $<TARGET_FILE:test-${name_we}>)
 endfunction()
 
@@ -32,8 +35,10 @@ foreach(src IN LISTS source_files)
   add_executable_test(${src})
 endforeach()
 
-add_executable_test(zlib.cpp)
-target_link_libraries(test-zlib PRIVATE zlib)
+if(ZLIB_FOUND)
+  add_executable_test(zlib.cpp)
+  target_link_libraries(test-zlib PRIVATE wtl::zlib)
+endif()
 
 find_package(Threads)
 if(Threads_FOUND)
