@@ -23,10 +23,19 @@ else()
   target_compile_definitions(zlib INTERFACE "ZLIB_NOT_FOUND")
 endif()
 
+add_library(threads INTERFACE)
+add_library(${PROJECT_NAME}::threads ALIAS threads)
+find_package(Threads)
+if(Threads_FOUND)
+  target_link_libraries(threads INTERFACE Threads::Threads)
+else()
+  target_compile_definitions(threads INTERFACE "THREADS_NOT_FOUND")
+endif()
+
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
-install(TARGETS ${PROJECT_NAME} zlib
+install(TARGETS ${PROJECT_NAME} zlib threads
   EXPORT ${PROJECT_NAME}-targets
 )
 
