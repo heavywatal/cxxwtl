@@ -25,7 +25,7 @@ double as_canonical(UIntType x) noexcept {
     constexpr auto max_uint = std::numeric_limits<UIntType>::max();
     constexpr double e = std::numeric_limits<double>::epsilon();
     constexpr double denom = static_cast<double>(max_uint) * (1.0 + e);
-    return x / denom;
+    return static_cast<double>(x) / denom;
 }
 
 } // namespace detail

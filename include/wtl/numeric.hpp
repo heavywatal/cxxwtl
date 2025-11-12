@@ -40,10 +40,10 @@ class Approx {
 // Generate valarray with equally spaced values
 inline std::valarray<double>
 lin_spaced(size_t size, double low=0.0, double high=1.0) {
-    const double step = (high - low) / (size - 1u);
+    const double step = (high - low) / static_cast<double>(size - 1u);
     std::valarray<double> x(step, size);
     for (size_t i=0; i<size; ++i) {
-        x[i] *= i;
+        x[i] *= static_cast<double>(i);
     }
     return x += low;
 }
@@ -98,8 +98,8 @@ cast(const std::valarray<U>& x) {
 
 inline size_t count(const std::valarray<bool>& x) {
     return std::accumulate(std::begin(x), std::end(x), 0ul,
-      [](size_t x, bool b) {
-          if (b) {return ++x;} else {return x;}
+      [](size_t a, bool b) {
+          if (b) {return ++a;} else {return a;}
       });
 }
 
@@ -242,14 +242,14 @@ double var(const Iter begin_, const Iter end_, bool unbiased=true) {
     size_t denom = std::distance(begin_, end_);
     if (unbiased) {--denom;}
     double s = devsq(begin_, end_, mean(begin_, end_));
-    return s /= denom;
+    return s /= static_cast<double>(denom);
 }
 template <class V> inline
 double var(const V& v, bool unbiased=true) {
     size_t denom = v.size();
     if (unbiased) {--denom;}
     double s = devsq(v, mean(v));
-    return s /= denom;
+    return s /= static_cast<double>(denom);
 }
 
 template <class Iter> inline
@@ -274,11 +274,11 @@ double var_once(Iter begin_, const Iter end_, bool unbiased=true) {
     for (; begin_!=end_; ++begin_) {
         double d = *begin_;
         d -= wmean;
-        wmean += d / (++n);
-        sqsum += (n - 1u) * d * d / n;
+        wmean += d / static_cast<double>(++n);
+        sqsum += static_cast<double>(n - 1u) * d * d / static_cast<double>(n);
     }
     n -= static_cast<unsigned int>(unbiased);
-    return sqsum /= n;
+    return sqsum /= static_cast<double>(n);
 }
 
 
@@ -487,7 +487,7 @@ double integrate_trapezoid(Func func, double lower, double upper, size_t precisi
 
 template <class Func> inline
 double integrate_midpoint(Func func, double lower, double upper, size_t precision=100) {
-    const double step = (upper - lower) / precision;
+    const double step = (upper - lower) / static_cast<double>(precision);
     double result = 0.0;
     for (double x=lower + 0.5 * step; x<upper; x+=step) {
         result += func(x);
@@ -497,7 +497,7 @@ double integrate_midpoint(Func func, double lower, double upper, size_t precisio
 
 template <class Func> inline
 double integrate_simpson(Func func, double lower, double upper, size_t precision=100) {
-    const double step = (upper - lower) / precision;
+    const double step = (upper - lower) / static_cast<double>(precision);
     const double double_step = step * 2.0;
     double result_odd = 0.0;
     for (double x=lower + step; x<upper; x+=double_step) {
