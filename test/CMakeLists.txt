@@ -17,6 +17,7 @@ set(source_files
   numeric.cpp
   random.cpp
   scope.cpp
+  signed.cpp
   string.cpp
 )
 
