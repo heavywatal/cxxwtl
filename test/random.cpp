@@ -6,16 +6,16 @@
 #include <limits>
 #include <fstream>
 
-inline void write_negative_binom(const unsigned n, const double mu, const double k, std::ostream& ost) {
+inline void write_negative_binom(const int n, const double mu, const double k, std::ostream& ost) {
     const double prob = k / (mu + k);
     wtl::negative_binomial_distribution<int> dist(k, prob);
-    for (unsigned i=0; i<n; ++i) {
+    for (int i=0; i<n; ++i) {
         ost << mu << "\t" << k << "\t" << dist(wtl::mt64()) << "\n";
     }
 }
 
 inline void negative_binomial() {
-    const unsigned n = 1000u;
+    const int n = 1000;
     std::ofstream ofs("nbinom.tsv");
     ofs << "mu\tk\tx\n";
     for (const double mu: {1.0, 10.0, 100.0, 1000.0}) {

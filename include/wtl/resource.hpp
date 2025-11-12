@@ -2,6 +2,8 @@
 #ifndef WTL_RESOURCE_HPP_
 #define WTL_RESOURCE_HPP_
 
+#include "signed.hpp"
+
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <algorithm>
@@ -50,9 +52,9 @@ inline long unit(long x) noexcept {
 
 template <class T> inline
 T median(std::vector<T>* v) {
-    const auto i = v->size() / 2u;
+    const auto i = ssize(*v) / 2;
     std::nth_element(v->begin(), v->begin() + i, v->end());
-    return v->at(i);
+    return at(*v, i);
 }
 
 } // namespace detail
@@ -103,14 +105,14 @@ diff_rusage(Fn&& fun) {
 
 template <class TimePrefix=std::micro, class MemoryPrefix=std::kilo, int Who=RUSAGE_SELF, class Fn>
 inline ResourceUsage<TimePrefix, MemoryPrefix, Who>
-diff_rusage(Fn&& fun, unsigned times) {
+diff_rusage(Fn&& fun, int times) {
     std::vector<long> utime;
     std::vector<long> stime;
     std::vector<long> maxrss;
-    utime.reserve(times);
-    stime.reserve(times);
-    maxrss.reserve(times);
-    for (unsigned i = 0u; i < times; ++i) {
+    reserve(utime, times);
+    reserve(stime, times);
+    reserve(maxrss, times);
+    for (int i = 0; i < times; ++i) {
         const auto ru = diff_rusage<TimePrefix, MemoryPrefix, Who>(std::forward<Fn>(fun));
         utime.push_back(ru.utime);
         stime.push_back(ru.stime);

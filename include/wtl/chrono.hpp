@@ -42,8 +42,8 @@ Duration stopwatch(Fn&& fn) {
 }
 
 template <class Duration = std::chrono::milliseconds, class Fn> inline
-std::ostream& stopwatch(std::ostream& ost, Fn&& fn, unsigned times=3u) {
-    for (; times>0u; --times) {
+std::ostream& stopwatch(std::ostream& ost, Fn&& fn, int times=3) {
+    for (; times > 0; --times) {
         ost << stopwatch<Duration>(std::forward<Fn>(fn)) << "\t" << std::flush;
     }
     return ost << "\n";

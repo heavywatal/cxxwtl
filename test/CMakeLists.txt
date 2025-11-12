@@ -1,6 +1,7 @@
 add_compile_definitions("_LIBCPP_REMOVE_TRANSITIVE_INCLUDES")
 add_compile_options(
-  -Wall -Wextra -Wpedantic
+  -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Wshadow
+  $<IF:$<BOOL:$<CONFIG>>,,-Werror>
   $<IF:$<BOOL:$<CONFIG>>,,-O2>
   $<IF:$<BOOL:$<CONFIG>>,,-g>
   $<$<STREQUAL:${CMAKE_SYSTEM_PROCESSOR},x86_64>:-march=native>
@@ -34,6 +35,8 @@ endfunction()
 foreach(src IN LISTS source_files)
   add_executable_test(${src})
 endforeach()
+
+target_compile_options(test-random PRIVATE -Wno-float-equal)
 
 if(ZLIB_FOUND)
   add_executable_test(zlib.cpp)

@@ -1,31 +1,33 @@
 #include <wtl/resource.hpp>
+#include <wtl/signed.hpp>
+
 #include <thread>
 #include <iostream>
 #include <memory>
 
 // to suppress optimization
-unsigned global = 0u;
+int global = 0;
 
-inline void div(unsigned n, unsigned divisor = 2u) {
-    unsigned sum = 0u;
-    for (unsigned i = 0u; i < n; ++i) {
-        if ((i % divisor) == 0u) {
+inline void divi(const int n, const int divisor = 2) {
+    int sum = 0;
+    for (int i = 0; i < n; ++i) {
+        if ((i % divisor) == 0) {
             sum += i;
         }
     }
     global += sum;
 }
 
-template <class T=unsigned>
-inline void mem(const unsigned n) {
+template <class T=int>
+inline void mem(const int n) {
     std::vector<std::unique_ptr<T>> v;
-    v.reserve(n);
-    unsigned sum = 0u;
-    for (unsigned i = 0u; i < n; ++i) {
+    wtl::reserve(v, n);
+    int sum = 0;
+    for (int i = 0; i < n; ++i) {
         v.push_back(std::make_unique<T>(i));
-        sum += *v[i];
+        sum += *wtl::at(v, i);
     }
-    global += sum + static_cast<unsigned>(v.size());
+    global += sum + static_cast<int>(v.size());
 }
 
 int main() {
@@ -33,12 +35,12 @@ int main() {
     // sleep takes time, but should not consume CPU time
     std::cout << wtl::diff_rusage([]{std::this_thread::sleep_for(30ms);}) << "\tsleep" << std::endl;
     // power-of-two is slightly faster
-    std::cout << wtl::diff_rusage([]{div(400000u, 1000u);}, 3u) << "\ti % 1022" << std::endl;
-    std::cout << wtl::diff_rusage([]{div(400000u, 1023u);}, 3u) << "\ti % 1023" << std::endl;
-    std::cout << wtl::diff_rusage([]{div(400000u, 1024u);}, 3u) << "\ti % 1024" << std::endl;
+    std::cout << wtl::diff_rusage([]{divi(400000, 1000);}, 3) << "\ti % 1022" << std::endl;
+    std::cout << wtl::diff_rusage([]{divi(400000, 1023);}, 3) << "\ti % 1023" << std::endl;
+    std::cout << wtl::diff_rusage([]{divi(400000, 1024);}, 3) << "\ti % 1024" << std::endl;
     // memory may be reused and not be returned to OS immediately
-    std::cout << wtl::diff_rusage([]{mem(1u * 1024u);}) << "\tvector(1k)" << std::endl;
-    std::cout << wtl::diff_rusage([]{mem(32u * 1024u);}) << "\tvector(32k)" << std::endl;
-    std::cout << wtl::diff_rusage([]{mem(32u * 1024u);}) << "\tvector(32k)" << std::endl;
+    std::cout << wtl::diff_rusage([]{mem(1 * 1024);}) << "\tvector(1k)" << std::endl;
+    std::cout << wtl::diff_rusage([]{mem(32 * 1024);}) << "\tvector(32k)" << std::endl;
+    std::cout << wtl::diff_rusage([]{mem(32 * 1024);}) << "\tvector(32k)" << std::endl;
     return 0;
 }

@@ -16,11 +16,16 @@
 namespace wtl {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
+inline int hardware_concurrency() noexcept {
+    const auto n = std::thread::hardware_concurrency();
+    return n ? static_cast<int>(n) : 1;
+}
+
 // compatible with std::lock_guard<BasicLockable>
 class Semaphore {
   public:
     explicit
-    Semaphore(unsigned int n=std::thread::hardware_concurrency()) noexcept:
+    Semaphore(int n=hardware_concurrency()) noexcept:
       count_(n) {}
 
     void lock() {
@@ -42,7 +47,7 @@ class Semaphore {
   private:
     std::mutex mutex_;
     std::condition_variable condition_;
-    unsigned int count_;
+    int count_;
 };
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
@@ -84,8 +89,8 @@ class Task: public BasicTask {
 
 class ThreadPool {
   public:
-    ThreadPool(unsigned int n) {
-        for (unsigned int i=0; i<n; ++i) {
+    ThreadPool(int n) {
+        for (int i=0; i<n; ++i) {
             threads_.emplace_back(&ThreadPool::run, this);
         }
     }
@@ -123,7 +128,7 @@ class ThreadPool {
         std::unique_lock<std::mutex> lck(mutex_);
         condition_wait_.wait(lck, [this]{
             return tasks_.empty() &&
-                (waiting_threads_ == static_cast<unsigned int>(threads_.size()));
+                (waiting_threads_ == static_cast<int>(threads_.size()));
         });
     }
 
@@ -153,7 +158,7 @@ class ThreadPool {
     std::condition_variable condition_run_;
     std::condition_variable condition_wait_;
     bool is_being_destroyed_ = false;
-    unsigned int waiting_threads_ = 0;
+    int waiting_threads_ = 0;
 };
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
