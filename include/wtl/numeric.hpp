@@ -267,7 +267,7 @@ double var_fast(Iter begin_, const Iter end_, bool unbiased=true) {
 
 template <class Iter> inline
 double var_once(Iter begin_, const Iter end_, bool unbiased=true) {
-    size_t n = 0;
+    ptrdiff_t n = 0;
     double wmean = 0.0;
     double sqsum = 0.0;
     // Only one loop, but many calculation steps -> slow
@@ -275,9 +275,9 @@ double var_once(Iter begin_, const Iter end_, bool unbiased=true) {
         double d = *begin_;
         d -= wmean;
         wmean += d / static_cast<double>(++n);
-        sqsum += static_cast<double>(n - 1u) * d * d / static_cast<double>(n);
+        sqsum += static_cast<double>(n - 1) * d * d / static_cast<double>(n);
     }
-    n -= static_cast<unsigned int>(unbiased);
+    n -= static_cast<ptrdiff_t>(unbiased);
     return sqsum /= static_cast<double>(n);
 }
 
@@ -336,23 +336,23 @@ double cov(const V& v, const U& u, bool unbiased=true) {
 template <class Iter> inline
 std::vector<double> rank(const Iter begin_, const Iter end_) {
     using T = typename Iter::value_type;
-    std::map<T, unsigned int> mtu;
+    std::map<T, int> mtu;
     for (auto it=begin_; it!=end_; ++it) {
         ++mtu[*it];
     }
     std::map<T, double> mtd;
-    unsigned int i = 0;
+    int i = 0;
     for (auto it=mtu.cbegin(); it!=mtu.cend(); ++it) {
         double r = 0.0;
-        const unsigned int n(std::get<1>(*it));
-        for (unsigned int j=0; j<n; ++j) {
-            r += ++i;
+        const auto n = it->second;
+        for (decltype(n) j=0; j<n; ++j) {
+            r += static_cast<double>(++i);
         }
-        r /= n;
+        r /= static_cast<double>(n);
         mtd[std::get<0>(*it)] = r;
     }
     std::vector<double> dst;
-    dst.reserve(i);
+    dst.reserve(static_cast<size_t>(i));
     for (auto it=begin_; it!=end_; ++it) {
         dst.push_back(mtd[*it]);
     }
@@ -475,7 +475,7 @@ Matrix transpose(const Matrix& A) {
 
 template <class Func> inline
 double integrate_trapezoid(Func func, double lower, double upper, size_t precision=100) {
-    const double step = (upper - lower) / precision;
+    const double step = (upper - lower) / static_cast<double>(precision);
     double result = func(lower);
     result += func(upper);
     result *= 0.5;

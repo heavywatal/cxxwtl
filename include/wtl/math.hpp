@@ -9,44 +9,49 @@ namespace wtl {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
 // integer powers at compile time
-template <class T>
-constexpr T pow(T base, unsigned int exponent) noexcept {
+template <class T, class Int>
+constexpr T pow(T base, Int exponent) noexcept {
     return exponent == 0 ? 1 : base * pow(base, --exponent);
 }
 
 // factorial at compile time
-constexpr unsigned int factorial(unsigned int n) {
-    return n ? (n * factorial(n - 1u)) : 1u;
+template <class Int>
+constexpr Int factorial(Int n) {
+    return n ? (n * factorial(n - 1)) : 1;
 }
 
-constexpr unsigned int permut(unsigned int n, unsigned int r) {
-    return r ? (n * permut(n - 1u, --r)) : 1u;
+template <class Int>
+constexpr Int permut(Int n, Int r) {
+    return r ? (n * permut(n - 1, --r)) : 1;
 }
 
-constexpr unsigned int choose(unsigned int n, unsigned int r) {
+template <class Int>
+constexpr Int choose(Int n, Int r) {
     return permut(n, r) / factorial(r);
 }
 
-template <class T>
-inline unsigned int multinomial(const T& v) {
-    unsigned int out = factorial(v.sum());
+template <class ValArray>
+inline auto multinomial(const ValArray& v) {
+    auto out = factorial(v.sum());
     for (const auto x: v) {
         out /= factorial(x);
     }
     return out;
 }
 
-inline unsigned int permut_runtime(unsigned int n, unsigned int r) {
-    unsigned int answer = n;
+template <class Int>
+inline Int permut_runtime(Int n, Int r) {
+    Int answer = n;
     while (--r) {
         answer *= --n;
     }
     return answer;
 }
 
-inline unsigned int choose_runtime(unsigned int n, unsigned int r) {
-    unsigned int numerator = n;
-    unsigned int denominator = r;
+template <class Int>
+inline Int choose_runtime(Int n, Int r) {
+    Int numerator = n;
+    Int denominator = r;
     while (--r) {
         numerator *= --n;
         denominator *= r;
