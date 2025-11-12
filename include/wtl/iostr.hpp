@@ -91,18 +91,18 @@ void read(const std::string& line, std::vector<T>* v) {
     read(iss, v);
 }
 
-template <size_t I=0u, typename... Ts> inline
+template <int I=0, typename... Ts> inline
 void read(std::istream& ist, std::tuple<Ts...>* x) {
     if constexpr (I < sizeof...(Ts)) {
         ist >> std::get<I>(*x);
-        read<I + 1u>(ist, x);
+        read<I + 1>(ist, x);
     }
 }
 
 template <typename... Ts> inline
 void read(const std::string& line, std::tuple<Ts...>* x) {
     std::istringstream iss(line);
-    read<0u>(iss, x);
+    read<0>(iss, x);
 }
 
 template <class T> inline
@@ -239,11 +239,6 @@ namespace detail {
         return ost << '}';
     }
 } // namespace detail
-
-// template<class Tuple, std::size_t... Is>
-// void print_tuple(std::ostream& ost, const Tuple& x, seq<Is...>){
-//     ost << (Is == 0 ? "" : ", ") << std::get<Is>(x);
-// }
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 } // namespace wtl

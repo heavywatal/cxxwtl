@@ -38,12 +38,13 @@ class Approx {
 // for std::valarray
 
 // Generate valarray with equally spaced values
+template <class IntType>
 inline std::valarray<double>
-lin_spaced(size_t size, double low=0.0, double high=1.0) {
-    const double step = (high - low) / static_cast<double>(size - 1u);
-    std::valarray<double> x(step, size);
-    for (size_t i=0; i<size; ++i) {
-        x[i] *= static_cast<double>(i);
+lin_spaced(IntType size, double low=0.0, double high=1.0) {
+    const double step = (high - low) / static_cast<double>(size - 1);
+    std::valarray<double> x(step, static_cast<size_t>(size));
+    for (IntType i=0; i<size; ++i) {
+        x[static_cast<size_t>(i)] *= static_cast<double>(i);
     }
     return x += low;
 }
@@ -56,9 +57,9 @@ round(const std::valarray<double>& x, double precision=1.0) {
 
 template <class T> inline std::valarray<T>
 row_sums(const std::vector<std::valarray<T>>& matrix) {
-    const size_t nrow = matrix.size();
+    const auto nrow = matrix.size();
     std::valarray<T> sums(nrow);
-    for (size_t i=0; i<nrow; ++i) {
+    for (auto i = decltype(nrow){}; i < nrow; ++i) {
         sums[i] = matrix[i].sum();
     }
     return sums;
@@ -66,7 +67,7 @@ row_sums(const std::vector<std::valarray<T>>& matrix) {
 
 template <class T> inline std::valarray<T>
 col_sums(const std::vector<std::valarray<T>>& matrix) {
-    const size_t ncol = matrix.at(0u).size();
+    const auto ncol = matrix.at(0u).size();
     std::valarray<T> sums(ncol);
     for (const auto& row: matrix) {
         sums += row;
@@ -78,8 +79,8 @@ template <class T> inline std::vector<std::valarray<T>>
 filter(const std::vector<std::valarray<T>>& matrix, const std::valarray<bool>& binary) {
     std::vector<std::valarray<T>> filtered;
     filtered.reserve(binary.sum());
-    const size_t nrow = matrix.size();
-    for (size_t i=0; i<nrow; ++i) {
+    const auto nrow = matrix.size();
+    for (auto i = decltype(nrow){}; i < nrow; ++i) {
         if (binary[i]) filtered.push_back(matrix[i]);
     }
     return filtered;
@@ -88,17 +89,17 @@ filter(const std::vector<std::valarray<T>>& matrix, const std::valarray<bool>& b
 template <class T, class U> inline
 std::valarray<T>
 cast(const std::valarray<U>& x) {
-    const size_t n = x.size();
+    const auto n = x.size();
     std::valarray<T> y(n);
-    for (size_t i=0; i<n; ++i) {
+    for (auto i = decltype(n){}; i < n; ++i) {
         y[i] = static_cast<T>(x[i]);
     }
     return y;
 }
 
-inline size_t count(const std::valarray<bool>& x) {
-    return std::accumulate(std::begin(x), std::end(x), 0ul,
-      [](size_t a, bool b) {
+inline ptrdiff_t count(const std::valarray<bool>& x) {
+    return std::accumulate(std::begin(x), std::end(x), 0l,
+      [](ptrdiff_t a, bool b) {
           if (b) {return ++a;} else {return a;}
       });
 }
@@ -114,8 +115,8 @@ T partial_sum(const T& v) {
 }
 
 // Generate integer vector with increasing values
-template <class T=size_t> inline
-typename std::vector<T> seq_len(size_t size, T init=0) {
+template <class T, class SizeType> inline
+typename std::vector<T> seq_len(SizeType size, T init=0) {
     typename std::vector<T> v(size);
     std::iota(std::begin(v), std::end(v), init);
     return v;
@@ -180,8 +181,8 @@ double geomean(const V& v) {
 // median
 template <class RandIter> inline
 double median(const RandIter begin_, const RandIter end_) {
-    const size_t n = std::distance(begin_, end_);
-    const RandIter mid = begin_ + (n / 2u); // larger one if n is even
+    const auto n = std::distance(begin_, end_);
+    const RandIter mid = begin_ + (n / 2); // larger one if n is even
     std::nth_element(begin_, mid, end_);
     if (n & 1) { // n is odd if the first bit is 1
         return *mid;
@@ -239,14 +240,14 @@ double rmsd(const V& v, typename V::value_type theta=0) {
 // variance
 template <class Iter> inline
 double var(const Iter begin_, const Iter end_, bool unbiased=true) {
-    size_t denom = std::distance(begin_, end_);
+    auto denom = std::distance(begin_, end_);
     if (unbiased) {--denom;}
     double s = devsq(begin_, end_, mean(begin_, end_));
     return s /= static_cast<double>(denom);
 }
 template <class V> inline
 double var(const V& v, bool unbiased=true) {
-    size_t denom = v.size();
+    auto denom = v.size();
     if (unbiased) {--denom;}
     double s = devsq(v, mean(v));
     return s /= static_cast<double>(denom);
@@ -254,7 +255,7 @@ double var(const V& v, bool unbiased=true) {
 
 template <class Iter> inline
 double var_fast(Iter begin_, const Iter end_, bool unbiased=true) {
-    size_t n = std::distance(begin_, end_);
+    auto n = std::distance(begin_, end_);
     if (unbiased) {--n;}
     typename Iter::value_type sq(0), s(0);
     // Be careful not to overflow if value_type is int
@@ -262,7 +263,7 @@ double var_fast(Iter begin_, const Iter end_, bool unbiased=true) {
         sq += (*begin_) * (*begin_);
         s += *begin_;
     }
-    return (sq - (1.0 / n) * s * s) / n;
+    return (sq - (1.0 / static_cast<double>(n)) * s * s) / static_cast<double>(n);
 }
 
 template <class Iter> inline
@@ -296,17 +297,17 @@ double sd(const V& v, bool unbiased=true) {
 
 // standard error of the mean (fpc: finite population correction)
 template <class Iter> inline
-double sem(const Iter begin_, const Iter end_, size_t N=0) {
-    const size_t n(std::distance(begin_, end_));
+double sem(const Iter begin_, const Iter end_, ptrdiff_t N=0) {
+    const auto n = std::distance(begin_, end_);
     double fpc(1.0);
-    if (N > 0u) {
+    if (N > 0) {
         if (N < n) {throw std::range_error("N<n in sem()");}
-        fpc = (N - n) * (1.0 / (N - 1u));
+        fpc = (N - n) * (1.0 / (N - 1));
     }
     return std::sqrt(fpc * var(begin_, end_) / n);
 }
 template <class V> inline
-double sem(const V& v, size_t N=0) {return sem(begin(v), end(v), N);}
+double sem(const V& v, ptrdiff_t N=0) {return sem(begin(v), end(v), N);}
 
 
 // covariance
@@ -345,7 +346,7 @@ std::vector<double> rank(const Iter begin_, const Iter end_) {
     for (auto it=mtu.cbegin(); it!=mtu.cend(); ++it) {
         double r = 0.0;
         const auto n = it->second;
-        for (decltype(n) j=0; j<n; ++j) {
+        for (auto j = decltype(n){}; j < n; ++j) {
             r += static_cast<double>(++i);
         }
         r /= static_cast<double>(n);
@@ -458,12 +459,12 @@ double shannon_diversity(const V& v) {
 
 template <class Matrix> inline
 Matrix transpose(const Matrix& A) {
-    const size_t nrow = A.size();
+    const auto nrow = A.size();
     if (nrow == 0u) return A;
-    const size_t ncol = A[0u].size();
+    const auto ncol = A[0u].size();
     Matrix out(ncol, typename Matrix::value_type(nrow));
-    for (size_t row=0; row<nrow; ++row) {
-        for (size_t col=0; col<ncol; ++col) {
+    for (auto row = decltype(nrow){}; row < nrow; ++row) {
+        for (auto col = decltype(ncol){}; col < ncol; ++col) {
             out[col][row] = A[row][col];
         }
     }
@@ -474,7 +475,7 @@ Matrix transpose(const Matrix& A) {
 // numerical integration
 
 template <class Func> inline
-double integrate_trapezoid(Func func, double lower, double upper, size_t precision=100) {
+double integrate_trapezoid(Func func, double lower, double upper, int precision=100) {
     const double step = (upper - lower) / static_cast<double>(precision);
     double result = func(lower);
     result += func(upper);
@@ -486,7 +487,7 @@ double integrate_trapezoid(Func func, double lower, double upper, size_t precisi
 }
 
 template <class Func> inline
-double integrate_midpoint(Func func, double lower, double upper, size_t precision=100) {
+double integrate_midpoint(Func func, double lower, double upper, int precision=100) {
     const double step = (upper - lower) / static_cast<double>(precision);
     double result = 0.0;
     for (double x=lower + 0.5 * step; x<upper; x+=step) {
@@ -496,7 +497,7 @@ double integrate_midpoint(Func func, double lower, double upper, size_t precisio
 }
 
 template <class Func> inline
-double integrate_simpson(Func func, double lower, double upper, size_t precision=100) {
+double integrate_simpson(Func func, double lower, double upper, int precision=100) {
     const double step = (upper - lower) / static_cast<double>(precision);
     const double double_step = step * 2.0;
     double result_odd = 0.0;
@@ -518,7 +519,7 @@ double integrate_simpson(Func func, double lower, double upper, size_t precision
 }
 
 template <class Func> inline
-double integrate(Func func, double lower, double upper, size_t precision=100) {
+double integrate(Func func, double lower, double upper, int precision=100) {
     return integrate_simpson(func, lower, upper, precision);
 }
 

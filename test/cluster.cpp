@@ -1,21 +1,22 @@
 #include <wtl/cluster.hpp>
 #include <wtl/random.hpp>
 #include <wtl/iostr.hpp>
+#include <wtl/signed.hpp>
 
 template <class T> inline
-void write(std::ostream& ost, const std::vector<T>& points, const std::vector<size_t>& labels) {
+void write(std::ostream& ost, const std::vector<T>& points, const std::vector<ptrdiff_t>& labels) {
     ost << "x\ty\tcluster\n";
-    for (size_t i=0; i<points.size(); ++i) {
-        wtl::join(points[i], ost, "\t") << "\t" << labels[i] << "\n";
+    for (ptrdiff_t i=0; i<wtl::ssize(points); ++i) {
+        wtl::join(wtl::at(points, i), ost, "\t") << "\t" << wtl::at(labels, i) << "\n";
     }
 }
 
 template <class T> inline
-std::vector<T> make_points(size_t n) {
+std::vector<T> make_points(const ptrdiff_t n) {
     std::uniform_real_distribution<double> uniform(-1.0, 1.0);
     std::vector<T> points;
-    points.reserve(n);
-    for (size_t i=0; i<n; ++i) {
+    wtl::reserve(points, n);
+    for (auto i = decltype(n){}; i < n; ++i) {
         points.push_back({{uniform(wtl::mt64()), uniform(wtl::mt64())}});
     }
     return points;
@@ -24,8 +25,8 @@ std::vector<T> make_points(size_t n) {
 int main(int argc, char* argv[]) {
     std::cout.precision(4);
     std::vector<std::string> arguments(argv + 1, argv + argc);
-    const size_t n = (arguments.size() > 0u) ? std::stoul(arguments[0u]) : 20;
-    const size_t k = (arguments.size() > 1u) ? std::stoul(arguments[1u]) : 3;
+    const ptrdiff_t n = (arguments.size() > 0u) ? std::stol(arguments[0u]) : 20;
+    const ptrdiff_t k = (arguments.size() > 1u) ? std::stol(arguments[1u]) : 3;
     const auto points = make_points<std::valarray<double>>(n);
     // const auto points = make_points<std::array<double, 2>>(n);
     auto cl = wtl::cluster::pam(points, k, wtl::mt64());

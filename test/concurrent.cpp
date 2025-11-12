@@ -9,10 +9,10 @@ static_assert(std::is_nothrow_move_constructible_v<wtl::Task<void>>, "");
 
 int main() {
     wtl::ThreadPool pool(2);
-    std::vector<std::future<size_t>> futures;
-    for (size_t j=0; j<2ul; ++j) {
-        for (size_t i=0; i<3ul; ++i) {
-            futures.push_back(pool.submit([](const size_t k) {
+    std::vector<std::future<int>> futures;
+    for (int j=0; j < 2; ++j) {
+        for (int i=0; i < 3; ++i) {
+            futures.push_back(pool.submit([](const int k) {
                 std::this_thread::sleep_for(std::chrono::milliseconds(250));
                 std::ostringstream oss;
                 oss << std::this_thread::get_id() << ": " << k << "\n";

@@ -2,6 +2,8 @@
 #ifndef WTL_DATAFRAME_HPP_
 #define WTL_DATAFRAME_HPP_
 
+#include "signed.hpp"
+
 #include <vector>
 #include <string>
 #include <memory>
@@ -16,8 +18,8 @@ class ColumnBase {
   public:
     ColumnBase() = default;
     virtual ~ColumnBase() = default;
-    virtual void reserve(size_t n) = 0;
-    virtual std::ostream& write_at(std::ostream& ost, size_t i) const = 0;
+    virtual void reserve(ptrdiff_t n) = 0;
+    virtual std::ostream& write_at(std::ostream& ost, ptrdiff_t i) const = 0;
   private:
 };
 
@@ -26,11 +28,11 @@ class Column: public ColumnBase {
   public:
     Column() = default;
     ~Column() = default;
-    void reserve(size_t n) override {
-        data_.reserve(n);
+    void reserve(ptrdiff_t n) override {
+        wtl::reserve(data_, n);
     }
-    std::ostream& write_at(std::ostream& ost, size_t i) const override {
-        return ost << data_[i];
+    std::ostream& write_at(std::ostream& ost, ptrdiff_t i) const override {
+        return ost << at(data_, i);
     }
     std::vector<T>& data() noexcept {return data_;}
   private:
@@ -55,11 +57,11 @@ class DataFrame {
         columns_.emplace_back(std::make_unique<detail::Column<T>>());
         return *this;
     }
-    DataFrame& reserve_cols(size_t n) {
-        columns_.reserve(n);
+    DataFrame& reserve_cols(ptrdiff_t n) {
+        wtl::reserve(columns_, n);
         return *this;
     }
-    DataFrame& reserve_rows(size_t n) {
+    DataFrame& reserve_rows(ptrdiff_t n) {
         for (const auto& column: columns_) {
             column->reserve(n);
         }
@@ -73,7 +75,7 @@ class DataFrame {
     }
     std::ostream& write(std::ostream& ost, const char* sep = "\t") const {
         write_header(ost, sep);
-        for (size_t i = 0; i < nrow_; ++i) {
+        for (ptrdiff_t i = 0; i < nrow_; ++i) {
             write_row(ost, i, sep);
         }
         return ost;
@@ -82,23 +84,23 @@ class DataFrame {
         return x.write(ost);
     }
     template <class T>
-    const std::vector<T>& at(size_t i) const {
-        return dynamic_cast<detail::Column<T>*>(columns_.at(i).get())->data();
+    const std::vector<T>& at(ptrdiff_t i) const {
+        return dynamic_cast<detail::Column<T>*>(wtl::at(columns_, i).get())->data();
     }
     const std::vector<std::string> colnames() const noexcept {return colnames_;}
-    size_t ncol() const noexcept {return columns_.size();}
-    size_t nrow() const noexcept {return nrow_;}
+    ptrdiff_t ncol() const noexcept {return ssize(columns_);}
+    ptrdiff_t nrow() const noexcept {return nrow_;}
 
   private:
     template <class T, class... Rest>
-    void add_row_impl(size_t i, T&& x, Rest&&... rest) {
+    void add_row_impl(ptrdiff_t i, T&& x, Rest&&... rest) {
         add_row_impl(i, std::forward<T>(x));
         add_row_impl(++i, std::forward<Rest>(rest)...);
     }
     template <class T>
-    void add_row_impl(size_t i, T&& x) {
+    void add_row_impl(ptrdiff_t i, T&& x) {
         using value_type = typename std::remove_const<typename std::remove_reference<T>::type>::type;
-        auto col_i = dynamic_cast<detail::Column<value_type>*>(columns_[i].get());
+        auto col_i = dynamic_cast<detail::Column<value_type>*>(wtl::at(columns_, i).get());
         col_i->data().push_back(std::forward<T>(x));
     }
     std::ostream& write_header(std::ostream& ost, const char* sep = "\t") const {
@@ -111,7 +113,7 @@ class DataFrame {
         ost << "\n";
         return ost;
     }
-    std::ostream& write_row(std::ostream& ost, size_t i, const char* sep = "\t") const {
+    std::ostream& write_row(std::ostream& ost, ptrdiff_t i, const char* sep = "\t") const {
         if (columns_.empty()) return ost;
         auto it = columns_.begin();
         (*it)->write_at(ost, i);
@@ -123,7 +125,7 @@ class DataFrame {
     }
     std::vector<std::unique_ptr<detail::ColumnBase>> columns_;
     std::vector<std::string> colnames_;
-    size_t nrow_ = 0u;
+    ptrdiff_t nrow_ = 0;
 };
 
 } // namespace wtl

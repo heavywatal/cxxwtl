@@ -13,17 +13,17 @@ namespace wtl {
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
 template <class T> inline
-size_t bisect_left(const std::vector<T>& array, const T& val) {
-    return static_cast<size_t>(std::lower_bound(array.begin(), array.end(), val) - array.begin());
+ptrdiff_t bisect_left(const std::vector<T>& array, const T& val) {
+    return std::lower_bound(array.begin(), array.end(), val) - array.begin();
 }
 
 template <class T> inline
-size_t bisect_right(const std::vector<T>& array, const T& val) {
-    return static_cast<size_t>(std::upper_bound(array.begin(), array.end(), val) - array.begin());
+ptrdiff_t bisect_right(const std::vector<T>& array, const T& val) {
+    return std::upper_bound(array.begin(), array.end(), val) - array.begin();
 }
 
 template <class T> inline
-size_t bisect(const std::vector<T>& array, const T& val) {
+ptrdiff_t bisect(const std::vector<T>& array, const T& val) {
     return bisect_right(array, val);
 }
 
@@ -103,13 +103,14 @@ map(const std::vector<Key>& keys, const std::vector<Value>& values) {
         throw std::runtime_error("keys.size() != values.size()");
     }
     std::map<Key, Value> output;
-    for (size_t i=0; i<keys.size(); ++i) {
+    const auto n = keys.size();
+    for (auto i=decltype(n){}; i < n; ++i) {
         output[keys[i]] = values[i];
     }
     return output;
 }
 
-template <size_t I, class T> inline
+template <int I, class T> inline
 std::vector<typename std::remove_const<typename std::tuple_element<I, typename T::value_type>::type>::type>
 unmap(const T& map_) {
     std::vector<typename std::remove_const<typename std::tuple_element<I, typename T::value_type>::type>::type> output;
@@ -163,16 +164,16 @@ OutputIter pairwise_transform(const InputIter begin_, const InputIter end_, Outp
 
 template <class Iter, class BinaryOperator> inline
 std::vector<typename BinaryOperator::result_type> pairwise_transform(const Iter begin_, const Iter end_, BinaryOperator op) {
-    const size_t n = std::distance(begin_, end_);
-    const size_t combinations = n * (n - 1u) / 2u;
+    const auto n = std::distance(begin_, end_);
+    const auto combinations = static_cast<size_t>(n * (n - 1) / 2);
     std::vector<typename BinaryOperator::result_type> result(combinations);
     pairwise_transform(begin_, end_, begin(result), op);
     return result;
 }
 
 template <class Iter> inline
-std::pair<Iter, Iter> nth_pair(const Iter begin_, const Iter end_, size_t n) {
-    size_t i = 0;
+std::pair<Iter, Iter> nth_pair(const Iter begin_, const Iter end_, const ptrdiff_t n) {
+    ptrdiff_t i = 0;
     for (auto it1=begin_; it1!=end_; ++it1) {
         for (auto it2=it1; ++it2!=end_; ++i) {
             if (i == n) {return {it1, it2};}

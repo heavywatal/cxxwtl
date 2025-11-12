@@ -3,6 +3,7 @@
 #define WTL_CLUSTER_HPP_
 
 #include "random.hpp"
+#include "signed.hpp"
 
 #include <cmath>
 #include <vector>
@@ -16,7 +17,8 @@ template <class Array>
 double euclidean_distance(const Array& lhs, const Array& rhs) {
     using T = typename Array::value_type;
     T sum_squared{0};
-    for (size_t i=0; i<lhs.size(); ++i) {
+    const auto n = lhs.size();
+    for (auto i = decltype(n){}; i < n; ++i) {
         T d = lhs[i] - rhs[i];
         sum_squared += d * d;
     }
@@ -26,18 +28,18 @@ double euclidean_distance(const Array& lhs, const Array& rhs) {
 template <class T, class URBG>
 class PAM {
   public:
-    PAM(const std::vector<T>& points, size_t k, URBG&& engine, size_t max_iteration)
+    PAM(const std::vector<T>& points, ptrdiff_t k, URBG&& engine, const int max_iteration)
     : points_(points), labels_(points.size()) {
-        const auto n = points_.size();
-        const auto indices = wtl::sample(points.size(), k, engine);
+        const auto n = ssize(points);
+        const auto indices = wtl::sample(n, k, engine);
         medoids_.assign(indices.begin(), indices.end());
-        for (size_t step=0; step<max_iteration; ++step) {
-            for (size_t i=0; i<n; ++i) {
-                labels_[i] = classify(i);
+        for (auto step = decltype(max_iteration){}; step < max_iteration; ++step) {
+            for (ptrdiff_t i=0; i<n; ++i) {
+                at(labels_, i) = classify(i);
             }
             auto prev_medoids = medoids_;
-            for (size_t i=0; i<k; ++i) {
-                medoids_[i] = select_medoid(i);
+            for (ptrdiff_t i=0; i<k; ++i) {
+                at(medoids_, i) = select_medoid(i);
             }
             if (medoids_ == prev_medoids) break;
         }
@@ -48,12 +50,13 @@ class PAM {
     const auto& medoids() const noexcept {return medoids_;}
 
   private:
-    size_t classify(size_t i) const {
-        const auto& x = points_[i];
+    ptrdiff_t classify(ptrdiff_t i) const {
+        const auto& x = at(points_, i);
         double min_dist = std::numeric_limits<double>::max();
-        size_t best_cluster = std::numeric_limits<size_t>::max();
-        for (size_t cluster=0; cluster<medoids_.size(); ++cluster) {
-            const auto dist = euclidean_distance(x, points_[medoids_[cluster]]);
+        ptrdiff_t best_cluster = -1;
+        const auto n = ssize(medoids_);
+        for (ptrdiff_t cluster=0; cluster<n; ++cluster) {
+            const auto dist = euclidean_distance(x, at(points_, at(medoids_, cluster)));
             if (dist < min_dist) {
                 min_dist = dist;
                 best_cluster = cluster;
@@ -62,16 +65,16 @@ class PAM {
         return best_cluster;
     }
 
-    size_t select_medoid(size_t cluster) const {
-        const size_t n = points_.size();
+    ptrdiff_t select_medoid(ptrdiff_t cluster) const {
+        const auto n = ssize(points_);
         double min_dist = std::numeric_limits<double>::max();
-        size_t medoid_idx = std::numeric_limits<size_t>::max();
-        for (size_t i=0; i<n; ++i) {
-            if (labels_[i] != cluster) continue;
+        ptrdiff_t medoid_idx = -1;
+        for (ptrdiff_t i=0; i<n; ++i) {
+            if (at(labels_, i) != cluster) continue;
             double dist = 0.0;
-            for (size_t j=0; j<n; ++j) {
-                if (labels_[j] != cluster) continue;
-                dist += euclidean_distance(points_[i], points_[j]);
+            for (ptrdiff_t j=0; j<n; ++j) {
+                if (at(labels_, j) != cluster) continue;
+                dist += euclidean_distance(at(points_, i), at(points_, j));
             }
             if (dist < min_dist) {
                 min_dist = dist;
@@ -82,12 +85,12 @@ class PAM {
     }
 
     const std::vector<T>& points_;
-    std::vector<size_t> labels_;
-    std::vector<size_t> medoids_;
+    std::vector<ptrdiff_t> labels_;
+    std::vector<ptrdiff_t> medoids_;
 };
 
 template <class T, class URBG> inline
-auto pam(const T& points, size_t k, URBG&& engine, size_t max_iteration=10ul) {
+auto pam(const T& points, ptrdiff_t k, URBG&& engine, int max_iteration=10) {
     return PAM<typename T::value_type, URBG>(points, k, std::forward<URBG>(engine), max_iteration);
 }
 

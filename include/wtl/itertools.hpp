@@ -65,15 +65,15 @@ class Product final: public Generator<value_type> {
   private:
     void source(typename coro_t::push_type& yield, size_type skip) override {
         if (--pos_ > 0) {
-            const value_size_t n = axes_[pos_].size();
-            for (value_size_t i=0; i<n; ++i) {
+            const auto n = axes_[pos_].size();
+            for (auto i = decltype(n){}; i < n; ++i) {
                 value_[pos_] = axes_[pos_][i];
                 source(yield, skip);
             }
             ++pos_;
         } else {
-            const value_size_t n = axes_[pos_].size();
-            for (value_size_t i=0; i<n; ++i) {
+            const auto n = axes_[pos_].size();
+            for (auto i = decltype(n){}; i < n; ++i) {
                 value_[pos_] = axes_[pos_][i];
                 if (++this->cnt_ > skip) {
                     yield(value_type(value_));
@@ -113,11 +113,12 @@ class UniAxes final: public Generator<value_type> {
 
   private:
     void source(typename coro_t::push_type& yield, size_type skip) override {
-        for (size_t i=0; i<axes_.size(); ++i) {
+        const auto n_dim = axes_.size();
+        for (auto i = decltype(n_dim){}; i < n_dim; ++i) {
             auto value = center_;
             const auto& axis = axes_[i];
             const auto l = axis.size();
-            for (value_size_t j=0; j<l; ++j) {
+            for (auto j = decltype(l){}; j < l; ++j) {
                 value[i] = axis[j];
                 if (++this->cnt_ > skip) {
                     yield(value_type(value));
@@ -149,7 +150,8 @@ class UniAxis final: public Generator<value_type> {
   private:
     void source(typename coro_t::push_type& yield, size_type skip) override {
         auto value = center_;
-        for (value_size_t j=0; j<axis_.size(); ++j) {
+        const auto n = axis_.size();
+        for (auto j = decltype(n){}; j < n; ++j) {
             value[idx_] = axis_[j];
             if (++this->cnt_ > skip) {
                 yield(value_type(value));

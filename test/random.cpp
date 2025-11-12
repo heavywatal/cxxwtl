@@ -59,7 +59,7 @@ inline void canonical() {
     static_assert(wtl::detail::as_canonical(1u) > epsilon);
     static_assert(wtl::detail::as_canonical(max_uint64) < 1.0);
     static_assert(wtl::detail::as_canonical(max_uint64) == 1.0 - epsilon);
-    for (size_t i=0; i<6u; ++i) {
+    for (int i=0; i < 6; ++i) {
         double x = wtl::generate_canonical(wtl::mt64());
         std::cout << x << " ";
         WTL_ASSERT(0.0 <= x && x < 1.0);

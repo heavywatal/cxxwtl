@@ -30,7 +30,8 @@ sto(std::string_view sv) {return std::stod(std::string{sv});}
 template <class T> inline void
 split(std::string_view src, std::string_view delimiter, T* dst) {
     if (src.empty()) return;
-    for (size_t start = 0, pos = 0; pos != src.npos; start = pos + 1u) {
+    using npos_t = decltype(src.npos);
+    for (auto start = npos_t{}, pos = npos_t{}; pos != src.npos; start = pos + 1u) {
         pos = src.find_first_of(delimiter, start);
         dst->push_back(sto<typename T::value_type>(src.substr(start, pos - start)));
     }
@@ -61,7 +62,7 @@ inline bool starts_with(std::string_view str, std::string_view prefix) {
 }
 
 inline bool ends_with(std::string_view str, std::string_view suffix) {
-    size_t str_size = str.size();
+    auto str_size = str.size();
     return (str_size >= suffix.size()) &&
            (str.compare(str_size -= suffix.size(), suffix.size(), suffix) == 0);
 }

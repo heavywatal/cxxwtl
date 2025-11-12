@@ -40,12 +40,12 @@ typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS,
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
 
 inline Graph make_graph(const std::vector<std::vector<double> >& adj_matrix) {
-    const size_t order = adj_matrix.size();
+    const auto order = adj_matrix.size();
     std::vector<std::pair<size_t, size_t> > adj_list;
     std::vector<double> weights;
-    for (size_t i=0; i<order; ++i) {
+    for (auto i = decltype(order){}; i < order; ++i) {
         const auto& row = adj_matrix[i];
-        for (size_t j=0; j<order; ++j) {
+        for (auto j = decltype(order){}; j < order; ++j) {
             if (row[j] != 0.0) {
                 adj_list.push_back({j, i});
                 weights.push_back(row[j]);
@@ -116,16 +116,18 @@ make_double_writer(const M1& m1, const std::string& key1,
 
 inline std::ostream& write_graphviz(std::ostream& ost,
                  const std::vector<std::vector<double> >& adj_matrix,
-                 const size_t frequency=0,
+                 const int frequency=0,
                  const std::vector<std::string>& normal_input={},
                  const std::vector<std::string>& novel_input={})
 {
     Graph graph = make_graph(adj_matrix);
-    for (size_t i=0; i<normal_input.size(); ++i) {
+    const auto size_normal = normal_input.size();
+    const auto size_novel = novel_input.size();
+    for (auto i = decltype(size_normal){}; i < size_normal; ++i) {
         boost::put(boost::vertex_index1, graph,
                    boost::vertex(i, graph), normal_input[i]);
     }
-    for (size_t i=0; i<novel_input.size(); ++i) {
+    for (auto i = decltype(size_novel){}; i < size_novel; ++i) {
         boost::put(boost::vertex_index2, graph,
                    boost::vertex(i, graph), novel_input[i]);
     }

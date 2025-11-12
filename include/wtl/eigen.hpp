@@ -41,10 +41,10 @@ Eigen::Matrix<typename T::value_type, 1, Eigen::Dynamic> RowVectorX(const T& vec
 template <class T> inline
 Eigen::Array<T, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>
 ArrayXX(const std::vector<std::string>& rows) {
-    const size_t nrow = rows.size();
-    const size_t ncol = rows[0].length();
+    const auto nrow = rows.size();
+    const auto ncol = rows[0].length();
     Eigen::Array<T, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> array(nrow, ncol);
-    for (size_t i=0; i<nrow; ++i) {
+    for (auto i = decltype(nrow){}; i < nrow; ++i) {
         std::string_view s = rows[i];
         const auto bytes = std::vector<uint8_t>(s.begin(), s.end());
         array.row(i) = RowVectorX(bytes).cast<T>();
@@ -58,9 +58,9 @@ ArrayXX(const std::vector<std::string>& rows) {
 template <class Vector> inline
 std::vector<size_t> which(const Vector& predicate) {
     std::vector<size_t> indices;
-    const size_t n = predicate.size();
+    const auto n = predicate.size();
     indices.reserve(n);
-    for (size_t i=0; i<n; ++i) {
+    for (auto i = decltype(n){}; i < n; ++i) {
         if (predicate[i] > 0) {indices.push_back(i);}
     }
     return indices;
@@ -68,9 +68,9 @@ std::vector<size_t> which(const Vector& predicate) {
 
 template <class T, class Vector> inline
 T slice(const Eigen::DenseBase<T>& orig, const Vector& indices) {
-    const size_t n = indices.size();
+    const auto n = indices.size();
     T result(n, orig.cols());
-    for (size_t i=0; i<n; ++i) {
+    for (auto i = decltype(n){}; i < n; ++i) {
         result.row(i) = orig.row(indices[i]);
     }
     return result;
@@ -78,9 +78,9 @@ T slice(const Eigen::DenseBase<T>& orig, const Vector& indices) {
 
 template <class T, class Vector> inline
 T slice_cols(const Eigen::DenseBase<T>& orig, const Vector& indices) {
-    const size_t n = indices.size();
+    const auto n = indices.size();
     T result(orig.rows(), n);
-    for (size_t i=0; i<n; ++i) {
+    for (auto i = decltype(n){}; i < n; ++i) {
         result.col(i) = orig.col(indices[i]);
     }
     return result;
@@ -103,10 +103,10 @@ inline Eigen::IOFormat tsv(const int precision=Eigen::StreamPrecision, std::stri
 template <class T> inline
 std::vector<Eigen::Array<typename T::value_type, Eigen::Dynamic, 1, Eigen::ColMajor>>
 columns(const Eigen::DenseBase<T>& matrix) {
-    const size_t n = matrix.cols();
+    const auto n = matrix.cols();
     std::vector<Eigen::Array<typename T::value_type, Eigen::Dynamic, 1, Eigen::ColMajor>> result;
     result.reserve(n);
-    for (size_t i=0; i<n; ++i) {
+    for (auto i = decltype(n){}; i < n; ++i) {
         result.push_back(matrix.col(i));
     }
     return result;

@@ -2,6 +2,8 @@
 #ifndef WTL_RANDOM_HPP_
 #define WTL_RANDOM_HPP_
 
+#include "signed.hpp"
+
 #include <cstdint>
 #include <initializer_list>
 #include <limits>
@@ -65,21 +67,21 @@ Iter choice(Iter begin_, Iter end_, URBG& engine) {
 
 //! Floyd's algorithm
 //! fast if k << n
-template <class Container, class URBG> inline
+template <class Container, class IntType, class URBG> inline
 std::vector<typename Container::value_type>
-sample_floyd(const Container& src, size_t k, URBG& engine) {
-    const size_t n = src.size();
+sample_floyd(const Container& src, const IntType k, URBG& engine) {
+    const auto n = static_cast<IntType>(src.size());
     if (n < k) throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + ": n < k");
-    std::unordered_set<size_t> existing_indices;
+    std::unordered_set<IntType> existing_indices;
     std::vector<typename Container::value_type> dst;
-    dst.reserve(k);
-    std::uniform_int_distribution<size_t> uniform(0, n - 1);
-    for (size_t upper = n - k; upper < n; ++upper) {
-        size_t idx = std::uniform_int_distribution<size_t>(0, upper)(engine);
+    reserve(dst, k);
+    std::uniform_int_distribution<IntType> uniform(0, n - 1);
+    for (IntType upper = n - k; upper < n; ++upper) {
+        IntType idx = std::uniform_int_distribution<IntType>(0, upper)(engine);
         if (existing_indices.insert(idx).second) {
-            dst.push_back(src[idx]);
+            dst.push_back(at(src, idx));
         } else {
-            dst.push_back(src[upper]);
+            dst.push_back(at(src, upper));
         }
     }
     return dst;
@@ -87,38 +89,38 @@ sample_floyd(const Container& src, size_t k, URBG& engine) {
 
 //! Fisher-Yates algorithm; Durstenfeld; Knuth's P
 //! consistently fast; note that whole src is copied first
-template <class Container, class URBG> inline
+template <class Container, class IntType, class URBG> inline
 std::vector<typename Container::value_type>
-sample_fisher(const Container& src, size_t k, URBG& engine) {
-    std::vector<typename Container::value_type> dst(std::begin(src), std::end(src));
-    const size_t n = dst.size();
+sample_fisher(const Container& src, const IntType k, URBG& engine) {
+    const auto n = static_cast<IntType>(src.size());
     if (n < k) throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + ": n < k");
-    const size_t last = n - 1;
-    for (size_t i=0; i<k; ++i) {
-        std::swap(dst[std::uniform_int_distribution<size_t>(i, last)(engine)], dst[i]);
+    std::vector<typename Container::value_type> dst(std::begin(src), std::end(src));
+    const auto last = n - 1;
+    for (IntType i=0; i < k; ++i) {
+        std::swap(at(dst, std::uniform_int_distribution<IntType>(i, last)(engine)), at(dst, i));
     }
-    dst.resize(k);
+    resize(dst, k);
     return dst;
 }
 
 //! Knuth's algorithm S
 //! fast if k / n is large
 //! The order is not random
-template <class Container, class URBG> inline
+template <class Container, class IntType, class URBG> inline
 std::vector<typename Container::value_type>
-sample_knuth(const Container& src, size_t k, URBG& engine) {
-    const size_t n = src.size();
+sample_knuth(const Container& src, const IntType k, URBG& engine) {
+    const auto n = static_cast<IntType>(src.size());
     if (n < k) throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + ": n < k");
     std::vector<typename Container::value_type> dst;
-    dst.reserve(k);
-    size_t i = 0;
+    reserve(dst, k);
+    IntType i = 0;
     for (; i<k; ++i) {
-        dst.push_back(src[i]);
+        dst.push_back(at(src, i));
     }
-    std::uniform_int_distribution<size_t> uniform(0, k - 1);
+    std::uniform_int_distribution<IntType> uniform(0, k - 1);
     while (i < n) {
         if (std::bernoulli_distribution((1.0 / ++i) * k)(engine)) {
-            dst[uniform(engine)] = src[i - 1];
+            at(dst, uniform(engine)) = at(src, i - 1);
         }
     }
     return dst;
@@ -138,10 +140,10 @@ std::unordered_set<T> sample(T n, T k, URBG& engine) {
     return existing_indices;
 }
 
-template <class Container, class URBG> inline
+template <class Container, class IntType, class URBG> inline
 std::vector<typename Container::value_type>
-sample(const Container& src, size_t k, URBG& engine) {
-    const size_t n = src.size();
+sample(const Container& src, const IntType k, URBG& engine) {
+    const auto n = static_cast<IntType>(src.size());
     if (100 * k < n) {return sample_floyd(src, k, engine);}
     else if (5 * k < n) {return sample_fisher(src, k, engine);}
     else {return sample_knuth(src, k, engine);}
@@ -292,9 +294,9 @@ class multinomial_distribution {
     operator()(URBG& engine, result_type n, const param_type& parameter) const {
         const auto& probs = parameter.probabilities();
         std::vector<result_type> res(probs.size());
-        const size_t last = probs.size() - 1u;
+        const auto last = probs.size() - 1u;
         double denom = 1.0;
-        for (size_t i=0; n > 0 && i < last; ++i) {
+        for (auto i = decltype(last){}; n > 0 && i < last; ++i) {
           std::binomial_distribution<result_type> binomial(n, probs[i] / denom);
           n -= (res[i] = binomial(engine));
           denom -= probs[i];
