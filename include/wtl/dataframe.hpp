@@ -99,7 +99,7 @@ class DataFrame {
     }
     template <class T>
     void add_row_impl(ptrdiff_t i, T&& x) {
-        using value_type = typename std::remove_const<typename std::remove_reference<T>::type>::type;
+        using value_type = typename std::remove_const_t<typename std::remove_reference_t<T>>;
         auto col_i = dynamic_cast<detail::Column<value_type>*>(wtl::at(columns_, i).get());
         col_i->data().push_back(std::forward<T>(x));
     }

@@ -184,9 +184,9 @@ class ostream_joiner {
 };
 
 template <class charT, class traits, class DelimT, class Func=Forward>
-ostream_joiner<typename std::decay<DelimT>::type, Func, charT, traits>
+ostream_joiner<typename std::decay_t<DelimT>, Func, charT, traits>
 make_ostream_joiner(std::basic_ostream<charT, traits>& ost, DelimT&& delim, Func&& func=Func{}) {
-    return ostream_joiner<typename std::decay<DelimT>::type, Func, charT, traits>(ost, std::forward<DelimT>(delim), std::forward<Func>(func));
+    return ostream_joiner<typename std::decay_t<DelimT>, Func, charT, traits>(ost, std::forward<DelimT>(delim), std::forward<Func>(func));
 }
 
 template <class Iter, class charT, class traits, class DelimT, class Func=Forward>

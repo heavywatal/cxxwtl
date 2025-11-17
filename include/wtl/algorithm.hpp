@@ -110,10 +110,10 @@ map(const std::vector<Key>& keys, const std::vector<Value>& values) {
     return output;
 }
 
-template <int I, class T> inline
-std::vector<typename std::remove_const<typename std::tuple_element<I, typename T::value_type>::type>::type>
+template <size_t I, class T> inline
+std::vector<typename std::remove_const_t<typename std::tuple_element_t<I, typename T::value_type>>>
 unmap(const T& map_) {
-    std::vector<typename std::remove_const<typename std::tuple_element<I, typename T::value_type>::type>::type> output;
+    std::vector<typename std::remove_const_t<typename std::tuple_element_t<I, typename T::value_type>>> output;
     output.reserve(map_.size());
     for (const auto& item: map_) {
         output.push_back(std::get<I>(item));
@@ -122,13 +122,13 @@ unmap(const T& map_) {
 }
 
 template <class T> inline
-std::vector<typename std::remove_const<typename std::tuple_element<0, typename T::value_type>::type>::type>
+std::vector<typename std::remove_const_t<typename std::tuple_element_t<0u, typename T::value_type>>>
 keys(const T& map_) {
     return unmap<0>(map_);
 }
 
 template <class T> inline
-std::vector<typename std::remove_const<typename std::tuple_element<1, typename T::value_type>::type>::type>
+std::vector<typename std::remove_const_t<typename std::tuple_element_t<1u, typename T::value_type>>>
 values(const T& map_) {
     return unmap<1>(map_);
 }

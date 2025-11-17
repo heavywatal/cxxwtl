@@ -181,8 +181,8 @@ namespace detail {
 template <class Stream>
 class FstrInitializer {
     static constexpr bool is_ist = std::is_same_v<std::istream, Stream>;
-    using Fstream = typename std::conditional<is_ist, std::ifstream, std::ofstream>::type;
-    using StreamBuf = typename std::conditional<is_ist, istreambuf, ostreambuf>::type;
+    using Fstream = typename std::conditional_t<is_ist, std::ifstream, std::ofstream>;
+    using StreamBuf = typename std::conditional_t<is_ist, istreambuf, ostreambuf>;
   public:
     FstrInitializer(const fs::path& path, std::ios_base::openmode mode)
     : fst_(path, mode | std::ios_base::binary),
@@ -195,8 +195,8 @@ class FstrInitializer {
 template <class Stream>
 class SstrInitializer {
     static constexpr bool is_ist = std::is_same_v<std::istream, Stream>;
-    using StringStream = typename std::conditional<is_ist, std::istringstream, std::ostringstream>::type;
-    using StreamBuf = typename std::conditional<is_ist, istreambuf, ostreambuf>::type;
+    using StringStream = typename std::conditional_t<is_ist, std::istringstream, std::ostringstream>;
+    using StreamBuf = typename std::conditional_t<is_ist, istreambuf, ostreambuf>;
   public:
     SstrInitializer()
     : sst_(std::ios_base::binary),

@@ -19,7 +19,7 @@ class Generator {
   public:
     using coro_t = boost::coroutines2::coroutine<value_type>;
     using size_type = uintmax_t;
-    using value_size_t = typename std::remove_const<decltype(value_type().size())>::type;
+    using value_size_t = typename std::remove_const_t<decltype(value_type().size())>;
 
     Generator() noexcept = default;
     virtual ~Generator() noexcept = default;
