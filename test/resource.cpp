@@ -1,5 +1,6 @@
 #include <wtl/resource.hpp>
 #include <wtl/signed.hpp>
+#include <wtl/iostr.hpp>
 
 #include <thread>
 #include <iostream>
@@ -33,14 +34,14 @@ inline void mem(const int n) {
 int main() {
     using namespace std::literals::chrono_literals;
     // sleep takes time, but should not consume CPU time
-    std::cout << wtl::diff_rusage([]{std::this_thread::sleep_for(30ms);}) << "\tsleep" << std::endl;
+    std::cout << wtl::delta_rusage([]{std::this_thread::sleep_for(30ms);}) << "\tsleep" << std::endl;
     // power-of-two is slightly faster
-    std::cout << wtl::diff_rusage([]{divi(400000, 1000);}, 3) << "\ti % 1022" << std::endl;
-    std::cout << wtl::diff_rusage([]{divi(400000, 1023);}, 3) << "\ti % 1023" << std::endl;
-    std::cout << wtl::diff_rusage([]{divi(400000, 1024);}, 3) << "\ti % 1024" << std::endl;
+    std::cout << wtl::delta_rusage([]{divi(400000, 1000);}, 3) << "\ti % 1022" << std::endl;
+    std::cout << wtl::delta_rusage([]{divi(400000, 1023);}, 3) << "\ti % 1023" << std::endl;
+    std::cout << wtl::delta_rusage([]{divi(400000, 1024);}, 3) << "\ti % 1024" << std::endl;
     // memory may be reused and not be returned to OS immediately
-    std::cout << wtl::diff_rusage([]{mem(1 * 1024);}) << "\tvector(1k)" << std::endl;
-    std::cout << wtl::diff_rusage([]{mem(32 * 1024);}) << "\tvector(32k)" << std::endl;
-    std::cout << wtl::diff_rusage([]{mem(32 * 1024);}) << "\tvector(32k)" << std::endl;
+    std::cout << wtl::delta_rusage([]{mem(1 * 1024);}) << "\tvector(1k)" << std::endl;
+    std::cout << wtl::delta_rusage([]{mem(32 * 1024);}) << "\tvector(32k)" << std::endl;
+    std::cout << wtl::delta_rusage([]{mem(32 * 1024);}) << "\tvector(32k)" << std::endl;
     return 0;
 }
