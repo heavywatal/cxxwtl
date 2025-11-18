@@ -21,6 +21,10 @@ inline void stream_op_for_containers() {
     oss.str(std::string{});
     oss << m;
     WTL_ASSERT(oss.str() == "{0: 0, 1: 0.5, 2: 1, 3: 1.5, 4: 2, 5: 2.5}");
+    oss.str(std::string{});
+    std::tuple<int, double, std::string> t{42, 3.14, "hello"};
+    oss << t;
+    WTL_ASSERT(oss.str() == "(42, 3.14, hello)");
 }
 
 inline void read_array() {

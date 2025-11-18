@@ -15,6 +15,7 @@
 #include <unordered_map>
 #include <set>
 #include <unordered_set>
+#include <tuple>
 
 namespace wtl {
 
@@ -238,6 +239,19 @@ namespace detail {
         }
         return ost << '}';
     }
+
+template<class... T, std::size_t... I>
+std::ostream& operator_ost_tuple_impl(std::ostream& ost, const std::tuple<T...>& x, std::index_sequence<I...>) {
+    ost << "(";
+    ((ost << (I == 0 ? "" : ", ") << std::get<I>(x)), ...);
+    return ost << ")";
+}
+
+template<class... T>
+std::ostream& operator_ost_tuple(std::ostream& ost, const std::tuple<T...>& x) {
+    return operator_ost_tuple_impl(ost, x, std::make_index_sequence<sizeof...(T)>{});
+}
+
 } // namespace detail
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
@@ -313,6 +327,12 @@ std::ostream& operator<< (std::ostream& ost, const std::multimap<Key, T, Comp>& 
 template <class Key, class T, class Hash> inline
 std::ostream& operator<< (std::ostream& ost, const std::unordered_map<Key, T, Hash>& m) {
     return wtl::detail::operator_ost_map(ost, m);
+}
+
+// tuple
+template<class... T> inline
+std::ostream& operator<<(std::ostream& ost, const std::tuple<T...>& x) {
+    return wtl::detail::operator_ost_tuple(ost, x);
 }
 
 }  // namespace std
