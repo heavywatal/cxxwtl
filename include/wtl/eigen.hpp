@@ -2,11 +2,15 @@
 #ifndef WTL_EIGEN_HPP_
 #define WTL_EIGEN_HPP_
 
+#include "signed.hpp"
+
 #include <cstdint>
+#include <iterator>
 #include <vector>
 #include <valarray>
 #include <string>
 #include <istream>
+
 #include <Eigen/Core>
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////
@@ -15,27 +19,27 @@ namespace wtl { namespace eigen {
 
 template <class T> inline
 std::vector<typename T::value_type> vector(const T& vec) {
-    return std::vector<typename T::value_type>(vec.data(), vec.data() + vec.size());
+    return std::vector<typename T::value_type>(vec.data(), vec.data() + ssize(vec));
 }
 
 template <class T> inline
 std::valarray<typename T::value_type> valarray(const T& vec) {
-    return std::valarray<typename T::value_type>(vec.data(), vec.size());
+    return std::valarray<typename T::value_type>(vec.data(), ssize(vec));
 }
 
 template <class T> inline
 Eigen::Array<typename T::value_type, Eigen::Dynamic, 1> ArrayX(const T& vec) {
-    return Eigen::Array<typename T::value_type, Eigen::Dynamic, 1>::Map(vec.data(), vec.size());
+    return Eigen::Array<typename T::value_type, Eigen::Dynamic, 1>::Map(vec.data(), ssize(vec));
 }
 
 template <class T> inline
 Eigen::Matrix<typename T::value_type, Eigen::Dynamic, 1> VectorX(const T& vec) {
-    return Eigen::Matrix<typename T::value_type, Eigen::Dynamic, 1>::Map(vec.data(), vec.size());
+    return Eigen::Matrix<typename T::value_type, Eigen::Dynamic, 1>::Map(vec.data(), ssize(vec));
 }
 
 template <class T> inline
 Eigen::Matrix<typename T::value_type, 1, Eigen::Dynamic> RowVectorX(const T& vec) {
-    return Eigen::Matrix<typename T::value_type, 1, Eigen::Dynamic>::Map(vec.data(), vec.size());
+    return Eigen::Matrix<typename T::value_type, 1, Eigen::Dynamic>::Map(vec.data(), ssize(vec));
 }
 
 template <class T> inline
@@ -96,7 +100,7 @@ T select(const Eigen::DenseBase<T>& orig, const Vector& predicate) {
     return slice_cols(orig, which(predicate));
 }
 
-inline Eigen::IOFormat tsv(const int precision=Eigen::StreamPrecision, std::string_view sep="\t") {
+inline Eigen::IOFormat tsv(const int precision=Eigen::StreamPrecision, const std::string& sep="\t") {
     return {precision, Eigen::DontAlignCols, sep, "\n"};
 }
 

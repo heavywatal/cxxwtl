@@ -50,3 +50,8 @@ if(Threads_FOUND)
   add_executable_test(concurrent.cpp)
   target_link_libraries(test-concurrent PRIVATE wtl::threads)
 endif()
+
+if(Eigen3_FOUND)
+  add_executable_test(eigen.cpp)
+  target_link_libraries(test-eigen PRIVATE Eigen3::Eigen)
+endif()

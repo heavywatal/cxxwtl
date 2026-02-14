@@ -32,6 +32,8 @@ else()
   target_compile_definitions(threads INTERFACE "THREADS_NOT_FOUND")
 endif()
 
+find_package(Eigen3 5.0)
+
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
