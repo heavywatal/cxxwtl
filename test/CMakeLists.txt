@@ -51,6 +51,13 @@ if(Threads_FOUND)
   target_link_libraries(test-concurrent PRIVATE wtl::threads)
 endif()
 
+if(Boost_FOUND)
+  add_executable_test(grn.cpp)
+  target_link_libraries(test-grn PRIVATE Boost::graph)
+  add_executable_test(itertools.cpp)
+  target_link_libraries(test-itertools PRIVATE Boost::coroutine)
+endif()
+
 if(Eigen3_FOUND)
   add_executable_test(eigen.cpp)
   target_link_libraries(test-eigen PRIVATE Eigen3::Eigen)
