@@ -88,7 +88,7 @@ class DataFrame {
         return dynamic_cast<detail::Column<T>*>(wtl::at(columns_, i).get())->data();
     }
     const std::vector<std::string> colnames() const noexcept {return colnames_;}
-    ptrdiff_t ncol() const noexcept {return ssize(columns_);}
+    ptrdiff_t ncol() const noexcept {return wtl::ssize(columns_);}
     ptrdiff_t nrow() const noexcept {return nrow_;}
 
   private:

@@ -70,7 +70,7 @@ constexpr auto minus(const std::tuple<T1...>& x1, const std::tuple<T2...>& x2) {
 
 template <class T> inline
 T median(std::vector<T>* v) {
-    const auto i = ssize(*v) / 2;
+    const auto i = wtl::ssize(*v) / 2;
     std::nth_element(v->begin(), v->begin() + i, v->end());
     return at(*v, i);
 }

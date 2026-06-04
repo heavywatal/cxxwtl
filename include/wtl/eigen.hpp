@@ -19,27 +19,27 @@ namespace wtl { namespace eigen {
 
 template <class T> inline
 std::vector<typename T::value_type> vector(const T& vec) {
-    return std::vector<typename T::value_type>(vec.data(), vec.data() + ssize(vec));
+    return std::vector<typename T::value_type>(vec.data(), vec.data() + wtl::ssize(vec));
 }
 
 template <class T> inline
 std::valarray<typename T::value_type> valarray(const T& vec) {
-    return std::valarray<typename T::value_type>(vec.data(), ssize(vec));
+    return std::valarray<typename T::value_type>(vec.data(), wtl::ssize(vec));
 }
 
 template <class T> inline
 Eigen::Array<typename T::value_type, Eigen::Dynamic, 1> ArrayX(const T& vec) {
-    return Eigen::Array<typename T::value_type, Eigen::Dynamic, 1>::Map(vec.data(), ssize(vec));
+    return Eigen::Array<typename T::value_type, Eigen::Dynamic, 1>::Map(vec.data(), wtl::ssize(vec));
 }
 
 template <class T> inline
 Eigen::Matrix<typename T::value_type, Eigen::Dynamic, 1> VectorX(const T& vec) {
-    return Eigen::Matrix<typename T::value_type, Eigen::Dynamic, 1>::Map(vec.data(), ssize(vec));
+    return Eigen::Matrix<typename T::value_type, Eigen::Dynamic, 1>::Map(vec.data(), wtl::ssize(vec));
 }
 
 template <class T> inline
 Eigen::Matrix<typename T::value_type, 1, Eigen::Dynamic> RowVectorX(const T& vec) {
-    return Eigen::Matrix<typename T::value_type, 1, Eigen::Dynamic>::Map(vec.data(), ssize(vec));
+    return Eigen::Matrix<typename T::value_type, 1, Eigen::Dynamic>::Map(vec.data(), wtl::ssize(vec));
 }
 
 template <class T> inline

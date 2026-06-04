@@ -30,7 +30,7 @@ class PAM {
   public:
     PAM(const std::vector<T>& points, ptrdiff_t k, URBG&& engine, const int max_iteration)
     : points_(points), labels_(points.size()) {
-        const auto n = ssize(points);
+        const auto n = wtl::ssize(points);
         const auto indices = wtl::sample(n, k, engine);
         medoids_.assign(indices.begin(), indices.end());
         for (auto step = decltype(max_iteration){}; step < max_iteration; ++step) {
@@ -54,7 +54,7 @@ class PAM {
         const auto& x = at(points_, i);
         double min_dist = std::numeric_limits<double>::max();
         ptrdiff_t best_cluster = -1;
-        const auto n = ssize(medoids_);
+        const auto n = wtl::ssize(medoids_);
         for (ptrdiff_t cluster=0; cluster<n; ++cluster) {
             const auto dist = euclidean_distance(x, at(points_, at(medoids_, cluster)));
             if (dist < min_dist) {
@@ -66,7 +66,7 @@ class PAM {
     }
 
     ptrdiff_t select_medoid(ptrdiff_t cluster) const {
-        const auto n = ssize(points_);
+        const auto n = wtl::ssize(points_);
         double min_dist = std::numeric_limits<double>::max();
         ptrdiff_t medoid_idx = -1;
         for (ptrdiff_t i=0; i<n; ++i) {
