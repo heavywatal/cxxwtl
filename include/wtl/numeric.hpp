@@ -2,6 +2,8 @@
 #ifndef WTL_NUMERIC_HPP_
 #define WTL_NUMERIC_HPP_
 
+#include "signed.hpp"
+
 #include <cmath>
 
 #include <numeric>
@@ -163,7 +165,7 @@ double mean(const Iter begin_, const Iter end_) {
 template <class V> inline
 double mean(const V& v) {
     double x = sum(v);
-    return x /= v.size();
+    return x /= wtl::ssize(v);
 }
 
 
@@ -174,7 +176,7 @@ double geomean(const Iter begin_, const Iter end_) {
 }
 template <class V> inline
 double geomean(const V& v) {
-    return std::pow(prod(v), 1.0 / v.size());
+    return std::pow(prod(v), 1.0 / wtl::ssize(v));
 }
 
 
@@ -222,7 +224,7 @@ double qmean(const Iter begin_, const Iter end_, typename Iter::value_type theta
 template <class V> inline
 double qmean(const V& v, typename V::value_type theta=0) {
     double x = devsq(v, theta);
-    return x /= v.size();
+    return x /= wtl::ssize(v);
 }
 
 
@@ -247,7 +249,7 @@ double var(const Iter begin_, const Iter end_, bool unbiased=true) {
 }
 template <class V> inline
 double var(const V& v, bool unbiased=true) {
-    auto denom = v.size();
+    auto denom = wtl::ssize(v);
     if (unbiased) {--denom;}
     double s = devsq(v, mean(v));
     return s /= static_cast<double>(denom);
